@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1753213483621,
-      "tag": "0000_empty_shape",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1753261144119,
-      "tag": "0001_great_bushwacker",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1753261706335,
-      "tag": "0002_dry_owl",
+      "when": 1753713944594,
+      "tag": "0000_glamorous_silhouette",
       "breakpoints": true
     }
   ]

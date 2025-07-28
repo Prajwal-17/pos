@@ -1,8 +1,8 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
-import { join } from 'path'
 import { electronApp, is } from '@electron-toolkit/utils'
-import * as schema from "../db/schema.ts"
-import { db } from "../db/db.ts"
+import { app, BrowserWindow, ipcMain } from 'electron'
+import { join } from 'node:path'
+import { db } from './db/db'
+import { products, users } from './db/schema'
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -10,7 +10,9 @@ function createWindow(): void {
     autoHideMenuBar: false,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
+      contextIsolation: true,
+      nodeIntegration: false,
     }
   })
 
@@ -40,24 +42,23 @@ function createWindow(): void {
 
 async function testDb() {
   try {
-    console.log("inside")
-    const response = await db.insert(schema.users).values({
+    await db.insert(users).values({
       id: Math.random().toString(),
-      name: "prajwal",
-      password: "hello world",
+      name: "hello",
+      password: "random",
     })
-    console.log(response)
 
-    const result = await db.select().from(schema.users);
-    console.log("result", result)
-
+    await db.insert(products).values({
+      id: Math.random().toString(),
+      name: "product 1",
+      price: 10,
+    })
   } catch (error) {
-    console.log(error)
+    console.log("error", error)
   }
 }
 
 app.whenReady().then(() => {
-
   testDb()
 
   electronApp.setAppUserModelId('com.electron')
