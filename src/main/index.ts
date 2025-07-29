@@ -1,8 +1,6 @@
 import { electronApp, is } from '@electron-toolkit/utils'
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'node:path'
-import { db } from './db/db'
-import { products, users } from './db/schema'
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -40,27 +38,7 @@ function createWindow(): void {
   }
 }
 
-async function testDb() {
-  try {
-    await db.insert(users).values({
-      id: Math.random().toString(),
-      name: "hello",
-      password: "random",
-    })
-
-    await db.insert(products).values({
-      id: Math.random().toString(),
-      name: "product 1",
-      price: 10,
-    })
-  } catch (error) {
-    console.log("error", error)
-  }
-}
-
 app.whenReady().then(() => {
-  testDb()
-
   electronApp.setAppUserModelId('com.electron')
 
   ipcMain.on('ping', () => console.log('pong'))
