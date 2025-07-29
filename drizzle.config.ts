@@ -7,10 +7,8 @@ let dbUrl: string;
 
 if (process.platform === "linux") {
   dbUrl = path.join(homedir, ".config", "pos", "pos.db")
-  console.log(process.platform, dbUrl)
 } else if (process.platform === "win32") {
   dbUrl = path.join(homedir, "AppData", "Roaming", "pos", "pos.db")
-  console.log(process.platform, dbUrl)
 } else {
   throw new Error("Unsupported platform")
 }

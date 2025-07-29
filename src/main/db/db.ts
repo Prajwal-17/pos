@@ -14,4 +14,6 @@ console.log("dbpath", dbPath)
 const sqlite = new Database(dbPath)
 export const db = drizzle(sqlite, { schema, logger: true })
 
-migrate(db, { migrationsFolder: "./drizzle" })
+// migrations are applied at startup only if there is a change
+const migrationsFolder = path.join(process.resourcesPath, "drizzle") // path of resources directory in electron
+migrate(db, { migrationsFolder })
