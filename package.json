@@ -11,7 +11,7 @@
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "start": "electron-vite preview",
     "postinstall": "electron-builder install-app-deps",
-    "dev": "electron-vite dev",
+    "dev": "cross-env ELECTRON_DISABLE_SANDBOX=1 electron-vite dev",
     "rebuild:node": "pnpm rebuild better-sqlite3",
     "rebuild:electron": "electron-rebuild -f -w better-sqlite3",
     "db:prepare": "pnpm run rebuild:node && rm -f ./node_modules/better-sqlite3/build/Release/better_sqlite3-node.node && cp ./node_modules/better-sqlite3/build/Release/better_sqlite3.node ./node_modules/better-sqlite3/build/Release/better_sqlite3-node.node && pnpm run rebuild:electron",
