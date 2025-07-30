@@ -1,16 +1,10 @@
+import { Button } from "./components/ui/button";
+
 const App = () => {
   return (
     <>
-      <div>
-        <div className="text-2xl font-bold bg-red-500">POS Software</div>
-        <div>A fully offline pos billing software</div>
-        <div>
-          hello world
-        </div>
-
-
-
-      </div>
+      <div>Hello World</div>
+      <Button>Button</Button>
     </>
   );
 };

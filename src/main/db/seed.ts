@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { seed } from "drizzle-seed";
-import { users } from "./schema"
+import { users } from "./schema";
 
 export async function main() {
   try {
@@ -10,4 +10,3 @@ export async function main() {
     console.error("Seed my error:", error);
   }
 }
-

@@ -129,12 +129,8 @@
           "name": "product_history_product_id_products_id_fk",
           "tableFrom": "product_history",
           "tableTo": "products",
-          "columnsFrom": [
-            "product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["product_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -268,12 +264,8 @@
           "name": "sale_items_sale_id_sales_id_fk",
           "tableFrom": "sale_items",
           "tableTo": "sales",
-          "columnsFrom": [
-            "sale_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["sale_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -281,12 +273,8 @@
           "name": "sale_items_product_id_products_id_fk",
           "tableFrom": "sale_items",
           "tableTo": "products",
-          "columnsFrom": [
-            "product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["product_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -354,12 +342,8 @@
           "name": "sales_customer_id_customers_id_fk",
           "tableFrom": "sales",
           "tableTo": "customers",
-          "columnsFrom": [
-            "customer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["customer_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }

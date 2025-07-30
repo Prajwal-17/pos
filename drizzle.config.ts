@@ -1,16 +1,16 @@
 import { defineConfig } from "drizzle-kit";
-import os from "os"
-import path from "path"
+import os from "os";
+import path from "path";
 
 const homedir = os.homedir();
 let dbUrl: string;
 
 if (process.platform === "linux") {
-  dbUrl = path.join(homedir, ".config", "pos", "pos.db")
+  dbUrl = path.join(homedir, ".config", "pos", "pos.db");
 } else if (process.platform === "win32") {
-  dbUrl = path.join(homedir, "AppData", "Roaming", "pos", "pos.db")
+  dbUrl = path.join(homedir, "AppData", "Roaming", "pos", "pos.db");
 } else {
-  throw new Error("Unsupported platform")
+  throw new Error("Unsupported platform");
 }
 
 export default defineConfig({
@@ -21,4 +21,3 @@ export default defineConfig({
     url: dbUrl
   }
 });
-

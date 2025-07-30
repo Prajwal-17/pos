@@ -1,57 +1,57 @@
-import { electronApp, is } from '@electron-toolkit/utils'
-import { app, BrowserWindow, ipcMain } from 'electron'
-import { join } from 'node:path'
+import { electronApp, is } from "@electron-toolkit/utils";
+import { app, BrowserWindow, ipcMain } from "electron";
+import { join } from "node:path";
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
     show: false,
     autoHideMenuBar: false,
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
+      preload: join(__dirname, "../preload/index.js"),
       sandbox: false,
       contextIsolation: true,
-      nodeIntegration: false,
+      nodeIntegration: false
     }
-  })
+  });
 
-  mainWindow.on('ready-to-show', () => {
+  mainWindow.on("ready-to-show", () => {
     setTimeout(() => {
-      mainWindow.maximize()
-    }, 25)
-    mainWindow.show()
-  })
+      mainWindow.maximize();
+    }, 25);
+    mainWindow.show();
+  });
 
-  // catch keyboard events 
+  // catch keyboard events
   // https://stackoverflow.com/a/75716165/25649886
   mainWindow.webContents.on("before-input-event", (_, input) => {
-    if (input.type === 'keyDown' && input.key === 'F12') {
+    if (input.type === "keyDown" && input.key === "F12") {
       mainWindow.webContents.isDevToolsOpened()
         ? mainWindow.webContents.closeDevTools()
-        : mainWindow.webContents.openDevTools({ mode: 'right' });
+        : mainWindow.webContents.openDevTools({ mode: "right" });
     }
-  })
+  });
 
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+  if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
+    mainWindow.loadURL(process.env["ELECTRON_RENDERER_URL"]);
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    mainWindow.loadFile(join(__dirname, "../renderer/index.html"));
   }
 }
 
 app.whenReady().then(() => {
-  electronApp.setAppUserModelId('com.electron')
+  electronApp.setAppUserModelId("com.electron");
 
-  ipcMain.on('ping', () => console.log('pong'))
+  ipcMain.on("ping", () => console.log("pong"));
 
-  createWindow()
+  createWindow();
 
-  app.on('activate', function () {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
-})
+  app.on("activate", function () {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
+});
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
   }
-})
+});
