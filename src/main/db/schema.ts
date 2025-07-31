@@ -6,7 +6,7 @@ export const users = sqliteTable("users", {
   name: text("name").notNull(),
   role: text("role").notNull(),
   password: text("password").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => sql`CURRENT_TIMESTAMP`),
   updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(() => sql`CURRENT_TIMESTAMP`)
 });
 
@@ -15,7 +15,7 @@ export const customers = sqliteTable("customers", {
   name: text("name").notNull(),
   contact: text("contact").notNull(),
   customerType: text("customer_type").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => sql`CURRENT_TIMESTAMP`),
   updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(() => sql`CURRENT_TIMESTAMP`)
 });
 
@@ -26,7 +26,7 @@ export const products = sqliteTable("products", {
   mrp: real("mrp").notNull(),
   price: real("price").notNull(),
   //unit:text("unit").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => sql`CURRENT_TIMESTAMP`),
   updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(() => sql`CURRENT_TIMESTAMP`)
 });
 
@@ -42,7 +42,7 @@ export const productHistory = sqliteTable("product_history", {
   newPrice: real("new_price"),
   old_mrp: real("old_mrp"),
   new_mrp: real("new_mrp"),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => sql`CURRENT_TIMESTAMP`)
 });
 
 export const sales = sqliteTable("sales", {
@@ -53,7 +53,7 @@ export const sales = sqliteTable("sales", {
   customerName: text("customer_name").notNull(),
   total: real("total").notNull(),
   totalQuantity: real("total_quantity").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => sql`CURRENT_TIMESTAMP`),
   updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(() => sql`CURRENT_TIMESTAMP`)
 });
 
@@ -68,6 +68,6 @@ export const saleItems = sqliteTable("sale_items", {
   name: text("name").notNull(),
   price: real("price").notNull(),
   quantity: real("quantity").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => sql`CURRENT_TIMESTAMP`),
   updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(() => sql`CURRENT_TIMESTAMP`)
 });
