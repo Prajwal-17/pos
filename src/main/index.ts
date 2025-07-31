@@ -2,11 +2,15 @@ import { electronApp, is } from "@electron-toolkit/utils";
 import { app, BrowserWindow, ipcMain } from "electron";
 import { join } from "node:path";
 
+app.commandLine.appendSwitch("high-dpi-support", "1"); // enable high dpi
+app.commandLine.appendSwitch("force-device-scale-factor", "1"); // overrides device scale factor
+
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
     show: false,
     autoHideMenuBar: false,
     webPreferences: {
+      zoomFactor: 1,
       preload: join(__dirname, "../preload/index.js"),
       sandbox: false,
       contextIsolation: true,
