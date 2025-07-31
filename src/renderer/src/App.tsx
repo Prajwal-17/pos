@@ -1,6 +1,6 @@
-import { Route, Routes } from "react-router-dom"
-import Container from "./components/Container"
-import { navLinks } from "./constants/Navlinks"
+import { Route, Routes } from "react-router-dom";
+import Container from "./components/Container";
+import { navLinks } from "./constants/Navlinks";
 
 const App = () => {
   return (
@@ -11,7 +11,7 @@ const App = () => {
         ))}
       </Routes>
     </Container>
-  )
-}
+  );
+};
 
-export default App
+export default App;

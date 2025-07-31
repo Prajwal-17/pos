@@ -5,7 +5,7 @@ const Estimate = () => {
         Estimate Page
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Estimate
+export default Estimate;

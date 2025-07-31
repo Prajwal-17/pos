@@ -1,4 +1,4 @@
-import { Sidebar } from "./Sidebar"
+import { Sidebar } from "./Sidebar";
 
 export default function Container({ children }: { children: React.ReactNode }) {
   return (
@@ -8,5 +8,5 @@ export default function Container({ children }: { children: React.ReactNode }) {
         <div className="flex-1">{children}</div>
       </div>
     </>
-  )
+  );
 }

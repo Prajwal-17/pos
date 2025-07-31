@@ -1,13 +1,13 @@
-import { Building2 } from "lucide-react"
-import { Link, useLocation } from "react-router-dom"
-import { navLinks } from "@/constants/Navlinks"
+import { Building2 } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { navLinks } from "@/constants/Navlinks";
 
 export const Sidebar = () => {
-  const location = useLocation()
+  const location = useLocation();
 
   return (
     <>
-      <div className="border-border text-sidebar-foreground bg-sidebar h-full w-full max-w-xs border-r px-4 py-4">
+      <div className="text-sidebar-foreground bg-sidebar border-border h-full w-full max-w-xs border-r px-4 py-4">
         <div className="flex h-full flex-col">
           <div className="flex w-full items-center justify-start gap-3">
             <div className="bg-primary text-foreground flex h-12 w-12 items-center justify-center rounded-lg">
@@ -20,7 +20,7 @@ export const Sidebar = () => {
           </div>
           <div className="mt-12 w-full flex-1 space-y-4">
             {navLinks.map((item, idx) => {
-              const isActive = location.pathname === item.href
+              const isActive = location.pathname === item.href;
               return (
                 <Link
                   key={idx}
@@ -30,7 +30,7 @@ export const Sidebar = () => {
                   {item.icon}
                   <span className="text-xl font-semibold">{item.title}</span>
                 </Link>
-              )
+              );
             })}
           </div>
           <div className="flex w-full items-center px-1 py-2">
@@ -49,5 +49,5 @@ export const Sidebar = () => {
         </div>
       </div>
     </>
-  )
-}
+  );
+};

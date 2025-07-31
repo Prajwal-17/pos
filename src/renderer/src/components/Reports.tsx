@@ -5,7 +5,7 @@ const Reports = () => {
         Reports Page
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Reports
+export default Reports;

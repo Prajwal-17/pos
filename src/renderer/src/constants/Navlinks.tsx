@@ -1,10 +1,10 @@
-import Estimate from "@/components/Estimate"
-import Home from "@/components/Home"
-import Items from "@/components/Items"
-import Parties from "@/components/Parties"
-import Reports from "@/components/Reports"
-import Sale from "@/components/Sale"
-import SettingsPage from "@/components/SettingsPage"
+import Estimate from "@/components/Estimate";
+import Home from "@/components/Home";
+import Items from "@/components/Items";
+import Parties from "@/components/Parties";
+import Reports from "@/components/Reports";
+import Sale from "@/components/Sale";
+import SettingsPage from "@/components/SettingsPage";
 import {
   ChartColumn,
   Settings,
@@ -13,14 +13,14 @@ import {
   ReceiptText,
   ShoppingCart,
   Users
-} from "lucide-react"
+} from "lucide-react";
 
 type NavlinkType = {
-  href: string
-  title: string
-  element: React.ReactNode
-  icon: React.ReactNode
-}
+  href: string;
+  title: string;
+  element: React.ReactNode;
+  icon: React.ReactNode;
+};
 export const navLinks: NavlinkType[] = [
   {
     href: "/",
@@ -64,4 +64,4 @@ export const navLinks: NavlinkType[] = [
     element: <SettingsPage />,
     icon: <Settings size={28} />
   }
-]
+];

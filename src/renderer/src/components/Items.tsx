@@ -5,7 +5,7 @@ const Items = () => {
         Items Page
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Items
+export default Items;

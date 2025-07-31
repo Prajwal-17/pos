@@ -5,7 +5,7 @@ const Sale = () => {
         Sales Page
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Sale
+export default Sale;

@@ -5,7 +5,7 @@ const Parties = () => {
         Parties Page
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Parties
+export default Parties;
