@@ -20,9 +20,9 @@ export const Sidebar = () => {
             </div>
           </div>
           <div className="mt-5 w-full">
-            <Link to="/sales/new">
+            <Link to="/billing/new">
               <Button variant="default" size="lg" className="w-full text-lg font-medium">
-                Add Sale
+                Create Sale
               </Button>
             </Link>
           </div>

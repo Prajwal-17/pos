@@ -4,5 +4,8 @@ declare global {
   interface Window {
     electron: ElectronAPI;
     api: unknown;
+    itemsApi: {
+      getAllItems: () => Promise<any>;
+    };
   }
 }

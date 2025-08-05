@@ -1,8 +1,13 @@
 import { contextBridge } from "electron";
 import { electronAPI } from "@electron-toolkit/preload";
+import { ipcRenderer } from "electron/renderer";
 
 // Custom APIs for renderer
 const api = {};
+
+const itemsApi = {
+  getAllItems: () => ipcRenderer.invoke("allItems")
+};
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
@@ -11,6 +16,7 @@ if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld("electron", electronAPI);
     contextBridge.exposeInMainWorld("api", api);
+    contextBridge.exposeInMainWorld("itemsApi", itemsApi);
   } catch (error) {
     console.error(error);
   }
