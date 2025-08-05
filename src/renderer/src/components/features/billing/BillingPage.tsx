@@ -19,11 +19,14 @@ const BillingPage = () => {
   const [customerName, setCustomerName] = useState("");
   const [customerContact, setCustomerContact] = useState("");
   const [items, setItems] = useState<ItemType[]>([]);
+  const [searchParam, setSearchParam] = useState<string>("");
+  const [searchRow, setSearchRow] = useState<number>();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const response = await window.itemsApi.getAllItems();
+        const response = await window.productsApi.getAllProducts();
 
         console.log(response);
         setItems(response);
@@ -34,9 +37,17 @@ const BillingPage = () => {
     fetchProducts();
   }, []);
 
-  const [searchParams, setSearchParams] = useState<string>("");
-  const [searchRow, setSearchRow] = useState<number>();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const response = await window.productsApi.search(searchParam);
+        console.log(response);
+      } catch (error) {
+        console.log("error", error);
+      }
+    }
+    fetchProducts();
+  }, [searchParam]);
 
   return (
     <div className="min-h-screen w-full">
@@ -122,7 +133,7 @@ const BillingPage = () => {
                 <div className="col-span-2 px-2 py-2 text-left">AMOUNT</div>
               </div>
 
-              <div className="relative w-full space-y-1 py-3">
+              {/*<div className="relative w-full space-y-1 py-3">
                 {items.map((item, idx) => (
                   <div key={idx} className="group grid grid-cols-10 border bg-neutral-100">
                     <div className="col-span-1 h-full w-full border-r bg-white">
@@ -181,7 +192,7 @@ const BillingPage = () => {
                   </div>
                 ))}
                 <div className="h-80"></div>
-              </div>
+              </div>*/}
             </div>
           </div>
         </div>

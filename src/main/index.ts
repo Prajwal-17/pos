@@ -1,7 +1,7 @@
 import { electronApp, is } from "@electron-toolkit/utils";
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow } from "electron";
 import { join } from "node:path";
-import { getAllItems } from "./db/db";
+import { setupIpcHandlers } from "./setupIpcHandlers";
 
 app.commandLine.appendSwitch("high-dpi-support", "1"); // enable high dpi
 app.commandLine.appendSwitch("force-device-scale-factor", "1"); // overrides device scale factor
@@ -45,12 +45,7 @@ function createWindow(): void {
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId("com.electron");
-
-  ipcMain.on("ping", () => console.log("pong"));
-  ipcMain.handle("allItems", async () => {
-    return getAllItems();
-  });
-
+  setupIpcHandlers();
   createWindow();
 
   app.on("activate", function () {

@@ -5,7 +5,6 @@ import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import * as schema from "./schema";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
-import { products } from "./schema";
 
 //getPath returs os specific directory
 const dbPath = path.join(app.getPath("userData"), "pos.db");
@@ -21,12 +20,3 @@ const migrationsFolder = app.isPackaged
   : path.join(__dirname, "../../drizzle"); // in dev
 console.log("folder", migrationsFolder);
 migrate(db, { migrationsFolder });
-
-export async function getAllItems(): Promise<any> {
-  try {
-    const items = await db.select().from(products);
-    return items;
-  } catch (error) {
-    console.log(error);
-  }
-}

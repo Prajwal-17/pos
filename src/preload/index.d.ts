@@ -3,9 +3,11 @@ import { ElectronAPI } from "@electron-toolkit/preload";
 declare global {
   interface Window {
     electron: ElectronAPI;
-    api: unknown;
-    itemsApi: {
-      getAllItems: () => Promise<any>;
-    };
+    productsApi: ProductsApi;
   }
+}
+
+interface ProductsApi {
+  getAllProducts: () => Promise<any>;
+  search: (query: string) => Promise<any>;
 }
