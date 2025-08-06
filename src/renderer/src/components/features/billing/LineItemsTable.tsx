@@ -16,7 +16,7 @@ export type ItemType = {
 
 const LineItemsTable = () => {
   const lineItems = useBillingStore((state) => state.lineItems);
-  const addLineItem = useBillingStore((state) => state.addLineItem);
+  const addEmptyLineItem = useBillingStore((state) => state.addEmptyLineItem);
   const updateLineItems = useBillingStore((state) => state.updateLineItems);
   const deleteLineItem = useBillingStore((state) => state.deleteLineItem);
 
@@ -74,7 +74,6 @@ const LineItemsTable = () => {
                       onClick={() => {
                         setSearchRow(idx + 1);
                         setIsDropdownOpen();
-                        setSearchParam(item.name);
                       }}
                       onChange={(e) => {
                         setSearchParam(e.target.value);
@@ -84,12 +83,8 @@ const LineItemsTable = () => {
                   </div>
                   <div className="col-span-2 border-r px-1 py-1">
                     <input
-                      value={item.quantity ?? ""}
+                      value={item.quantity}
                       className="focus:border-ring focus:ring-ring w-full rounded-lg border bg-white px-2 py-2 text-center text-base font-semibold shadow-sm transition-all focus:ring-2 focus:ring-offset-0 focus:outline-none"
-                      onClick={() => {
-                        setSearchRow(idx + 1);
-                        setIsDropdownOpen();
-                      }}
                       onChange={(e) => {
                         updateLineItems(item.id, "quantity", e.target.value);
                       }}
@@ -97,12 +92,8 @@ const LineItemsTable = () => {
                   </div>
                   <div className="col-span-2 border-r px-1 py-1">
                     <input
-                      value={item.price ?? 0}
+                      value={item.price}
                       className="focus:border-ring focus:ring-ring w-full rounded-lg border bg-white px-2 py-2 text-center text-base font-semibold shadow-sm transition-all focus:ring-2 focus:ring-offset-0 focus:outline-none"
-                      onClick={() => {
-                        setSearchRow(idx + 1);
-                        setIsDropdownOpen();
-                      }}
                       onChange={(e) => {
                         updateLineItems(item.id, "price", e.target.value);
                       }}
@@ -110,12 +101,8 @@ const LineItemsTable = () => {
                   </div>
                   <div className="col-span-2 border-r px-1 py-1">
                     <input
-                      value={item.amount ?? 0}
+                      value={item.amount}
                       className="focus:border-ring focus:ring-ring w-full rounded-lg border bg-white px-2 py-2 text-center text-base font-semibold shadow-sm transition-all focus:ring-2 focus:ring-offset-0 focus:outline-none"
-                      onClick={() => {
-                        setSearchRow(idx + 1);
-                        setIsDropdownOpen();
-                      }}
                       onChange={(e) => {
                         updateLineItems(item.id, "amount", e.target.value);
                       }}
@@ -130,7 +117,7 @@ const LineItemsTable = () => {
             <div className="grid w-full grid-cols-10 border bg-neutral-100">
               <div className="col-span-1"></div>
               <div className="col-span-2">
-                <Button className="hover:cursor-pointer" onClick={addLineItem}>
+                <Button className="hover:cursor-pointer" onClick={addEmptyLineItem}>
                   Add Row
                 </Button>
               </div>

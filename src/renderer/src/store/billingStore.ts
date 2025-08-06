@@ -18,8 +18,9 @@ type BillingStoreType = {
   setCustomerContact: (newCustomerContact: string) => void;
   lineItems: LineItems[] | [];
   setLineItems: () => void;
+  addEmptyLineItem: () => void;
+  addLineItem: (index: number, newItem: LineItems) => void;
   updateLineItems: (itemId: string, field: string, value: string | number) => void;
-  addLineItem: () => void;
   deleteLineItem: (itemId: string) => void;
 };
 
@@ -41,11 +42,26 @@ export const useBillingStore = create<BillingStoreType>((set) => ({
 
   setLineItems: () => set(() => ({})),
 
-  addLineItem: () =>
+  // add empty row
+  addEmptyLineItem: () =>
     set((state) => ({
       lineItems: [...state.lineItems, initialLineItem()]
     })),
 
+  // add new item on selection
+  addLineItem: (index, newItem) =>
+    set((state) => {
+      const updatedLineItems = [...state.lineItems];
+
+      updatedLineItems[index] = { ...newItem };
+
+      return {
+        ...state,
+        lineItems: updatedLineItems
+      };
+    }),
+
+  // update on field change
   updateLineItems: (itemId, field, value) =>
     set((state) => {
       const updatedLineItem = state.lineItems.map((item) => {
@@ -55,7 +71,7 @@ export const useBillingStore = create<BillingStoreType>((set) => ({
           [field]: value
         };
         return {
-          updatedItem
+          ...updatedItem
         };
       });
 
@@ -65,6 +81,7 @@ export const useBillingStore = create<BillingStoreType>((set) => ({
       };
     }),
 
+  // delete a row
   deleteLineItem: (itemId) =>
     set((state) => {
       const updatedLineItems = state.lineItems.filter((item) => item.id !== itemId);
