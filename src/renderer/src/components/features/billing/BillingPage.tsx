@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Calendar, Check, Clock4, GripVertical, SquarePen, Trash2, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useBillingStore } from "@/store/billingStore";
 
 export type ItemType = {
   id: string;
@@ -9,17 +10,25 @@ export type ItemType = {
   quantity: number;
   mrp: number;
   price: number;
+  amount: number;
 };
 
 const BillingPage = () => {
-  const [invoiceNo, setInvoiceNo] = useState("177");
+  const invoiceNo = useBillingStore((state) => state.invoiceNo);
+  const setInvoiceNo = useBillingStore((state) => state.setInvoiceNo);
+  const customerName = useBillingStore((state) => state.customerName);
+  const setCustomerName = useBillingStore((state) => state.setCustomerName);
+  const customerContact = useBillingStore((state) => state.customerContact);
+  const setCustomerContact = useBillingStore((state) => state.setCustomerContact);
+  const lineItems = useBillingStore((state) => state.lineItems);
+  const addLineItem = useBillingStore((state) => state.addLineItem);
+  const updateLineItems = useBillingStore((state) => state.updateLineItems);
+  const deleteLineItem = useBillingStore((state) => state.deleteLineItem);
+
   const [tempInvoice, setTempInvoice] = useState(invoiceNo);
   const [editInvoice, setEditInvoice] = useState(false);
-
-  const [customerName, setCustomerName] = useState("");
-  const [customerContact, setCustomerContact] = useState("");
-  const [items, setItems] = useState<ItemType[]>([]);
   const [searchParam, setSearchParam] = useState<string>("");
+  const [searchResult, setSearchResult] = useState([]);
   const [searchRow, setSearchRow] = useState<number>();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -27,9 +36,8 @@ const BillingPage = () => {
     async function fetchProducts() {
       try {
         const response = await window.productsApi.getAllProducts();
-
         console.log(response);
-        setItems(response);
+        // setLineItems(response);
       } catch (error) {
         console.log(error);
       }
@@ -40,8 +48,10 @@ const BillingPage = () => {
   useEffect(() => {
     async function fetchProducts() {
       try {
+        setSearchResult([]);
         const response = await window.productsApi.search(searchParam);
-        console.log(response);
+        // console.log("search result ", response);
+        setSearchResult(response);
       } catch (error) {
         console.log("error", error);
       }
@@ -133,66 +143,109 @@ const BillingPage = () => {
                 <div className="col-span-2 px-2 py-2 text-left">AMOUNT</div>
               </div>
 
-              {/*<div className="relative w-full space-y-1 py-3">
-                {items.map((item, idx) => (
-                  <div key={idx} className="group grid grid-cols-10 border bg-neutral-100">
-                    <div className="col-span-1 h-full w-full border-r bg-white">
-                      <div className="flex h-full w-full items-center justify-between gap-2 px-4">
-                        <GripVertical
-                          className="invisible px-1 py-1 group-hover:visible hover:cursor-grab hover:bg-neutral-100"
-                          size={33}
+              <div className="relative w-full space-y-1 py-3">
+                {lineItems.map((item, idx) => (
+                  <div key={idx} className="relative">
+                    <div className="group grid w-full grid-cols-10 border bg-neutral-100">
+                      <div className="col-span-1 h-full w-full border-r bg-white">
+                        <div className="flex h-full w-full items-center justify-between gap-2 px-4">
+                          <GripVertical
+                            className="invisible px-1 py-1 group-hover:visible hover:cursor-grab hover:bg-neutral-100"
+                            size={33}
+                          />
+                          <span className="text-xl">{idx + 1}</span>
+                          <Trash2
+                            className="text-destructive invisible rounded-md px-1 py-1 group-hover:visible hover:scale-103 hover:cursor-pointer hover:bg-neutral-100 active:scale-98"
+                            size={33}
+                            onClick={() => deleteLineItem(item.id)}
+                          />
+                        </div>
+                      </div>
+                      <div className="col-span-3 border-r px-1 py-1">
+                        <input
+                          value={item.name}
+                          className="focus:border-ring focus:ring-ring w-full rounded-lg border bg-white px-2 py-2 text-lg font-bold shadow-sm transition-all focus:ring-2 focus:ring-offset-0 focus:outline-none"
+                          onClick={() => {
+                            setSearchRow(idx + 1);
+                            setIsDropdownOpen(true);
+                            setSearchParam(item.name);
+                          }}
+                          onChange={(e) => {
+                            setSearchParam(e.target.value);
+                            updateLineItems(item.id, "name", e.target.value);
+                          }}
                         />
-                        <span className="text-xl">{idx + 1}</span>
-                        <Trash2
-                          className="text-destructive invisible rounded-md px-1 py-1 group-hover:visible hover:scale-103 hover:cursor-pointer hover:bg-neutral-100 active:scale-98"
-                          size={33}
+                      </div>
+                      <div className="col-span-2 border-r px-1 py-1">
+                        <input
+                          value={item.quantity ?? ""}
+                          className="focus:border-ring focus:ring-ring w-full rounded-lg border bg-white px-2 py-2 text-center text-base font-semibold shadow-sm transition-all focus:ring-2 focus:ring-offset-0 focus:outline-none"
+                          onClick={() => {
+                            setSearchRow(idx + 1);
+                            setIsDropdownOpen(true);
+                          }}
+                          onChange={(e) => {
+                            updateLineItems(item.id, "quantity", e.target.value);
+                          }}
+                        />
+                      </div>
+                      <div className="col-span-2 border-r px-1 py-1">
+                        <input
+                          value={item.price ?? 0}
+                          className="focus:border-ring focus:ring-ring w-full rounded-lg border bg-white px-2 py-2 text-center text-base font-semibold shadow-sm transition-all focus:ring-2 focus:ring-offset-0 focus:outline-none"
+                          onClick={() => {
+                            setSearchRow(idx + 1);
+                            setIsDropdownOpen(true);
+                          }}
+                          onChange={(e) => {
+                            updateLineItems(item.id, "price", e.target.value);
+                          }}
+                        />
+                      </div>
+                      <div className="col-span-2 border-r px-1 py-1">
+                        <input
+                          value={item.amount ?? 0}
+                          className="focus:border-ring focus:ring-ring w-full rounded-lg border bg-white px-2 py-2 text-center text-base font-semibold shadow-sm transition-all focus:ring-2 focus:ring-offset-0 focus:outline-none"
+                          onClick={() => {
+                            setSearchRow(idx + 1);
+                            setIsDropdownOpen(true);
+                          }}
+                          onChange={(e) => {
+                            updateLineItems(item.id, "amount", e.target.value);
+                          }}
                         />
                       </div>
                     </div>
-                    <div className="col-span-3 border-r px-1 py-1">
-                      <input
-                        value={item.name}
-                        className="focus:border-ring focus:ring-ring w-full rounded-lg border bg-white px-2 py-2 text-lg font-bold shadow-sm transition-all focus:ring-2 focus:ring-offset-0 focus:outline-none"
-                        onClick={() => {
-                          setSearchRow(idx + 1);
-                          setIsDropdownOpen(true);
-                        }}
-                      />
-                    </div>
-                    <div className="col-span-2 border-r px-1 py-1">
-                      <input
-                        value={1}
-                        className="focus:border-ring focus:ring-ring w-full rounded-lg border bg-white px-2 py-2 text-base font-semibold shadow-sm transition-all focus:ring-2 focus:ring-offset-0 focus:outline-none"
-                        onClick={() => {
-                          setSearchRow(idx + 1);
-                          setIsDropdownOpen(true);
-                        }}
-                      />
-                    </div>
-                    <div className="col-span-2 border-r px-1 py-1">
-                      <input
-                        value={item.price}
-                        className="focus:border-ring focus:ring-ring w-full rounded-lg border bg-white px-2 py-2 text-base font-semibold shadow-sm transition-all focus:ring-2 focus:ring-offset-0 focus:outline-none"
-                        onClick={() => {
-                          setSearchRow(idx + 1);
-                          setIsDropdownOpen(true);
-                        }}
-                      />
-                    </div>
-                    <div className="col-span-2 border-r px-1 py-1">
-                      <input
-                        value={item.quantity}
-                        className="focus:border-ring focus:ring-ring w-full rounded-lg border bg-white px-2 py-2 text-base font-semibold shadow-sm transition-all focus:ring-2 focus:ring-offset-0 focus:outline-none"
-                        onClick={() => {
-                          setSearchRow(idx + 1);
-                          setIsDropdownOpen(true);
-                        }}
-                      />
-                    </div>
+
+                    {isDropdownOpen && searchRow === idx + 1 && (
+                      <div className="absolute top-full right-0 left-32 z-20 mx-1 h-32 overflow-y-auto rounded-md bg-red-500 px-2 py-2 transition-all">
+                        <div className="text-accent-foreground border-border grid grid-cols-10 items-center border bg-gray-100 text-base font-semibold">
+                          <div className="col-span-4 border-r border-gray-300 px-2 py-2 text-left">
+                            ITEM
+                          </div>
+                          <div className="col-span-2 border-r border-gray-300 px-2 py-2 text-left">
+                            QTY
+                          </div>
+                          <div className="col-span-2 border-r border-gray-300 px-2 py-2 text-left">
+                            PRICE
+                          </div>
+                          <div className="col-span-2 px-2 py-2 text-left">AMOUNT</div>
+                        </div>
+                        <div></div>
+                      </div>
+                    )}
                   </div>
                 ))}
-                <div className="h-80"></div>
-              </div>*/}
+
+                <div className="grid w-full grid-cols-10 border bg-neutral-100">
+                  <div className="col-span-1"></div>
+                  <div className="col-span-2">
+                    <Button className="hover:cursor-pointer" onClick={addLineItem}>
+                      Add Row
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
