@@ -83,12 +83,23 @@ const LineItemsTable = () => {
                   </div>
                   <div className="col-span-3 h-full w-full border-r px-1 py-1">
                     <div className="border-border flex h-full w-full items-center rounded-lg border bg-white font-bold shadow-sm">
-                      <button className="hover:bg-primary/80 bg-primary flex h-full w-20 cursor-pointer items-center justify-center rounded-lg rounded-r-none text-white transition-all active:scale-95">
+                      <button
+                        onClick={() => {
+                          console.log("clicked");
+                          if (item.quantity >= 0) {
+                            console.log(typeof item.quantity);
+                            const newQuantity = item.quantity + 1;
+                            updateLineItems(item.id, "quantity", newQuantity);
+                          }
+                        }}
+                        className="hover:bg-primary/80 bg-primary flex h-full w-20 cursor-pointer items-center justify-center rounded-lg rounded-r-none text-white transition-all active:scale-95"
+                      >
                         <Plus size={22} />
                       </button>
                       <input
+                        type="number"
                         value={item.quantity}
-                        className="focus:border-ring focus:ring-ring w-full rounded-lg px-2 py-2 text-center text-base font-semibold transition-all focus:ring-2 focus:ring-offset-0 focus:outline-none"
+                        className="focus:border-ring focus:ring-ring w-full appearance-none rounded-lg px-2 py-2 text-center text-base font-semibold transition-all focus:ring-2 focus:ring-offset-0 focus:outline-none"
                         onChange={(e) => {
                           updateLineItems(item.id, "quantity", e.target.value);
                         }}
@@ -96,6 +107,12 @@ const LineItemsTable = () => {
                       <button
                         disabled={item.quantity <= 0}
                         className="hover:bg-primary/80 bg-primary flex h-full w-20 cursor-pointer items-center justify-center rounded-lg rounded-l-none text-white transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+                        onClick={() => {
+                          if (item.quantity > 1) {
+                            const newQuantity = item.quantity - 1;
+                            updateLineItems(item.id, "quantity", newQuantity);
+                          }
+                        }}
                       >
                         <Minus size={22} />
                       </button>
@@ -107,9 +124,10 @@ const LineItemsTable = () => {
                         <IndianRupee size={18} />
                       </span>
                       <input
+                        type="number"
                         value={item.price === 0 ? "" : item.price}
                         onChange={(e) => updateLineItems(item.id, "price", e.target.value)}
-                        className="focus:border-ring focus:ring-ring h-full w-full rounded-lg border bg-white py-2 pr-7 pl-10 text-right text-base font-semibold text-black placeholder-gray-400 focus:ring-2 focus:outline-none"
+                        className="focus:border-ring focus:ring-ring h-full w-full appearance-none rounded-lg border bg-white py-2 pr-7 pl-10 text-right text-base font-semibold text-black placeholder-gray-400 focus:ring-2 focus:outline-none"
                         placeholder="0"
                       />
                     </div>
@@ -120,9 +138,11 @@ const LineItemsTable = () => {
                         <IndianRupee size={18} />
                       </span>
                       <input
+                        disabled
+                        type="number"
                         value={item.amount === 0 ? "" : item.amount}
                         onChange={(e) => updateLineItems(item.id, "amount", e.target.value)}
-                        className="focus:border-ring focus:ring-ring h-full w-full rounded-lg border bg-white py-2 pr-7 pl-10 text-right text-base font-semibold text-black placeholder-gray-400 focus:ring-2 focus:outline-none"
+                        className="focus:border-ring focus:ring-ring h-full w-full appearance-none rounded-lg border bg-white py-2 pr-7 pl-10 text-right text-base font-semibold text-black placeholder-gray-400 focus:ring-2 focus:outline-none disabled:cursor-not-allowed"
                         placeholder="0"
                       />
                     </div>

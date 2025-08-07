@@ -56,33 +56,42 @@ export const useBillingStore = create<BillingStoreType>((set) => ({
        * shallow comparison hence the array reference remains the same, so creating new array creates new reference
        * where react/zustand notices change
        */
-      const updatedLineItems = [...state.lineItems];
+      const currLineItems = [...state.lineItems];
 
-      updatedLineItems[index] = { ...newItem };
+      const updatedItem = {
+        ...newItem,
+        amount: parseFloat((newItem.quantity * newItem.price).toFixed(2))
+      };
+
+      currLineItems[index] = { ...updatedItem };
 
       return {
-        ...state,
-        lineItems: updatedLineItems
+        lineItems: currLineItems
       };
     }),
 
   // update on field change
   updateLineItems: (itemId, field, value) =>
     set((state) => {
-      const updatedLineItem = state.lineItems.map((item) => {
+      const updatedLineItems = state.lineItems.map((item) => {
         if (itemId !== item.id) return item;
+
         const updatedItem = {
           ...item,
-          [field]: value
+          [field]: field === "quantity" || field === "price" ? Number(value) : value
         };
-        return {
-          ...updatedItem
-        };
+
+        if (["quantity", "price"].includes(field)) {
+          return {
+            ...updatedItem,
+            amount: parseFloat((updatedItem.quantity * updatedItem.price).toFixed(2))
+          };
+        }
+        return updatedItem;
       });
 
       return {
-        ...state,
-        lineItems: updatedLineItem
+        lineItems: updatedLineItems
       };
     }),
 
@@ -91,7 +100,6 @@ export const useBillingStore = create<BillingStoreType>((set) => ({
     set((state) => {
       const updatedLineItems = state.lineItems.filter((item) => item.id !== itemId);
       return {
-        ...state,
         lineItems: updatedLineItems
       };
     })
