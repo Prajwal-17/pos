@@ -51,6 +51,11 @@ export const useBillingStore = create<BillingStoreType>((set) => ({
   // add new item on selection
   addLineItem: (index, newItem) =>
     set((state) => {
+      /**
+       * always create a new array to update the existing state array, coz react/zustand does
+       * shallow comparison hence the array reference remains the same, so creating new array creates new reference
+       * where react/zustand notices change
+       */
       const updatedLineItems = [...state.lineItems];
 
       updatedLineItems[index] = { ...newItem };
