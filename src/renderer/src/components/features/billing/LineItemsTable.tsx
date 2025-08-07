@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { GripVertical, Trash2 } from "lucide-react";
+import { GripVertical, IndianRupee, Minus, Plus, Trash2 } from "lucide-react";
 import { useBillingStore } from "@/store/billingStore";
 import SearchDropdown from "./SearchDropdown";
 import { Button } from "@/components/ui/button";
@@ -41,19 +41,19 @@ const LineItemsTable = () => {
     <>
       <div className="h-full w-full flex-1 overflow-auto">
         <div className="w-full space-y-0 py-5">
-          <div className="text-accent-foreground border-border grid grid-cols-10 items-center border bg-gray-100 text-base font-semibold">
-            <div className="col-span-1 border-r border-gray-300 py-2 text-center">#</div>
-            <div className="col-span-3 border-r border-gray-300 px-2 py-2 text-left">ITEM</div>
-            <div className="col-span-2 border-r border-gray-300 px-2 py-2 text-left">QTY</div>
-            <div className="col-span-2 border-r border-gray-300 px-2 py-2 text-left">PRICE</div>
-            <div className="col-span-2 px-2 py-2 text-left">AMOUNT</div>
+          <div className="text-accent-foreground border-border grid grid-cols-20 items-center border bg-gray-100 text-base font-semibold">
+            <div className="col-span-2 border-r border-gray-300 py-2 text-center">#</div>
+            <div className="col-span-9 border-r border-gray-300 px-2 py-2 text-left">ITEM</div>
+            <div className="col-span-3 border-r border-gray-300 px-2 py-2 text-left">QTY</div>
+            <div className="col-span-3 border-r border-gray-300 px-2 py-2 text-left">PRICE</div>
+            <div className="col-span-3 px-2 py-2 text-left">AMOUNT</div>
           </div>
 
           <div className="relative w-full space-y-1 py-3">
             {lineItems.map((item, idx: number) => (
               <div key={idx} className="relative">
-                <div className="group grid w-full grid-cols-10 border bg-neutral-100">
-                  <div className="col-span-1 h-full w-full border-r bg-white">
+                <div className="group grid w-full grid-cols-20 border bg-neutral-100">
+                  <div className="col-span-2 h-full w-full border-r bg-white">
                     <div className="flex h-full w-full items-center justify-between gap-2 px-4">
                       <GripVertical
                         className="invisible px-1 py-1 group-hover:visible hover:cursor-grab hover:bg-neutral-100"
@@ -67,7 +67,7 @@ const LineItemsTable = () => {
                       />
                     </div>
                   </div>
-                  <div className="col-span-3 border-r px-1 py-1">
+                  <div className="col-span-9 border-r px-1 py-1">
                     <input
                       value={item.name}
                       className="focus:border-ring focus:ring-ring w-full rounded-lg border bg-white px-2 py-2 text-lg font-bold shadow-sm transition-all focus:ring-2 focus:ring-offset-0 focus:outline-none"
@@ -81,32 +81,51 @@ const LineItemsTable = () => {
                       }}
                     />
                   </div>
-                  <div className="col-span-2 border-r px-1 py-1">
-                    <input
-                      value={item.quantity}
-                      className="focus:border-ring focus:ring-ring w-full rounded-lg border bg-white px-2 py-2 text-center text-base font-semibold shadow-sm transition-all focus:ring-2 focus:ring-offset-0 focus:outline-none"
-                      onChange={(e) => {
-                        updateLineItems(item.id, "quantity", e.target.value);
-                      }}
-                    />
+                  <div className="col-span-3 h-full w-full border-r px-1 py-1">
+                    <div className="border-border flex h-full w-full items-center rounded-lg border bg-white font-bold shadow-sm">
+                      <button className="hover:bg-primary/80 bg-primary flex h-full w-20 cursor-pointer items-center justify-center rounded-lg rounded-r-none text-white transition-all active:scale-95">
+                        <Plus size={22} />
+                      </button>
+                      <input
+                        value={item.quantity}
+                        className="focus:border-ring focus:ring-ring w-full rounded-lg px-2 py-2 text-center text-base font-semibold transition-all focus:ring-2 focus:ring-offset-0 focus:outline-none"
+                        onChange={(e) => {
+                          updateLineItems(item.id, "quantity", e.target.value);
+                        }}
+                      />
+                      <button
+                        disabled={item.quantity <= 0}
+                        className="hover:bg-primary/80 bg-primary flex h-full w-20 cursor-pointer items-center justify-center rounded-lg rounded-l-none text-white transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        <Minus size={22} />
+                      </button>
+                    </div>
                   </div>
-                  <div className="col-span-2 border-r px-1 py-1">
-                    <input
-                      value={item.price}
-                      className="focus:border-ring focus:ring-ring w-full rounded-lg border bg-white px-2 py-2 text-center text-base font-semibold shadow-sm transition-all focus:ring-2 focus:ring-offset-0 focus:outline-none"
-                      onChange={(e) => {
-                        updateLineItems(item.id, "price", e.target.value);
-                      }}
-                    />
+                  <div className="col-span-3 border-r px-1 py-1">
+                    <div className="relative h-full w-full">
+                      <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
+                        <IndianRupee size={18} />
+                      </span>
+                      <input
+                        value={item.price === 0 ? "" : item.price}
+                        onChange={(e) => updateLineItems(item.id, "price", e.target.value)}
+                        className="focus:border-ring focus:ring-ring h-full w-full rounded-lg border bg-white py-2 pr-7 pl-10 text-right text-base font-semibold text-black placeholder-gray-400 focus:ring-2 focus:outline-none"
+                        placeholder="0"
+                      />
+                    </div>
                   </div>
-                  <div className="col-span-2 border-r px-1 py-1">
-                    <input
-                      value={item.amount}
-                      className="focus:border-ring focus:ring-ring w-full rounded-lg border bg-white px-2 py-2 text-center text-base font-semibold shadow-sm transition-all focus:ring-2 focus:ring-offset-0 focus:outline-none"
-                      onChange={(e) => {
-                        updateLineItems(item.id, "amount", e.target.value);
-                      }}
-                    />
+                  <div className="col-span-3 border-r px-1 py-1">
+                    <div className="relative h-full w-full">
+                      <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
+                        <IndianRupee size={18} />
+                      </span>
+                      <input
+                        value={item.amount === 0 ? "" : item.amount}
+                        onChange={(e) => updateLineItems(item.id, "amount", e.target.value)}
+                        className="focus:border-ring focus:ring-ring h-full w-full rounded-lg border bg-white py-2 pr-7 pl-10 text-right text-base font-semibold text-black placeholder-gray-400 focus:ring-2 focus:outline-none"
+                        placeholder="0"
+                      />
+                    </div>
                   </div>
                 </div>
 
