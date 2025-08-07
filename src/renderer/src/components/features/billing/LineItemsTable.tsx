@@ -37,6 +37,10 @@ const LineItemsTable = () => {
     fetchProducts();
   }, []);
 
+  const totalAmount = lineItems.reduce((sum, currentItem) => {
+    return sum + Number(currentItem.amount || 0);
+  }, 0);
+
   return (
     <>
       <div className="h-full w-full flex-1 overflow-auto">
@@ -98,11 +102,12 @@ const LineItemsTable = () => {
                       </button>
                       <input
                         type="number"
-                        value={item.quantity}
-                        className="focus:border-ring focus:ring-ring w-full appearance-none rounded-lg px-2 py-2 text-center text-base font-semibold transition-all focus:ring-2 focus:ring-offset-0 focus:outline-none"
+                        value={item.quantity === 0 ? null : item.quantity}
+                        className="focus:border-ring focus:ring-ring w-full appearance-none rounded-lg px-2 py-2 text-center text-base font-semibold placeholder-gray-400 transition-all focus:ring-2 focus:ring-offset-0 focus:outline-none"
                         onChange={(e) => {
                           updateLineItems(item.id, "quantity", e.target.value);
                         }}
+                        placeholder="0"
                       />
                       <button
                         disabled={item.quantity <= 0}
@@ -125,7 +130,7 @@ const LineItemsTable = () => {
                       </span>
                       <input
                         type="number"
-                        value={item.price === 0 ? "" : item.price}
+                        value={item.price === 0 ? null : item.price}
                         onChange={(e) => updateLineItems(item.id, "price", e.target.value)}
                         className="focus:border-ring focus:ring-ring h-full w-full appearance-none rounded-lg border bg-white py-2 pr-7 pl-10 text-right text-base font-semibold text-black placeholder-gray-400 focus:ring-2 focus:outline-none"
                         placeholder="0"
@@ -141,7 +146,6 @@ const LineItemsTable = () => {
                         disabled
                         type="number"
                         value={item.amount === 0 ? "" : item.amount}
-                        onChange={(e) => updateLineItems(item.id, "amount", e.target.value)}
                         className="focus:border-ring focus:ring-ring h-full w-full appearance-none rounded-lg border bg-white py-2 pr-7 pl-10 text-right text-base font-semibold text-black placeholder-gray-400 focus:ring-2 focus:outline-none disabled:cursor-not-allowed"
                         placeholder="0"
                       />
@@ -163,6 +167,10 @@ const LineItemsTable = () => {
             </div>
           </div>
         </div>
+      </div>
+      <div className="border-t-border flex h-16 w-full items-center justify-between border bg-white px-6 py-4">
+        <div className="text-xl font-bold">Total Amount:</div>
+        <div className="text-primary text-3xl font-extrabold">₹ {totalAmount}</div>
       </div>
     </>
   );

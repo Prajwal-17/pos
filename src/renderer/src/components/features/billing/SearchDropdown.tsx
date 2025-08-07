@@ -10,6 +10,7 @@ const SearchDropdown = ({ idx }: { idx: number }) => {
   const isDropdownOpen = useSearchDropdownStore((state) => state.isDropdownOpen);
   const setIsDropdownOpen = useSearchDropdownStore((state) => state.setIsDropdownOpen);
   const addLineItem = useBillingStore((state) => state.addLineItem);
+  const addEmptyLineItem = useBillingStore((state) => state.addEmptyLineItem);
 
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -76,6 +77,7 @@ const SearchDropdown = ({ idx }: { idx: number }) => {
                 onClick={() => {
                   addLineItem(idx, item);
                   setIsDropdownOpen();
+                  addEmptyLineItem();
                 }}
               >
                 <div className="col-span-4 border-r border-black px-1 py-1">{item.name}</div>
