@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GripVertical, IndianRupee, Minus, Plus, Trash2 } from "lucide-react";
 import { useBillingStore } from "@/store/billingStore";
 import SearchDropdown from "./SearchDropdown";
 import { Button } from "@/components/ui/button";
 import { useSearchDropdownStore } from "@/store/searchDropdownStore";
+import QuantityPresets from "./QuantityPresets";
 
 export type ItemType = {
   id: string;
@@ -15,6 +16,7 @@ export type ItemType = {
 };
 
 const LineItemsTable = () => {
+  const popDownRef = useRef<HTMLDivElement | null>(null);
   const lineItems = useBillingStore((state) => state.lineItems);
   const addEmptyLineItem = useBillingStore((state) => state.addEmptyLineItem);
   const updateLineItems = useBillingStore((state) => state.updateLineItems);
@@ -40,6 +42,32 @@ const LineItemsTable = () => {
   const totalAmount = lineItems.reduce((sum, currentItem) => {
     return sum + Number(currentItem.amount || 0);
   }, 0);
+
+  const [qtyPresetOpen, setQtyPresetOpen] = useState<number | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setQtyPresetOpen(null);
+      }
+    };
+
+    const handleMouseDown = (e: MouseEvent) => {
+      if (popDownRef.current && !popDownRef.current.contains(e.target as Node))
+        setQtyPresetOpen(null);
+    };
+
+    if (qtyPresetOpen != null) {
+      console.log("here");
+      document.addEventListener("keydown", handleKeyDown);
+      document.addEventListener("mousedown", handleMouseDown);
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleMouseDown);
+    };
+  }, [qtyPresetOpen, setQtyPresetOpen]);
 
   return (
     <>
@@ -85,13 +113,11 @@ const LineItemsTable = () => {
                       }}
                     />
                   </div>
-                  <div className="col-span-3 h-full w-full border-r px-1 py-1">
-                    <div className="border-border flex h-full w-full items-center rounded-lg border bg-white font-bold shadow-sm">
+                  <div ref={popDownRef} className="col-span-3 h-full w-full border-r px-1 py-1">
+                    <div className="border-border relative flex h-full w-full items-center rounded-lg border bg-white font-bold shadow-sm">
                       <button
                         onClick={() => {
-                          console.log("clicked");
                           if (item.quantity >= 0) {
-                            console.log(typeof item.quantity);
                             const newQuantity = item.quantity + 1;
                             updateLineItems(item.id, "quantity", newQuantity);
                           }
@@ -102,6 +128,10 @@ const LineItemsTable = () => {
                       </button>
                       <input
                         type="number"
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          setQtyPresetOpen(idx);
+                        }}
                         value={item.quantity === 0 ? null : item.quantity}
                         className="focus:border-ring focus:ring-ring w-full appearance-none rounded-lg px-2 py-2 text-center text-base font-semibold placeholder-gray-400 transition-all focus:ring-2 focus:ring-offset-0 focus:outline-none"
                         onChange={(e) => {
@@ -121,6 +151,7 @@ const LineItemsTable = () => {
                       >
                         <Minus size={22} />
                       </button>
+                      <QuantityPresets itemId={item.id} qtyPresetOpen={qtyPresetOpen} idx={idx} />
                     </div>
                   </div>
                   <div className="col-span-3 border-r px-1 py-1">

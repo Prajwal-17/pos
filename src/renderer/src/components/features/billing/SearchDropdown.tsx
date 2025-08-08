@@ -43,8 +43,6 @@ const SearchDropdown = ({ idx }: { idx: number }) => {
 
     if (isDropdownOpen) {
       document.addEventListener("mousedown", handleClickOutside);
-    }
-    if (isDropdownOpen) {
       document.addEventListener("keydown", handleKeyDown);
     }
 
