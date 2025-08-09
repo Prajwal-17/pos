@@ -151,7 +151,12 @@ const LineItemsTable = () => {
                       >
                         <Minus size={22} />
                       </button>
-                      <QuantityPresets itemId={item.id} qtyPresetOpen={qtyPresetOpen} idx={idx} />
+                      <QuantityPresets
+                        itemId={item.id}
+                        qtyPresetOpen={qtyPresetOpen}
+                        idx={idx}
+                        setQtyPresetOpen={setQtyPresetOpen}
+                      />
                     </div>
                   </div>
                   <div className="col-span-3 border-r px-1 py-1">

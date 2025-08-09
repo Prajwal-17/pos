@@ -5,11 +5,13 @@ import { useBillingStore } from "@/store/billingStore";
 const QuantityPresets = ({
   itemId,
   idx,
-  qtyPresetOpen
+  qtyPresetOpen,
+  setQtyPresetOpen
 }: {
   itemId: string;
   idx: number;
   qtyPresetOpen: number | null;
+  setQtyPresetOpen: React.Dispatch<React.SetStateAction<number | null>>;
 }) => {
   const updateLineItems = useBillingStore((state) => state.updateLineItems);
   const numbers = Array.from({ length: 40 }, (_, i) => i + 1);
@@ -29,6 +31,7 @@ const QuantityPresets = ({
       return;
     }
     updateLineItems(itemId, "quantity", parseFloat(button.dataset.value));
+    setQtyPresetOpen(null);
   }
 
   const weights = [
