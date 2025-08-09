@@ -15,7 +15,7 @@ export type CustomersType = {
 export type ProductsType = {
   id: string;
   name: string;
-  quantity: number;
+  weight: string;
   mrp: number;
   price: number;
 };
@@ -24,6 +24,7 @@ export type SalesType = {
   id: string;
   customerId: string;
   customerName: string;
-  total: number;
+  grandTotal: number;
   totalQuantity: number;
+  isPaid: boolean;
 };

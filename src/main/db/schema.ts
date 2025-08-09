@@ -14,7 +14,7 @@ export const customers = sqliteTable("customers", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   contact: text("contact").notNull(),
-  customerType: text("customer_type").notNull(),
+  customerType: text("customer_type"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sql`(CURRENT_TIMESTAMP)`),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).$onUpdate(() => sql`CURRENT_TIMESTAMP`)
 });
@@ -22,10 +22,10 @@ export const customers = sqliteTable("customers", {
 export const products = sqliteTable("products", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
-  quantity: real("quantity").notNull(),
-  mrp: real("mrp").notNull(),
+  weight: text("weight"),
+  unit: text("unit"),
+  mrp: real("mrp"),
   price: real("price").notNull(),
-  //unit:text("unit").notNull(),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sql`(CURRENT_TIMESTAMP)`),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).$onUpdate(() => sql`CURRENT_TIMESTAMP`)
 });
@@ -33,8 +33,8 @@ export const products = sqliteTable("products", {
 export const productHistory = sqliteTable("product_history", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
-  quantity: real("quantity"),
-  //unit:text("unit").notNull(),
+  weight: text("weight"),
+  unit: text("unit"),
   productId: text("product_id")
     .references(() => products.id)
     .notNull(),
@@ -47,12 +47,11 @@ export const productHistory = sqliteTable("product_history", {
 
 export const sales = sqliteTable("sales", {
   id: text("id").primaryKey(),
-  customerId: text("customer_id")
-    .references(() => customers.id)
-    .notNull(),
+  customerId: text("customer_id").references(() => customers.id),
   customerName: text("customer_name").notNull(),
-  total: real("total").notNull(),
-  totalQuantity: real("total_quantity").notNull(),
+  grandTotal: real("grandTotal").notNull(),
+  totalQuantity: real("total_quantity"),
+  isPaid: integer("is_paid", { mode: "boolean" }).notNull().default(true),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sql`(CURRENT_TIMESTAMP)`),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).$onUpdate(() => sql`CURRENT_TIMESTAMP`)
 });
@@ -62,12 +61,14 @@ export const saleItems = sqliteTable("sale_items", {
   saleId: text("sale_id")
     .references(() => sales.id)
     .notNull(),
-  productId: text("product_id")
-    .references(() => products.id)
-    .notNull(),
+  productId: text("product_id").references(() => products.id),
   name: text("name").notNull(),
+  mrp: real("mrp"),
   price: real("price").notNull(),
+  weight: text("weight"),
+  unit: text("unit"),
   quantity: real("quantity").notNull(),
+  totalPrice: real("total_price").notNull(),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sql`(CURRENT_TIMESTAMP)`),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).$onUpdate(() => sql`CURRENT_TIMESTAMP`)
 });

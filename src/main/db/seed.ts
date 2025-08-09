@@ -28,10 +28,12 @@ export async function main() {
     const productsData: ProductsType[] = Array.from({ length: 10 }).map(() => ({
       id: uuidv4(),
       name: faker.commerce.product(),
-      quantity: Number(faker.number.int({ max: 50 })),
+      weight: faker.string.numeric(2),
+      unit: faker.string.alpha(1),
       mrp: Number(faker.commerce.price()),
       price: Number(faker.commerce.price())
     }));
+    // quantity: Number(faker.number.int({ max: 50 })),
 
     const salesData: SalesType[] = Array.from({ length: 3 }).map(() => {
       const customer = faker.helpers.arrayElement(customersData);
@@ -39,7 +41,8 @@ export async function main() {
         id: uuidv4(),
         customerId: customer.id,
         customerName: customer.name,
-        total: faker.number.int(),
+        grandTotal: faker.number.int(),
+        isPaid: faker.datatype.boolean(),
         totalQuantity: faker.number.int()
       };
     });
