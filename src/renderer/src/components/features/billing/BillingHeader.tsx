@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useBillingStore } from "@/store/billingStore";
-import { Calendar, Check, Clock4, SquarePen, X } from "lucide-react";
+import { Check, SquarePen, X } from "lucide-react";
 import { useState } from "react";
+import { DateTime } from "./DateTime";
 
 const BillingHeader = () => {
   const invoiceNo = useBillingStore((state) => state.invoiceNo);
@@ -11,9 +12,12 @@ const BillingHeader = () => {
   const setCustomerName = useBillingStore((state) => state.setCustomerName);
   const customerContact = useBillingStore((state) => state.customerContact);
   const setCustomerContact = useBillingStore((state) => state.setCustomerContact);
+  const paymentMethod = useBillingStore((state) => state.paymentMethod);
+  const setPaymentMethod = useBillingStore((state) => state.setPaymentMethod);
 
   const [tempInvoice, setTempInvoice] = useState(invoiceNo);
   const [editInvoice, setEditInvoice] = useState(false);
+
   return (
     <>
       <div className="border-b-border flex w-full flex-col justify-center gap-10 border px-4 py-5">
@@ -51,38 +55,56 @@ const BillingHeader = () => {
             <SquarePen size={20} onClick={() => setEditInvoice(true)} />
           </div>
           <div className="flex items-center justify-center gap-4">
-            <div className="flex items-center">
-              <Calendar />
-              <span>17/04/2025</span>
-            </div>
-            <div className="flex items-center">
-              <Clock4 />
-              <span>17:53</span>
-            </div>
+            <DateTime />
           </div>
         </div>
         <div className="flex items-center">
           <div className="flex w-full flex-1 items-center gap-4">
             <div className="w-full">
-              <span>Customer Name</span>
+              <label htmlFor="customer-name" className="text-sm font-medium text-gray-700">
+                Customer Name
+              </label>
               <Input
                 placeholder="Enter Name"
+                id="customer-name"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
               />
             </div>
             <div className="w-full">
-              <span>Customer Phone Number</span>
-              <Input
-                placeholder="Enter Name"
-                value={customerContact}
-                onChange={(e) => setCustomerContact(e.target.value)}
-              />
+              <label htmlFor="customer-contact" className="text-sm font-medium text-gray-700">
+                Customer Phone Number
+              </label>
+
+              <div className="relative mt-1">
+                <div className="border-r-border pointer-events-none absolute inset-y-0 left-0 flex items-center rounded-l-md border border-gray-300 bg-gray-50 px-3">
+                  <span className="text-gray-500 sm:text-sm">+91</span>
+                </div>
+
+                <Input
+                  type="number"
+                  id="customer-contact"
+                  className="pl-16"
+                  placeholder="Contact Number"
+                  value={customerContact}
+                  onChange={(e) => setCustomerContact(e.target.value)}
+                />
+              </div>
             </div>
           </div>
           <div className="flex items-center justify-center gap-2 px-4">
-            <Button>Cash</Button>
-            <Button>Credit</Button>
+            <Button
+              variant={paymentMethod === "cash" ? "default" : "outline"}
+              onClick={() => setPaymentMethod("cash")}
+            >
+              Cash
+            </Button>
+            <Button
+              variant={paymentMethod === "credit" ? "default" : "outline"}
+              onClick={() => setPaymentMethod("credit")}
+            >
+              Credit
+            </Button>
           </div>
         </div>
       </div>

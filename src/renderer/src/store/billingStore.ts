@@ -16,6 +16,8 @@ type BillingStoreType = {
   setCustomerName: (newCustomerName: string) => void;
   customerContact: string;
   setCustomerContact: (newCustomerContact: string) => void;
+  paymentMethod: string;
+  setPaymentMethod: (method: string) => void;
   lineItems: LineItems[] | [];
   setLineItems: () => void;
   addEmptyLineItem: () => void;
@@ -37,6 +39,12 @@ export const useBillingStore = create<BillingStoreType>((set) => ({
 
   customerContact: "",
   setCustomerContact: (newCustomerContact) => set({ customerContact: newCustomerContact }),
+
+  paymentMethod: "cash",
+  setPaymentMethod: (method) =>
+    set(() => ({
+      paymentMethod: method
+    })),
 
   lineItems: [initialLineItem()],
 

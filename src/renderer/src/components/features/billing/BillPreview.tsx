@@ -16,6 +16,10 @@ const BillPreview = () => {
     contentRef: receiptRef
   });
 
+  function handleSave() {
+    console.log("save");
+  }
+
   return (
     <>
       <div className="flex w-1/4 flex-col items-center justify-between overflow-y-auto bg-neutral-100 py-7">
@@ -70,7 +74,9 @@ const BillPreview = () => {
           <div className="text-center">Thank You</div>
         </div>
         <div className="flex w-1/4">
-          <Button className="">Save</Button>
+          <Button className="" onClick={handleSave}>
+            Save
+          </Button>
           <Button className="" onClick={handlePrint}>
             Print
           </Button>

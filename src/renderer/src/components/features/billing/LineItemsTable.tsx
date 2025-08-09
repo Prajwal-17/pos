@@ -30,7 +30,7 @@ const LineItemsTable = () => {
     async function fetchProducts() {
       try {
         const response = await window.productsApi.getAllProducts();
-        console.log(response);
+        // console.log(response);
         // setLineItems(response);
       } catch (error) {
         console.log(error);
@@ -206,7 +206,7 @@ const LineItemsTable = () => {
       </div>
       <div className="border-t-border flex h-16 w-full items-center justify-between border bg-white px-6 py-4">
         <div className="text-xl font-bold">Total Amount:</div>
-        <div className="text-primary text-3xl font-extrabold">₹ {totalAmount}</div>
+        <div className="text-primary text-3xl font-extrabold">₹ {totalAmount.toFixed(2)}</div>
       </div>
     </>
   );
