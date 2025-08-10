@@ -50,7 +50,7 @@ export function setupIpcHandlers() {
   ipcMain.handle("billingApi:save", async (_event, obj: any): Promise<any> => {
     try {
       // for better-sqlite3 inside a transaction asynchronous is not required, only used for standalone queries
-      db.transaction(async (tx) => {
+      db.transaction((tx) => {
         const sale = tx
           .insert(sales)
           .values({
