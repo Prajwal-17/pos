@@ -59,6 +59,7 @@ CREATE TABLE `__new_sales` (
 );
 --> statement-breakpoint
 INSERT INTO `__new_sales`("id", "customer_id", "customer_name", "grandTotal", "total_quantity", "is_paid", "created_at", "updated_at") SELECT "id", "customer_id", "customer_name", "total", "total_quantity", 1, "created_at", "updated_at" FROM `sales`;
+--> statement-breakpoint
 DROP TABLE `sales`;--> statement-breakpoint
 ALTER TABLE `__new_sales` RENAME TO `sales`;--> statement-breakpoint
 ALTER TABLE `product_history` ADD `weight` text;--> statement-breakpoint

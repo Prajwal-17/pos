@@ -15,9 +15,9 @@ export type CustomersType = {
 export type ProductsType = {
   id: string;
   name: string;
-  weight: string;
-  mrp: number;
-  price: number;
+  weight: string | null;
+  mrp: number | null;
+  price: number | null;
 };
 
 export type SalesType = {

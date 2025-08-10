@@ -7,10 +7,16 @@ const productsApi = {
   search: (query: string) => ipcRenderer.invoke("productsApi:search", query)
 };
 
+const billingApi = {
+  getNextInvoiceNo: () => ipcRenderer.invoke("billingApi:getNextInvoiceNo"),
+  save: (obj: any) => ipcRenderer.invoke("billingApi:save", obj)
+};
+
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld("electronAPI", electronAPI);
     contextBridge.exposeInMainWorld("productsApi", productsApi);
+    contextBridge.exposeInMainWorld("billingApi", billingApi);
   } catch (error) {
     console.error(error);
   }

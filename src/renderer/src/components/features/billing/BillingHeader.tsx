@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useBillingStore } from "@/store/billingStore";
 import { Check, SquarePen, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DateTime } from "./DateTime";
 
 const BillingHeader = () => {
@@ -15,8 +15,20 @@ const BillingHeader = () => {
   const paymentMethod = useBillingStore((state) => state.paymentMethod);
   const setPaymentMethod = useBillingStore((state) => state.setPaymentMethod);
 
-  const [tempInvoice, setTempInvoice] = useState(invoiceNo);
-  const [editInvoice, setEditInvoice] = useState(false);
+  const [tempInvoice, setTempInvoice] = useState<number | null>(invoiceNo);
+  const [editInvoice, setEditInvoice] = useState<boolean>(false);
+
+  useEffect(() => {
+    async function getLatestInvoiceNumber() {
+      try {
+        const newInvoiceNo = await window.billingApi.getNextInvoiceNo();
+        setInvoiceNo(newInvoiceNo);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    getLatestInvoiceNumber();
+  }, [setInvoiceNo]);
 
   return (
     <>
@@ -28,9 +40,10 @@ const BillingHeader = () => {
             {editInvoice ? (
               <>
                 <Input
+                  type="number"
                   className="text-primary w-24 px-1 py-1 text-center !text-xl font-extrabold"
-                  value={tempInvoice}
-                  onChange={(e) => setTempInvoice(e.target.value)}
+                  value={Number(tempInvoice)}
+                  onChange={(e) => setTempInvoice(Number(e.target.value))}
                 />
                 <Check
                   onClick={() => {
@@ -52,7 +65,7 @@ const BillingHeader = () => {
             ) : (
               <span className="text-primary text-3xl font-extrabold">{invoiceNo}</span>
             )}
-            <SquarePen size={20} onClick={() => setEditInvoice(true)} />
+            {/*<SquarePen size={20} onClick={() => setEditInvoice(true)} />*/}
           </div>
           <div className="flex items-center justify-center gap-4">
             <DateTime />
@@ -93,6 +106,7 @@ const BillingHeader = () => {
             </div>
           </div>
           <div className="flex items-center justify-center gap-2 px-4">
+            <Button onClick={() => getLatestInvoiceNumber()}>Random</Button>
             <Button
               variant={paymentMethod === "cash" ? "default" : "outline"}
               onClick={() => setPaymentMethod("cash")}

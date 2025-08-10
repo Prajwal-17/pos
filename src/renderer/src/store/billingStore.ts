@@ -10,8 +10,8 @@ type LineItems = {
   amount: number;
 };
 type BillingStoreType = {
-  invoiceNo: string;
-  setInvoiceNo: (newInvoiceNo: string) => void;
+  invoiceNo: number | null;
+  setInvoiceNo: (newInvoiceNo: number | null) => void;
   customerName: string;
   setCustomerName: (newCustomerName: string) => void;
   customerContact: string;
@@ -27,11 +27,11 @@ type BillingStoreType = {
 };
 
 function initialLineItem() {
-  return { id: uuidv4(), name: "", quantity: 0, mrp: 0, price: 0, amount: 0 };
+  return { id: uuidv4(), name: "", weight: "", quantity: 0, mrp: 0, price: 0, amount: 0 };
 }
 
 export const useBillingStore = create<BillingStoreType>((set) => ({
-  invoiceNo: "",
+  invoiceNo: null,
   setInvoiceNo: (newInvoiceNo) => set(() => ({ invoiceNo: newInvoiceNo })),
 
   customerName: "",
@@ -68,7 +68,8 @@ export const useBillingStore = create<BillingStoreType>((set) => ({
 
       const updatedItem = {
         ...newItem,
-        amount: parseFloat((newItem.quantity * newItem.price).toFixed(2))
+        quantity: 1,
+        amount: parseFloat((1 * newItem.price).toFixed(2))
       };
 
       currLineItems[index] = { ...updatedItem };
@@ -81,6 +82,7 @@ export const useBillingStore = create<BillingStoreType>((set) => ({
   // update on field change
   updateLineItems: (itemId, field, value) =>
     set((state) => {
+      console.log("here");
       const updatedLineItems = state.lineItems.map((item) => {
         if (itemId !== item.id) return item;
 

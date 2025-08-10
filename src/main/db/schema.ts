@@ -47,6 +47,7 @@ export const productHistory = sqliteTable("product_history", {
 
 export const sales = sqliteTable("sales", {
   id: text("id").primaryKey(),
+  invoiceNumber: real("invoice_number").unique().notNull(),
   customerId: text("customer_id").references(() => customers.id),
   customerName: text("customer_name").notNull(),
   grandTotal: real("grandTotal").notNull(),

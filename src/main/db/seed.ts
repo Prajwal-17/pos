@@ -33,12 +33,12 @@ export async function main() {
       mrp: Number(faker.commerce.price()),
       price: Number(faker.commerce.price())
     }));
-    // quantity: Number(faker.number.int({ max: 50 })),
 
     const salesData: SalesType[] = Array.from({ length: 3 }).map(() => {
       const customer = faker.helpers.arrayElement(customersData);
       return {
         id: uuidv4(),
+        invoiceNumber: uuidv4(),
         customerId: customer.id,
         customerName: customer.name,
         grandTotal: faker.number.int(),

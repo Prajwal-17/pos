@@ -1,24 +1,51 @@
 import { Button } from "@/components/ui/button";
-import { useRef } from "react";
+import { useBillingStore } from "@/store/billingStore";
+import { useEffect, useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 
 const BillPreview = () => {
   const receiptRef = useRef<HTMLDivElement | null>(null);
-  const items = [
-    { id: "item001", name: "Wireless Mouse", quantity: 2, price: 20.0, amount: 40.0 },
-    { id: "item002", name: "Mechanical Keyboard", quantity: 1, price: 65.0, amount: 65.0 },
-    { id: "item003", name: "HD Monitor", quantity: 3, price: 140.0, amount: 420.0 },
-    { id: "item004", name: "USB-C Hub", quantity: 4, price: 35.0, amount: 140.0 },
-    { id: "item005", name: "Laptop Stand", quantity: 2, price: 28.0, amount: 56.0 }
-  ];
+  // const items = [
+  //   { id: "item001", name: "Wireless Mouse", quantity: 2, price: 20.0, amount: 40.0 },
+  //   { id: "item002", name: "Mechanical Keyboard", quantity: 1, price: 65.0, amount: 65.0 },
+  //   { id: "item003", name: "HD Monitor", quantity: 3, price: 140.0, amount: 420.0 },
+  //   { id: "item004", name: "USB-C Hub", quantity: 4, price: 35.0, amount: 140.0 },
+  //   { id: "item005", name: "Laptop Stand", quantity: 2, price: 28.0, amount: 56.0 }
+  // ];
+
+  const lineItems = useBillingStore((state) => state.lineItems);
+  const invoiceNo = useBillingStore((state) => state.invoiceNo);
+  const customerName = useBillingStore((state) => state.customerName);
+  const customerContact = useBillingStore((state) => state.customerContact);
 
   const handlePrint = useReactToPrint({
     contentRef: receiptRef
   });
+  const totalAmount = lineItems.reduce((sum, currentItem) => {
+    return sum + Number(currentItem.amount || 0);
+  }, 0);
 
-  function handleSave() {
-    console.log("save");
+  async function handleSave() {
+    try {
+      console.log("save");
+      const values = {
+        invoiceNo,
+        customerName,
+        customerContact,
+        items: lineItems,
+        totalAmount
+      };
+      const response = await window.billingApi.save(values);
+      console.log("response ", response);
+    } catch (error) {
+      console.log(error);
+    }
   }
+  // cstname ,cstnon,tyep,total
+
+  useEffect(() => {
+    console.log("lineitems", lineItems);
+  }, [lineItems]);
 
   return (
     <>
@@ -56,7 +83,7 @@ const BillPreview = () => {
             <div className="col-span-2 text-right">AMT</div>
           </div>
           <div className="border-b border-dashed border-black text-xs">
-            {items.map((item, idx) => (
+            {lineItems.map((item, idx) => (
               <div key={item.id} className="grid grid-cols-12 py-1">
                 <div className="col-span-1">{idx + 1}</div>
                 <div className="col-span-5">{item.name}</div>
