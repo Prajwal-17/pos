@@ -1,6 +1,6 @@
 import { ipcMain } from "electron";
 import { db } from "./db/db";
-import { products, sales } from "./db/schema";
+import { products, saleItems, sales } from "./db/schema";
 import { desc, like } from "drizzle-orm";
 import type { ProductsType } from "./types";
 
@@ -33,7 +33,7 @@ export function setupIpcHandlers() {
   ipcMain.handle("billingApi:getNextInvoiceNo", async (): Promise<number | null> => {
     try {
       const lastInvoice = await db.select().from(sales).orderBy(desc(sales.createdAt)).limit(1);
-      const lastInvoiceNo = lastInvoice[0]?.invoiceNumber;
+      const lastInvoiceNo = lastInvoice[0]?.invoiceNo;
       let nextInvoiceNo = 1;
 
       if (lastInvoiceNo) {
@@ -49,10 +49,41 @@ export function setupIpcHandlers() {
 
   ipcMain.handle("billingApi:save", async (_event, obj: any): Promise<any> => {
     try {
-      console.log("obj", obj);
-      return "done";
+      // for better-sqlite3 inside a transaction asynchronous is not required, only used for standalone queries
+      db.transaction(async (tx) => {
+        const sale = tx
+          .insert(sales)
+          .values({
+            invoiceNo: Number(obj.invoiceNo),
+            customerName: "DEFAULT",
+            grandTotal: obj.grandTotal,
+            isPaid: true
+          })
+          .returning({ id: sales.id })
+          .get();
+
+        if (!sale || !sale.id) {
+          throw new Error("Failed to create sale record.");
+        }
+
+        for (const item of obj.items) {
+          tx.insert(saleItems)
+            .values({
+              saleId: sale.id,
+              name: item.name,
+              // mrp:item.mrp ?? 24,
+              price: item.price ?? 34,
+              quantity: item.quantity ?? 34,
+              totalPrice: item.totalPrice ?? 23
+            })
+            .run();
+        }
+      });
+
+      return "success";
     } catch (error) {
-      console.log(error);
+      console.error("Error in transaction:", error);
+      throw error;
     }
   });
 }

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useBillingStore } from "@/store/billingStore";
-import { Check, SquarePen, X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { DateTime } from "./DateTime";
 
@@ -106,7 +106,6 @@ const BillingHeader = () => {
             </div>
           </div>
           <div className="flex items-center justify-center gap-2 px-4">
-            <Button onClick={() => getLatestInvoiceNumber()}>Random</Button>
             <Button
               variant={paymentMethod === "cash" ? "default" : "outline"}
               onClick={() => setPaymentMethod("cash")}

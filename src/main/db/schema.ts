@@ -1,8 +1,11 @@
 import { sql } from "drizzle-orm";
 import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { v4 as uuidv4 } from "uuid";
 
 export const users = sqliteTable("users", {
-  id: text("id").primaryKey(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv4()),
   name: text("name").notNull(),
   role: text("role").notNull(),
   password: text("password").notNull(),
@@ -11,7 +14,9 @@ export const users = sqliteTable("users", {
 });
 
 export const customers = sqliteTable("customers", {
-  id: text("id").primaryKey(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv4()),
   name: text("name").notNull(),
   contact: text("contact").notNull(),
   customerType: text("customer_type"),
@@ -20,7 +25,9 @@ export const customers = sqliteTable("customers", {
 });
 
 export const products = sqliteTable("products", {
-  id: text("id").primaryKey(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv4()),
   name: text("name").notNull(),
   weight: text("weight"),
   unit: text("unit"),
@@ -31,7 +38,9 @@ export const products = sqliteTable("products", {
 });
 
 export const productHistory = sqliteTable("product_history", {
-  id: text("id").primaryKey(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv4()),
   name: text("name").notNull(),
   weight: text("weight"),
   unit: text("unit"),
@@ -46,11 +55,13 @@ export const productHistory = sqliteTable("product_history", {
 });
 
 export const sales = sqliteTable("sales", {
-  id: text("id").primaryKey(),
-  invoiceNumber: real("invoice_number").unique().notNull(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv4()),
+  invoiceNo: integer("invoice_no").notNull(),
   customerId: text("customer_id").references(() => customers.id),
   customerName: text("customer_name").notNull(),
-  grandTotal: real("grandTotal").notNull(),
+  grandTotal: integer("grand_total", { mode: "number" }),
   totalQuantity: real("total_quantity"),
   isPaid: integer("is_paid", { mode: "boolean" }).notNull().default(true),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sql`(CURRENT_TIMESTAMP)`),
@@ -58,7 +69,9 @@ export const sales = sqliteTable("sales", {
 });
 
 export const saleItems = sqliteTable("sale_items", {
-  id: text("id").primaryKey(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv4()),
   saleId: text("sale_id")
     .references(() => sales.id)
     .notNull(),
