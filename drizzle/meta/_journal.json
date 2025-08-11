@@ -43,6 +43,13 @@
       "when": 1754846587566,
       "tag": "0005_gifted_skrulls",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1754900645596,
+      "tag": "0006_chunky_hobgoblin",
+      "breakpoints": true
     }
   ]
 }

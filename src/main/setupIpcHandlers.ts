@@ -2,35 +2,38 @@ import { ipcMain } from "electron";
 import { db } from "./db/db";
 import { products, saleItems, sales } from "./db/schema";
 import { desc, like } from "drizzle-orm";
-import type { ProductsType } from "./types";
+import type { ApiResponse, ProductsType } from "../shared/types";
 
 export function setupIpcHandlers() {
-  ipcMain.handle("productsApi:getAllProducts", async (): Promise<ProductsType[]> => {
+  ipcMain.handle("productsApi:getAllProducts", async (): Promise<ApiResponse<ProductsType[]>> => {
     try {
-      const result = await db.select().from(products);
-      return result;
+      const allProducts = await db.select().from(products);
+      return { status: "success", data: allProducts };
     } catch (error) {
       console.log(error);
-      return [];
+      return { status: "error", error: { message: "Could not fetch Products" } };
     }
   });
 
-  ipcMain.handle("productsApi:search", async (_event, query: string): Promise<ProductsType[]> => {
-    try {
-      if (query === "") return [];
-      const result = await db
-        .select()
-        .from(products)
-        .where(like(products.name, `%${query}%`));
+  ipcMain.handle(
+    "productsApi:search",
+    async (_event, query: string): Promise<ApiResponse<ProductsType[]>> => {
+      try {
+        if (query === "") return { status: "success", data: [] };
+        const searchResult = await db
+          .select()
+          .from(products)
+          .where(like(products.name, `%${query}%`));
 
-      return result;
-    } catch (error) {
-      console.log(error);
-      return [];
+        return { status: "success", data: searchResult };
+      } catch (error) {
+        console.log(error);
+        return { status: "error", error: { message: "Could not search Products" } };
+      }
     }
-  });
+  );
 
-  ipcMain.handle("billingApi:getNextInvoiceNo", async (): Promise<number | null> => {
+  ipcMain.handle("billingApi:getNextInvoiceNo", async (): Promise<ApiResponse<number>> => {
     try {
       const lastInvoice = await db.select().from(sales).orderBy(desc(sales.createdAt)).limit(1);
       const lastInvoiceNo = lastInvoice[0]?.invoiceNo;
@@ -40,14 +43,14 @@ export function setupIpcHandlers() {
         nextInvoiceNo = lastInvoiceNo + 1;
       }
 
-      return nextInvoiceNo;
+      return { status: "success", data: nextInvoiceNo };
     } catch (error) {
       console.log(error);
-      return null;
+      return { status: "error", error: { message: "Failed to retrieve next invoice number" } };
     }
   });
 
-  ipcMain.handle("billingApi:save", async (_event, obj: any): Promise<any> => {
+  ipcMain.handle("billingApi:save", async (_event, obj: any): Promise<ApiResponse<string>> => {
     try {
       // for better-sqlite3 inside a transaction asynchronous is not required, only used for standalone queries
       db.transaction((tx) => {
@@ -80,10 +83,10 @@ export function setupIpcHandlers() {
         }
       });
 
-      return "success";
+      return { status: "success", data: "Sale was saved successfully" };
     } catch (error) {
       console.error("Error in transaction:", error);
-      throw error;
+      return { status: "error", error: { message: "Error occured while saving." } };
     }
   });
 }

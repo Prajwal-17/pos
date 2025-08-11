@@ -19,8 +19,11 @@ const SearchDropdown = ({ idx }: { idx: number }) => {
       try {
         setSearchResult([]);
         const response = await window.productsApi.search(searchParam);
-        console.log("search result ", response);
-        setSearchResult(response);
+        if (response.status === "success") {
+          setSearchResult(response.data);
+        } else {
+          console.log(response.error);
+        }
       } catch (error) {
         console.log("error", error);
       }

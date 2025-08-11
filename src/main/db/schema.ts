@@ -49,8 +49,8 @@ export const productHistory = sqliteTable("product_history", {
     .notNull(),
   oldPrice: real("old_price"),
   newPrice: real("new_price"),
-  old_mrp: real("old_mrp"),
-  new_mrp: real("new_mrp"),
+  oldMrp: real("old_mrp"),
+  newMrp: real("new_mrp"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sql`(CURRENT_TIMESTAMP)`)
 });
 
@@ -61,6 +61,7 @@ export const sales = sqliteTable("sales", {
   invoiceNo: integer("invoice_no").notNull(),
   customerId: text("customer_id").references(() => customers.id),
   customerName: text("customer_name").notNull(),
+  customerContact: text("customer_contact"),
   grandTotal: integer("grand_total", { mode: "number" }),
   totalQuantity: real("total_quantity"),
   isPaid: integer("is_paid", { mode: "boolean" }).notNull().default(true),

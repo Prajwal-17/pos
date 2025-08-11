@@ -1,18 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { useBillingStore } from "@/store/billingStore";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 
 const BillPreview = () => {
   const receiptRef = useRef<HTMLDivElement | null>(null);
-  // const items = [
-  //   { id: "item001", name: "Wireless Mouse", quantity: 2, price: 20.0, amount: 40.0 },
-  //   { id: "item002", name: "Mechanical Keyboard", quantity: 1, price: 65.0, amount: 65.0 },
-  //   { id: "item003", name: "HD Monitor", quantity: 3, price: 140.0, amount: 420.0 },
-  //   { id: "item004", name: "USB-C Hub", quantity: 4, price: 35.0, amount: 140.0 },
-  //   { id: "item005", name: "Laptop Stand", quantity: 2, price: 28.0, amount: 56.0 }
-  // ];
-
   const lineItems = useBillingStore((state) => state.lineItems);
   const invoiceNo = useBillingStore((state) => state.invoiceNo);
   const customerName = useBillingStore((state) => state.customerName);
@@ -22,30 +14,33 @@ const BillPreview = () => {
     contentRef: receiptRef
   });
   const totalAmount = lineItems.reduce((sum, currentItem) => {
-    return sum + Number(currentItem.amount || 0);
+    return sum + Number(currentItem.totalPrice || 0);
   }, 0);
 
   async function handleSave() {
     try {
       console.log("save");
       const values = {
-        invoiceNo,
+        invoiceNo: Number(invoiceNo),
+        customerId: "asdf",
         customerName,
         customerContact,
-        items: lineItems,
-        totalAmount
+        grandTotal: totalAmount,
+        totalQuantity: 234,
+        isPaid: true,
+        items: lineItems
       };
+
       const response = await window.billingApi.save(values);
-      console.log("response ", response);
+      if (response.status === "success") {
+        console.log("response ", response);
+      } else {
+        console.log(response.error.message);
+      }
     } catch (error) {
       console.log(error);
     }
   }
-  // cstname ,cstnon,tyep,total
-
-  useEffect(() => {
-    console.log("lineitems", lineItems);
-  }, [lineItems]);
 
   return (
     <>
@@ -89,7 +84,7 @@ const BillPreview = () => {
                 <div className="col-span-5">{item.name}</div>
                 <div className="col-span-2 text-center">{item.quantity}</div>
                 <div className="col-span-2 text-right">{item.price.toFixed(2)}</div>
-                <div className="col-span-2 text-right">{item.amount.toFixed(2)}</div>
+                <div className="col-span-2 text-right">{item.totalPrice.toFixed(2)}</div>
               </div>
             ))}
           </div>

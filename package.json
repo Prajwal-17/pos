@@ -14,7 +14,7 @@
     "dev": "cross-env ELECTRON_DISABLE_SANDBOX=1 electron-vite dev",
     "rebuild:node": "pnpm rebuild better-sqlite3",
     "rebuild:electron": "electron-rebuild -f -w better-sqlite3",
-    "db:seed": "tsx src/main/db/seed.ts",
+    "db:seed": "pnpm run rebuild:node && tsx src/main/db/seed.ts",
     "migrate": "pnpm run rebuild:node && drizzle-kit migrate",
     "studio": "pnpm run rebuild:node && drizzle-kit studio",
     "push": "pnpm run rebuild:node && drizzle-kit push",

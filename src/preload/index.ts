@@ -1,15 +1,15 @@
-import { contextBridge } from "electron";
+import { contextBridge, ipcRenderer } from "electron";
 import { electronAPI } from "@electron-toolkit/preload";
-import { ipcRenderer } from "electron/renderer";
+import type { BillingApi, ProductsApi, SalePayload } from "../shared/types";
 
-const productsApi = {
+const productsApi: ProductsApi = {
   getAllProducts: () => ipcRenderer.invoke("productsApi:getAllProducts"),
-  search: (query: string) => ipcRenderer.invoke("productsApi:search", query)
+  search: (query) => ipcRenderer.invoke("productsApi:search", query)
 };
 
-const billingApi = {
+const billingApi: BillingApi = {
   getNextInvoiceNo: () => ipcRenderer.invoke("billingApi:getNextInvoiceNo"),
-  save: (obj: any) => ipcRenderer.invoke("billingApi:save", obj)
+  save: (payload: SalePayload) => ipcRenderer.invoke("billingApi:save", payload)
 };
 
 if (process.contextIsolated) {

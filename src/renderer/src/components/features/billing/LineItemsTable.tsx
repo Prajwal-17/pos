@@ -12,7 +12,7 @@ export type ItemType = {
   quantity: number;
   mrp: number;
   price: number;
-  amount: number;
+  totalPrice: number;
 };
 
 const LineItemsTable = () => {
@@ -26,21 +26,8 @@ const LineItemsTable = () => {
   const setSearchRow = useSearchDropdownStore((state) => state.setSearchRow);
   const setIsDropdownOpen = useSearchDropdownStore((state) => state.setIsDropdownOpen);
 
-  useEffect(() => {
-    async function fetchProducts() {
-      try {
-        const response = await window.productsApi.getAllProducts();
-        // console.log(response);
-        // setLineItems(response);
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    fetchProducts();
-  }, []);
-
   const totalAmount = lineItems.reduce((sum, currentItem) => {
-    return sum + Number(currentItem.amount || 0);
+    return sum + Number(currentItem.totalPrice || 0);
   }, 0);
 
   const [qtyPresetOpen, setQtyPresetOpen] = useState<number | null>(null);
@@ -58,7 +45,6 @@ const LineItemsTable = () => {
     };
 
     if (qtyPresetOpen != null) {
-      console.log("here");
       document.addEventListener("keydown", handleKeyDown);
       document.addEventListener("mousedown", handleMouseDown);
     }
@@ -181,7 +167,7 @@ const LineItemsTable = () => {
                       <input
                         disabled
                         type="number"
-                        value={item.amount === 0 ? "" : item.amount}
+                        value={item.totalPrice === 0 ? "" : item.totalPrice}
                         className="focus:border-ring focus:ring-ring h-full w-full appearance-none rounded-lg border bg-white py-2 pr-7 pl-10 text-right text-base font-semibold text-black placeholder-gray-400 focus:ring-2 focus:outline-none disabled:cursor-not-allowed"
                         placeholder="0"
                       />

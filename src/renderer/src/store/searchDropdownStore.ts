@@ -1,18 +1,19 @@
 import { create } from "zustand";
 
-type LineItems = {
+type SearchResultType = {
   id: string;
   name: string;
-  quantity: number;
-  mrp: number;
+  weight: string | null;
+  unit: string | null;
+  mrp: number | null;
   price: number;
-  amount: number;
 };
+
 type SearchDropdownStoreType = {
   searchParam: string;
   setSearchParam: (query: string) => void;
-  searchResult: LineItems[];
-  setSearchResult: (newResult: LineItems[]) => void;
+  searchResult: SearchResultType[];
+  setSearchResult: (newResult: SearchResultType[]) => void;
   searchRow: number | null;
   setSearchRow: (rowIndex: number) => void;
   isDropdownOpen: boolean;

@@ -2,7 +2,7 @@ import { customers, products, sales, users } from "./schema";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { v4 as uuidv4 } from "uuid";
 import { faker } from "@faker-js/faker";
-import type { CustomersType, ProductsType, SalesType, UsersType } from "../types";
+import type { CustomersType, ProductsType, SalesType, UsersType } from "../../shared/types";
 
 const dbPath = "/home/prajwal/.config/pos/pos.db";
 const db = drizzle(dbPath);
@@ -11,7 +11,7 @@ export async function main() {
   try {
     console.log("Seeding started...");
 
-    const usersData: UsersType[] = Array.from({ length: 10 }).map(() => ({
+    const usersData: (UsersType & { password: string })[] = Array.from({ length: 10 }).map(() => ({
       id: uuidv4(),
       name: faker.person.firstName(),
       role: "cashier",
@@ -38,7 +38,7 @@ export async function main() {
       const customer = faker.helpers.arrayElement(customersData);
       return {
         id: uuidv4(),
-        invoiceNumber: uuidv4(),
+        invoiceNo: faker.number.int(),
         customerId: customer.id,
         customerName: customer.name,
         grandTotal: faker.number.int(),

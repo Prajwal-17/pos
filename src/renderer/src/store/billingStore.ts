@@ -1,14 +1,9 @@
 import { create } from "zustand";
 import { v4 as uuidv4 } from "uuid";
+import type { ProductsType } from "src/shared/types";
 
-type LineItems = {
-  id: string;
-  name: string;
-  quantity: number;
-  mrp: number;
-  price: number;
-  amount: number;
-};
+type LineItemsType = ProductsType & { quantity: number; totalPrice: number };
+
 type BillingStoreType = {
   invoiceNo: number | null;
   setInvoiceNo: (newInvoiceNo: number | null) => void;
@@ -18,16 +13,25 @@ type BillingStoreType = {
   setCustomerContact: (newCustomerContact: string) => void;
   paymentMethod: string;
   setPaymentMethod: (method: string) => void;
-  lineItems: LineItems[] | [];
+  lineItems: LineItemsType[] | [];
   setLineItems: () => void;
   addEmptyLineItem: () => void;
-  addLineItem: (index: number, newItem: LineItems) => void;
+  addLineItem: (index: number, newItem: ProductsType) => void;
   updateLineItems: (itemId: string, field: string, value: string | number) => void;
   deleteLineItem: (itemId: string) => void;
 };
 
 function initialLineItem() {
-  return { id: uuidv4(), name: "", weight: "", quantity: 0, mrp: 0, price: 0, amount: 0 };
+  return {
+    id: uuidv4(),
+    name: "",
+    weight: "",
+    unit: "",
+    quantity: 0,
+    mrp: 0,
+    price: 0,
+    totalPrice: 0
+  };
 }
 
 export const useBillingStore = create<BillingStoreType>((set) => ({
@@ -69,7 +73,7 @@ export const useBillingStore = create<BillingStoreType>((set) => ({
       const updatedItem = {
         ...newItem,
         quantity: 1,
-        amount: parseFloat((1 * newItem.price).toFixed(2))
+        totalPrice: parseFloat((1 * newItem.price).toFixed(2))
       };
 
       currLineItems[index] = { ...updatedItem };
@@ -83,7 +87,7 @@ export const useBillingStore = create<BillingStoreType>((set) => ({
   updateLineItems: (itemId, field, value) =>
     set((state) => {
       console.log("here");
-      const updatedLineItems = state.lineItems.map((item) => {
+      const updatedLineItems = state.lineItems.map((item: LineItemsType) => {
         if (itemId !== item.id) return item;
 
         const updatedItem = {
@@ -94,7 +98,7 @@ export const useBillingStore = create<BillingStoreType>((set) => ({
         if (["quantity", "price"].includes(field)) {
           return {
             ...updatedItem,
-            amount: parseFloat((updatedItem.quantity * updatedItem.price).toFixed(2))
+            totalPrice: parseFloat((updatedItem.quantity * updatedItem.price).toFixed(2))
           };
         }
         return updatedItem;
