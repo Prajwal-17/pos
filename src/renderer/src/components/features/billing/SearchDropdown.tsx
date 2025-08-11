@@ -20,6 +20,7 @@ const SearchDropdown = ({ idx }: { idx: number }) => {
         setSearchResult([]);
         const response = await window.productsApi.search(searchParam);
         if (response.status === "success") {
+          console.log("response", response.data);
           setSearchResult(response.data);
         } else {
           console.log(response.error);
@@ -82,8 +83,8 @@ const SearchDropdown = ({ idx }: { idx: number }) => {
                 }}
               >
                 <div className="col-span-4 border-r border-black px-1 py-1">{item.name}</div>
-                <div className="col-span-2 border-r border-black px-1 py-1">{item.mrp}</div>
-                <div className="col-span-2 px-1 py-1">{item.price}</div>
+                <div className="col-span-2 border-r border-black px-1 py-1">{item.price}</div>
+                <div className="col-span-2 px-1 py-1">{item.mrp}</div>
               </div>
             ))}
           </div>
