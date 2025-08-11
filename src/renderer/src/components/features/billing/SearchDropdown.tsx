@@ -1,3 +1,4 @@
+import useDebounce from "@/hooks/useDebounce";
 import { useBillingStore } from "@/store/billingStore";
 import { useSearchDropdownStore } from "@/store/searchDropdownStore";
 import { useEffect, useRef } from "react";
@@ -13,24 +14,30 @@ const SearchDropdown = ({ idx }: { idx: number }) => {
   const addEmptyLineItem = useBillingStore((state) => state.addEmptyLineItem);
 
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const debouncedSearchParam = useDebounce(searchParam, 200);
 
   useEffect(() => {
-    async function fetchProducts() {
-      try {
-        setSearchResult([]);
-        const response = await window.productsApi.search(searchParam);
-        if (response.status === "success") {
-          console.log("response", response.data);
-          setSearchResult(response.data);
-        } else {
-          console.log(response.error);
+    if (debouncedSearchParam) {
+      async function fetchProducts() {
+        try {
+          setSearchResult([]);
+          const response = await window.productsApi.search(searchParam);
+          if (response.status === "success") {
+            console.log("response", response.data);
+            setSearchResult(response.data);
+          } else {
+            console.log(response.error);
+          }
+        } catch (error) {
+          console.log("error", error);
         }
-      } catch (error) {
-        console.log("error", error);
       }
+
+      fetchProducts();
+    } else {
+      setSearchResult([]);
     }
-    fetchProducts();
-  }, [searchParam]);
+  }, [debouncedSearchParam, setSearchResult, searchParam]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

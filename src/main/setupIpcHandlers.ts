@@ -23,7 +23,8 @@ export function setupIpcHandlers() {
         const searchResult = await db
           .select()
           .from(products)
-          .where(like(products.name, `%${query}%`));
+          .where(like(products.name, `%${query}%`))
+          .limit(40);
 
         return { status: "success", data: searchResult };
       } catch (error) {
