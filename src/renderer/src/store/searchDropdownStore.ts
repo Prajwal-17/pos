@@ -1,19 +1,22 @@
+import type { ProductsType } from "src/shared/types";
 import { create } from "zustand";
 
-type SearchResultType = {
-  id: string;
-  name: string;
-  weight: string | null;
-  unit: string | null;
-  mrp: number | null;
-  price: number;
-};
+// type SearchResultType = {
+//   id: string;
+//   name: string;
+//   weight: string | null;
+//   unit: string | null;
+//   mrp: number | null;
+//   price: number;
+// };
+
+// store
 
 type SearchDropdownStoreType = {
   searchParam: string;
   setSearchParam: (query: string) => void;
-  searchResult: SearchResultType[];
-  setSearchResult: (newResult: SearchResultType[]) => void;
+  searchResult: ProductsType[] | [];
+  setSearchResult: (mode: string, newResult: ProductsType[]) => void; // mode = "append" | "replace"
   searchRow: number | null;
   setSearchRow: (rowIndex: number) => void;
   isDropdownOpen: boolean;
@@ -28,10 +31,19 @@ export const useSearchDropdownStore = create<SearchDropdownStoreType>((set) => (
     })),
 
   searchResult: [],
-  setSearchResult: (newResult) =>
-    set(() => ({
-      searchResult: newResult
-    })),
+  setSearchResult: (mode, newResult) =>
+    set((state) => {
+      if (mode === "append") {
+        return {
+          searchResult: [...state.searchResult, ...newResult]
+        };
+      } else {
+        console.log("replace");
+        return {
+          searchResult: newResult
+        };
+      }
+    }),
 
   searchRow: null,
   setSearchRow: (rowIndex) =>

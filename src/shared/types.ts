@@ -81,7 +81,7 @@ export interface SalePayload {
 
 export interface ProductsApi {
   getAllProducts: () => Promise<ApiResponse<ProductsType[]>>;
-  search: (query: string) => Promise<ApiResponse<ProductsType[]>>;
+  search: (query: string, page: number, limit: number) => Promise<ApiResponse<ProductsType[]>>;
 }
 
 export interface BillingApi {

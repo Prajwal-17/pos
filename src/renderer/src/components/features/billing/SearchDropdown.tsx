@@ -1,43 +1,88 @@
 import useDebounce from "@/hooks/useDebounce";
 import { useBillingStore } from "@/store/billingStore";
 import { useSearchDropdownStore } from "@/store/searchDropdownStore";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 const SearchDropdown = ({ idx }: { idx: number }) => {
   const searchParam = useSearchDropdownStore((state) => state.searchParam);
   const searchResult = useSearchDropdownStore((state) => state.searchResult);
   const setSearchResult = useSearchDropdownStore((state) => state.setSearchResult);
-  const searchRow = useSearchDropdownStore((state) => state.searchRow);
   const isDropdownOpen = useSearchDropdownStore((state) => state.isDropdownOpen);
   const setIsDropdownOpen = useSearchDropdownStore((state) => state.setIsDropdownOpen);
   const addLineItem = useBillingStore((state) => state.addLineItem);
   const addEmptyLineItem = useBillingStore((state) => state.addEmptyLineItem);
+  const searchRow = useSearchDropdownStore((state) => state.searchRow);
 
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const debouncedSearchParam = useDebounce(searchParam, 200);
 
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState<number>(1);
+  const [loading, setLoading] = useState(false);
+
+  const fetchProducts = useCallback(
+    async (term: string, fetchPage: number, mode: "replace" | "append") => {
+      setLoading(true);
+      try {
+        if (mode === "replace") {
+          setSearchResult("replace", []);
+        }
+        const response = await window.productsApi.search(term, fetchPage, 20);
+        if (response.status === "success") {
+          setSearchResult(mode, response.data);
+          setPage(fetchPage + 1);
+          if (response.data.length < 20) {
+            setHasMore(false);
+          }
+        } else {
+          console.log(response.error);
+          setHasMore(false);
+        }
+      } catch (error) {
+        console.log("error", error);
+        setHasMore(false);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [setSearchResult]
+  );
+
   useEffect(() => {
     if (debouncedSearchParam) {
-      async function fetchProducts() {
-        try {
-          setSearchResult([]);
-          const response = await window.productsApi.search(searchParam);
-          if (response.status === "success") {
-            console.log("response", response.data);
-            setSearchResult(response.data);
-          } else {
-            console.log(response.error);
-          }
-        } catch (error) {
-          console.log("error", error);
-        }
-      }
-
-      fetchProducts();
+      setHasMore(true);
+      setPage(1);
+      fetchProducts(debouncedSearchParam, 1, "replace");
     } else {
-      setSearchResult([]);
+      setSearchResult("replace", []);
+      setHasMore(true);
+      setPage(1);
     }
-  }, [debouncedSearchParam, setSearchResult, searchParam]);
+  }, [debouncedSearchParam, fetchProducts, setSearchResult]);
+
+  const handleScroll = useCallback(() => {
+    const container = dropdownRef.current;
+    if (!container || loading || !hasMore) return;
+
+    const scrollPercent =
+      (container.scrollTop / (container.scrollHeight - container.clientHeight)) * 100;
+
+    if (scrollPercent >= 80) {
+      fetchProducts(searchParam, page, "append");
+    }
+  }, [loading, hasMore, searchParam, page, fetchProducts]);
+
+  useEffect(() => {
+    const container = dropdownRef.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+    }
+    return () => {
+      if (container) {
+        container.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, [handleScroll]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -45,23 +90,20 @@ const SearchDropdown = ({ idx }: { idx: number }) => {
         setIsDropdownOpen();
       }
     };
-
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setIsDropdownOpen();
       }
     };
-
     if (isDropdownOpen) {
       document.addEventListener("mousedown", handleClickOutside);
       document.addEventListener("keydown", handleKeyDown);
     }
-
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isDropdownOpen]);
+  }, [isDropdownOpen, setIsDropdownOpen]);
 
   return (
     <>

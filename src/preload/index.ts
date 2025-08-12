@@ -4,7 +4,7 @@ import type { BillingApi, ProductsApi, SalePayload } from "../shared/types";
 
 const productsApi: ProductsApi = {
   getAllProducts: () => ipcRenderer.invoke("productsApi:getAllProducts"),
-  search: (query) => ipcRenderer.invoke("productsApi:search", query)
+  search: (query, page, limit) => ipcRenderer.invoke("productsApi:search", query, page, limit)
 };
 
 const billingApi: BillingApi = {

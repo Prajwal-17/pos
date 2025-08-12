@@ -57,7 +57,7 @@ const LineItemsTable = () => {
 
   return (
     <>
-      <div className="h-full w-full flex-1 overflow-auto">
+      <div className="h-full w-full flex-1">
         <div className="w-full space-y-0 py-5">
           <div className="text-accent-foreground border-border grid grid-cols-20 items-center border bg-gray-100 text-base font-semibold">
             <div className="col-span-2 border-r border-gray-300 py-2 text-center">#</div>

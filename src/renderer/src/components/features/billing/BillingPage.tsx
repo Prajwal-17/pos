@@ -6,7 +6,7 @@ const BillingPage = () => {
   return (
     <div className="min-h-screen w-full">
       <div className="flex h-full w-full overflow-hidden">
-        <div className="flex h-full w-full flex-1 flex-col">
+        <div className="flex h-full w-full flex-1 flex-col overflow-y-auto">
           <BillingHeader />
           <LineItemsTable />
         </div>
