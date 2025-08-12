@@ -1,8 +1,8 @@
-import BillingHeader from "./BillingHeader";
-import BillPreview from "./BillPreview";
-import LineItemsTable from "./LineItemsTable";
+import BillingHeader from "../../components/features/billing/BillingHeader";
+import BillPreview from "../../components/features/billing/BillPreview";
+import LineItemsTable from "../../components/features/billing/LineItemsTable";
 
-const BillingPage = () => {
+const SalesPage = () => {
   return (
     <div className="min-h-screen w-full">
       <div className="flex h-full w-full overflow-hidden">
@@ -16,4 +16,4 @@ const BillingPage = () => {
   );
 };
 
-export default BillingPage;
+export default SalesPage;

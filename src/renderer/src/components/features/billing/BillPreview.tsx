@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { useBillingStore } from "@/store/billingStore";
 import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
+import { toast } from "sonner";
 
 const BillPreview = () => {
+  const navigate = useNavigate();
   const receiptRef = useRef<HTMLDivElement | null>(null);
   const lineItems = useBillingStore((state) => state.lineItems);
   const invoiceNo = useBillingStore((state) => state.invoiceNo);
@@ -22,7 +25,7 @@ const BillPreview = () => {
       console.log("save");
       const values = {
         invoiceNo: Number(invoiceNo),
-        customerId: "asdf",
+        // customerId: "",
         customerName,
         customerContact,
         grandTotal: totalAmount,
@@ -33,9 +36,10 @@ const BillPreview = () => {
 
       const response = await window.billingApi.save(values);
       if (response.status === "success") {
-        console.log("response ", response);
+        toast.success("Sale Saved successfully");
+        navigate("/");
       } else {
-        console.log(response.error.message);
+        toast.error(response.error.message);
       }
     } catch (error) {
       console.log(error);
@@ -78,15 +82,18 @@ const BillPreview = () => {
             <div className="col-span-2 text-right">AMT</div>
           </div>
           <div className="border-b border-dashed border-black text-xs">
-            {lineItems.map((item, idx) => (
-              <div key={item.id} className="grid grid-cols-12 py-1">
-                <div className="col-span-1">{idx + 1}</div>
-                <div className="col-span-5">{item.name}</div>
-                <div className="col-span-2 text-center">{item.quantity}</div>
-                <div className="col-span-2 text-right">{item.price.toFixed(2)}</div>
-                <div className="col-span-2 text-right">{item.totalPrice.toFixed(2)}</div>
-              </div>
-            ))}
+            {lineItems.map((item, idx) => {
+              if (item.name === "") return <></>;
+              return (
+                <div key={item.id} className="grid grid-cols-12 py-1">
+                  <div className="col-span-1">{idx + 1}</div>
+                  <div className="col-span-5">{item.name}</div>
+                  <div className="col-span-2 text-center">{item.quantity}</div>
+                  <div className="col-span-2 text-right">{item.price.toFixed(2)}</div>
+                  <div className="col-span-2 text-right">{item.totalPrice.toFixed(2)}</div>
+                </div>
+              );
+            })}
           </div>
           <div className="py-3 text-right">
             <span className="text-base font-semibold">Total: </span>

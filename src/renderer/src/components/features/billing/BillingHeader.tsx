@@ -4,6 +4,7 @@ import { useBillingStore } from "@/store/billingStore";
 import { Check, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { DateTime } from "./DateTime";
+import { Link, useLocation } from "react-router-dom";
 
 const BillingHeader = () => {
   const invoiceNo = useBillingStore((state) => state.invoiceNo);
@@ -17,6 +18,9 @@ const BillingHeader = () => {
 
   const [tempInvoice, setTempInvoice] = useState<number | null>(invoiceNo);
   const [editInvoice, setEditInvoice] = useState<boolean>(false);
+
+  const location = useLocation();
+  const page = location.pathname.split("/")[1];
 
   useEffect(() => {
     async function getLatestInvoiceNumber() {
@@ -38,38 +42,48 @@ const BillingHeader = () => {
     <>
       <div className="border-b-border flex w-full flex-col justify-center gap-10 border px-4 py-5">
         <div className="flex items-center justify-between gap-5 px-2 py-2">
-          <div className="flex items-center justify-center gap-2">
-            <span className="text-muted-foreground text-base font-medium">Invoice Number</span>
-            <span className="text-bold text-primary text-3xl font-semibold">#</span>
-            {editInvoice ? (
-              <>
-                <Input
-                  type="number"
-                  className="text-primary w-24 px-1 py-1 text-center !text-xl font-extrabold"
-                  value={Number(tempInvoice)}
-                  onChange={(e) => setTempInvoice(Number(e.target.value))}
-                />
-                <Check
-                  onClick={() => {
-                    setEditInvoice(false);
-                    setInvoiceNo(tempInvoice);
-                  }}
-                  className="cursor-pointer rounded-md p-1 text-green-600 hover:bg-neutral-200"
-                  size={30}
-                />
-                <X
-                  className="cursor-pointer rounded-md p-1 text-red-500 hover:bg-neutral-200"
-                  onClick={() => {
-                    setTempInvoice(invoiceNo);
-                    setEditInvoice(false);
-                  }}
-                  size={30}
-                />
-              </>
-            ) : (
-              <span className="text-primary text-3xl font-extrabold">{invoiceNo}</span>
-            )}
-            {/*<SquarePen size={20} onClick={() => setEditInvoice(true)} />*/}
+          <div>
+            <div className="flex items-center gap-4">
+              <Link to="/">
+                <Button variant="default" size="lg" className="text-lg font-medium">
+                  Home
+                </Button>
+              </Link>
+              <h1 className="text-3xl font-bold">{page.charAt(0).toUpperCase() + page.slice(1)}</h1>
+            </div>
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-muted-foreground text-base font-medium">Invoice Number</span>
+              <span className="text-bold text-primary text-3xl font-semibold">#</span>
+              {editInvoice ? (
+                <>
+                  <Input
+                    type="number"
+                    className="text-primary w-24 px-1 py-1 text-center !text-xl font-extrabold"
+                    value={Number(tempInvoice)}
+                    onChange={(e) => setTempInvoice(Number(e.target.value))}
+                  />
+                  <Check
+                    onClick={() => {
+                      setEditInvoice(false);
+                      setInvoiceNo(tempInvoice);
+                    }}
+                    className="cursor-pointer rounded-md p-1 text-green-600 hover:bg-neutral-200"
+                    size={30}
+                  />
+                  <X
+                    className="cursor-pointer rounded-md p-1 text-red-500 hover:bg-neutral-200"
+                    onClick={() => {
+                      setTempInvoice(invoiceNo);
+                      setEditInvoice(false);
+                    }}
+                    size={30}
+                  />
+                </>
+              ) : (
+                <span className="text-primary text-3xl font-extrabold">{invoiceNo}</span>
+              )}
+              {/*<SquarePen size={20} onClick={() => setEditInvoice(true)} />*/}
+            </div>
           </div>
           <div className="flex items-center justify-center gap-4">
             <DateTime />

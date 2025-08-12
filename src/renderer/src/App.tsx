@@ -2,7 +2,8 @@ import { Route, Routes } from "react-router-dom";
 import SidebarLayout from "./components/layouts/SidebarLayout";
 import { navLinks } from "./constants/Navlinks";
 import FullPageLayout from "./components/layouts/FullPageLayout";
-import BillingPage from "./components/features/billing/BillingPage";
+import SalesPage from "./pages/SalesPage/SalesPage";
+import EstimatePage from "./pages/EstimatePage/EstimatePage";
 
 const App = () => {
   return (
@@ -14,7 +15,8 @@ const App = () => {
           ))}
         </Route>
         <Route element={<FullPageLayout />}>
-          <Route path="/billing/new" element={<BillingPage />} />
+          <Route path="/sales/new" element={<SalesPage />} />
+          <Route path="/estimate/new" element={<EstimatePage />} />
         </Route>
       </Routes>
     </>

@@ -70,7 +70,6 @@ export type ApiResponse<T> =
 
 export interface SalePayload {
   invoiceNo: number;
-  customerId: string;
   customerName: string;
   customerContact: string;
   grandTotal: number;

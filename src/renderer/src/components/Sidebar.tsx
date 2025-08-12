@@ -19,10 +19,15 @@ export const Sidebar = () => {
               <span className="text-muted-foreground text-md font-medium">POS Billing</span>
             </div>
           </div>
-          <div className="mt-5 w-full">
-            <Link to="/billing/new">
+          <div className="mt-5 flex w-full flex-col items-center justify-center gap-3">
+            <Link to="/sales/new" className="w-full">
               <Button variant="default" size="lg" className="w-full text-lg font-medium">
                 Create Sale
+              </Button>
+            </Link>
+            <Link to="/estimate/new" className="w-full">
+              <Button variant="default" size="lg" className="w-full text-lg font-medium">
+                Add Estimate
               </Button>
             </Link>
           </div>
