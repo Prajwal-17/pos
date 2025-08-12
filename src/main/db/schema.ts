@@ -31,8 +31,9 @@ export const products = sqliteTable("products", {
   name: text("name").notNull(),
   weight: text("weight"),
   unit: text("unit"),
-  mrp: real("mrp"),
-  price: real("price").notNull(),
+  mrp: integer("mrp"),
+  price: integer("price").notNull(),
+  totalQuantitySold: integer("total_quantity_sold").default(0),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sql`(CURRENT_TIMESTAMP)`),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).$onUpdate(() => sql`CURRENT_TIMESTAMP`)
 });
@@ -47,10 +48,10 @@ export const productHistory = sqliteTable("product_history", {
   productId: text("product_id")
     .references(() => products.id)
     .notNull(),
-  oldPrice: real("old_price"),
-  newPrice: real("new_price"),
-  oldMrp: real("old_mrp"),
-  newMrp: real("new_mrp"),
+  oldPrice: integer("old_price"),
+  newPrice: integer("new_price"),
+  oldMrp: integer("old_mrp"),
+  newMrp: integer("new_mrp"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sql`(CURRENT_TIMESTAMP)`)
 });
 
@@ -78,12 +79,46 @@ export const saleItems = sqliteTable("sale_items", {
     .notNull(),
   productId: text("product_id").references(() => products.id),
   name: text("name").notNull(),
-  mrp: real("mrp"),
-  price: real("price").notNull(),
+  mrp: integer("mrp"),
+  price: integer("price").notNull(),
   weight: text("weight"),
   unit: text("unit"),
-  quantity: real("quantity").notNull(),
-  totalPrice: real("total_price").notNull(),
+  quantity: integer("quantity").notNull(),
+  totalPrice: integer("total_price").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).$onUpdate(() => sql`CURRENT_TIMESTAMP`)
+});
+
+export const estimate = sqliteTable("estimate", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv4()),
+  estimateNo: integer("estimate_no").notNull(),
+  customerId: text("customer_id").references(() => customers.id),
+  customerName: text("customer_name").notNull(),
+  customerContact: text("customer_contact"),
+  grandTotal: integer("grand_total", { mode: "number" }),
+  totalQuantity: real("total_quantity"),
+  isPaid: integer("is_paid", { mode: "boolean" }).notNull().default(true),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).$onUpdate(() => sql`CURRENT_TIMESTAMP`)
+});
+
+export const estimateItems = sqliteTable("estimate_items", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv4()),
+  estimateId: text("estimate_id")
+    .references(() => estimate.id)
+    .notNull(),
+  productId: text("product_id").references(() => products.id),
+  name: text("name").notNull(),
+  mrp: integer("mrp"),
+  price: integer("price").notNull(),
+  weight: text("weight"),
+  unit: text("unit"),
+  quantity: integer("quantity").notNull(),
+  totalPrice: integer("total_price").notNull(),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sql`(CURRENT_TIMESTAMP)`),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).$onUpdate(() => sql`CURRENT_TIMESTAMP`)
 });
