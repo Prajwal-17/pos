@@ -34,7 +34,7 @@ const BillPreview = () => {
         items: lineItems
       };
 
-      const response = await window.billingApi.save(values);
+      const response = await window.salesApi.save(values);
       if (response.status === "success") {
         toast.success("Sale Saved successfully");
         navigate("/");

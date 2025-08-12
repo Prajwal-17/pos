@@ -68,22 +68,29 @@ export type ApiResponse<T> =
       };
     };
 
-export interface SalePayload {
+export type SalePayload = {
   invoiceNo: number;
   customerName: string;
   customerContact: string;
   grandTotal: number;
   totalQuantity: number;
   isPaid: boolean;
-  items: (ProductsType & { quantity: number; totalPrice: number })[] | [];
-}
+  items: (ProductsType & { quantity: number; totalPrice: number })[];
+};
+
+export type EstimatePayload = SalePayload;
 
 export interface ProductsApi {
   getAllProducts: () => Promise<ApiResponse<ProductsType[]>>;
   search: (query: string, page: number, limit: number) => Promise<ApiResponse<ProductsType[]>>;
 }
 
-export interface BillingApi {
+export interface SalesApi {
   getNextInvoiceNo: () => Promise<ApiResponse<number>>;
   save: (payload: SalePayload) => Promise<ApiResponse<string>>;
+}
+
+export interface EstimatesApi {
+  getNextEstimateNo: () => Promise<ApiResponse<number>>;
+  save: (payload: EstimatePayload) => Promise<ApiResponse<string>>;
 }

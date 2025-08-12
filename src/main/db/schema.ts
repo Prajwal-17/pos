@@ -89,7 +89,7 @@ export const saleItems = sqliteTable("sale_items", {
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).$onUpdate(() => sql`CURRENT_TIMESTAMP`)
 });
 
-export const estimate = sqliteTable("estimate", {
+export const estimates = sqliteTable("estimates", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => uuidv4()),
@@ -109,7 +109,7 @@ export const estimateItems = sqliteTable("estimate_items", {
     .primaryKey()
     .$defaultFn(() => uuidv4()),
   estimateId: text("estimate_id")
-    .references(() => estimate.id)
+    .references(() => estimateItems.id)
     .notNull(),
   productId: text("product_id").references(() => products.id),
   name: text("name").notNull(),

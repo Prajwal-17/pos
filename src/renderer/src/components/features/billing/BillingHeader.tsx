@@ -25,7 +25,7 @@ const BillingHeader = () => {
   useEffect(() => {
     async function getLatestInvoiceNumber() {
       try {
-        const response = await window.billingApi.getNextInvoiceNo();
+        const response = await window.salesApi.getNextInvoiceNo();
         if (response.status === "success") {
           setInvoiceNo(response.data);
         } else {
