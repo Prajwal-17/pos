@@ -1,8 +1,8 @@
 import { ipcMain } from "electron/main";
 import type { ApiResponse, ProductsType } from "../../shared/types";
-import { products } from "../db/schema";
+import { productHistory, products } from "../db/schema";
 import { db } from "../db/db";
-import { like } from "drizzle-orm";
+import { like, sql } from "drizzle-orm";
 
 export function productHandlers() {
   ipcMain.handle("productsApi:getAllProducts", async (): Promise<ApiResponse<ProductsType[]>> => {
@@ -27,10 +27,19 @@ export function productHandlers() {
         if (query === "") return { status: "success", data: [] };
         console.log(page, limit);
         const offset = (page - 1) * limit;
+
+        const priorityOrder = sql`
+            CASE
+                WHEN ${products.name} LIKE ${query + "%"} THEN 1
+                ELSE 2
+            END
+          `;
+
         const searchResult = await db
           .select()
           .from(products)
           .where(like(products.name, `%${query}%`))
+          .orderBy(priorityOrder, products.name)
           .limit(limit)
           .offset(offset);
 
