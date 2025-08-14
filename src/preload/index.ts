@@ -15,11 +15,13 @@ const productsApi: ProductsApi = {
 
 const salesApi: SalesApi = {
   getNextInvoiceNo: () => ipcRenderer.invoke("salesApi:getNextInvoiceNo"),
-  save: (payload: SalePayload) => ipcRenderer.invoke("salesApi:save", payload)
+  save: (payload: SalePayload) => ipcRenderer.invoke("salesApi:save", payload),
+  getAllSales: () => ipcRenderer.invoke("salesApi:getAllSales")
 };
 const estimatesApi: EstimatesApi = {
   getNextEstimateNo: () => ipcRenderer.invoke("estimatesApi:getNextEstimateNo"),
-  save: (payload: EstimatePayload) => ipcRenderer.invoke("estimatesApi:save", payload)
+  save: (payload: EstimatePayload) => ipcRenderer.invoke("estimatesApi:save", payload),
+  getAllEstimates: () => ipcRenderer.invoke("estimateApi:getAllEstimates")
 };
 
 if (process.contextIsolated) {

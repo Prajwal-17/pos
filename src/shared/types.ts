@@ -35,14 +35,43 @@ export type ProductHistoryType = {
 export type SalesType = {
   id: string;
   invoiceNo: number;
-  customerId: string;
+  customerId: string | null;
   customerName: string;
-  grandTotal: number;
-  totalQuantity: number;
+  customerContact: string | null;
+  grandTotal: number | null;
+  totalQuantity: number | null;
   isPaid: boolean;
+  createdAt?: Date | null;
+  updatedAt?: Date | null;
+};
+
+export type EstimateType = {
+  id: string;
+  estimateNo: number;
+  customerId: string | null;
+  customerName: string;
+  customerContact: string | null;
+  grandTotal: number | null;
+  totalQuantity: number | null;
+  isPaid: boolean;
+  createdAt?: Date | null;
+  updatedAt?: Date | null;
 };
 
 export type SaleItemsType = {
+  id: string;
+  saleId: string;
+  productId: string;
+  name: string;
+  mrp: number;
+  price: number;
+  weight: string;
+  unit: string;
+  quantity: number;
+  totalPrice: number;
+};
+
+export type EstimateItemsType = {
   id: string;
   saleId: string;
   productId: string;
@@ -88,9 +117,11 @@ export interface ProductsApi {
 export interface SalesApi {
   getNextInvoiceNo: () => Promise<ApiResponse<number>>;
   save: (payload: SalePayload) => Promise<ApiResponse<string>>;
+  getAllSales: () => Promise<ApiResponse<SalesType[]>>;
 }
 
 export interface EstimatesApi {
   getNextEstimateNo: () => Promise<ApiResponse<number>>;
   save: (payload: EstimatePayload) => Promise<ApiResponse<string>>;
+  getAllEstimates: () => Promise<ApiResponse<EstimateType[]>>;
 }

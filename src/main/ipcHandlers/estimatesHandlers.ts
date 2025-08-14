@@ -1,5 +1,5 @@
 import { ipcMain } from "electron/main";
-import type { ApiResponse, EstimatePayload } from "../../shared/types";
+import type { ApiResponse, EstimatePayload, EstimateType } from "../../shared/types";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../db/db";
 import { estimateItems, estimates } from "../db/schema";
@@ -23,6 +23,17 @@ export function estimatesHandlers() {
     } catch (error) {
       console.log(error);
       return { status: "error", error: { message: "Failed to retrieve next invoice number" } };
+    }
+  });
+
+  ipcMain.handle("estimatesApi:getAllEstimates", async (): Promise<ApiResponse<EstimateType[]>> => {
+    try {
+      const estimatesArray = await db.select().from(estimates).orderBy(desc(estimates.createdAt));
+
+      return { status: "success", data: estimatesArray };
+    } catch (error) {
+      console.log(error);
+      return { status: "error", error: { message: "Failed to retrieve sales" } };
     }
   });
 
@@ -52,7 +63,7 @@ export function estimatesHandlers() {
             .get();
 
           if (!estimate || !estimate.id) {
-            throw new Error("Failed to create sale record.");
+            throw new Error("Failed to create estimate record.");
           }
 
           for (const item of estimateObj.items) {

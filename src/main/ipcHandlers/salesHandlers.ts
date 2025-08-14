@@ -1,5 +1,5 @@
 import { ipcMain } from "electron/main";
-import type { ApiResponse, SalePayload } from "../../shared/types";
+import type { ApiResponse, SalePayload, SalesType } from "../../shared/types";
 import { db } from "../db/db";
 import { saleItems, sales } from "../db/schema";
 import { desc, eq } from "drizzle-orm";
@@ -19,6 +19,17 @@ export function salesHandlers() {
     } catch (error) {
       console.log(error);
       return { status: "error", error: { message: "Failed to retrieve next invoice number" } };
+    }
+  });
+
+  ipcMain.handle("salesApi:getAllSales", async (): Promise<ApiResponse<SalesType[]>> => {
+    try {
+      const salesArray = await db.select().from(sales).orderBy(desc(sales.createdAt));
+
+      return { status: "success", data: salesArray };
+    } catch (error) {
+      console.log(error);
+      return { status: "error", error: { message: "Failed to retrieve sales" } };
     }
   });
 

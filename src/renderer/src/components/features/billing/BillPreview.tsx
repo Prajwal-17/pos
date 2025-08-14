@@ -99,7 +99,7 @@ const BillPreview = () => {
             <span className="text-base font-semibold">Total: </span>
             <span className="text-lg font-semibold">₹3740.00</span>
           </div>
-          <div className="py-4 text-center">*** You Saved ₹30 ***</div>
+          {/*<div className="py-4 text-center">*** You Saved ₹30 ***</div>*/}
           <div className="text-center">Thank You</div>
         </div>
         <div className="flex w-1/4">
