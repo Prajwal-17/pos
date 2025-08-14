@@ -2,7 +2,17 @@ import { create } from "zustand";
 import { v4 as uuidv4 } from "uuid";
 import type { ProductsType } from "src/shared/types";
 
-type LineItemsType = ProductsType & { quantity: number; totalPrice: number };
+type LineItemsType = {
+  id: string;
+  productId: string;
+  name: string;
+  weight: string | null;
+  unit: string | null;
+  quantity: number;
+  mrp: number | null;
+  price: number;
+  totalPrice: number;
+};
 
 type BillingStoreType = {
   invoiceNo: number | null;
@@ -17,13 +27,14 @@ type BillingStoreType = {
   setLineItems: () => void;
   addEmptyLineItem: () => void;
   addLineItem: (index: number, newItem: ProductsType) => void;
-  updateLineItems: (itemId: string, field: string, value: string | number) => void;
-  deleteLineItem: (itemId: string) => void;
+  updateLineItems: (id: string, field: string, value: string | number) => void;
+  deleteLineItem: (id: string) => void;
 };
 
 function initialLineItem() {
   return {
     id: uuidv4(),
+    productId: "",
     name: "",
     weight: "",
     unit: "",
@@ -72,6 +83,8 @@ export const useBillingStore = create<BillingStoreType>((set) => ({
 
       const updatedItem = {
         ...newItem,
+        id: uuidv4(),
+        productId: newItem.id,
         quantity: 1,
         totalPrice: parseFloat((1 * newItem.price).toFixed(2))
       };
@@ -84,10 +97,10 @@ export const useBillingStore = create<BillingStoreType>((set) => ({
     }),
 
   // update on field change
-  updateLineItems: (itemId, field, value) =>
+  updateLineItems: (id, field, value) =>
     set((state) => {
       const updatedLineItems = state.lineItems.map((item: LineItemsType) => {
-        if (itemId !== item.id) return item;
+        if (id !== item.id) return item;
 
         const updatedItem = {
           ...item,
@@ -109,9 +122,9 @@ export const useBillingStore = create<BillingStoreType>((set) => ({
     }),
 
   // delete a row
-  deleteLineItem: (itemId) =>
+  deleteLineItem: (id) =>
     set((state) => {
-      const updatedLineItems = state.lineItems.filter((item) => item.id !== itemId);
+      const updatedLineItems = state.lineItems.filter((item) => item.id !== id);
       return {
         lineItems: updatedLineItems
       };

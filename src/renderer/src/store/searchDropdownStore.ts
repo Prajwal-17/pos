@@ -38,7 +38,6 @@ export const useSearchDropdownStore = create<SearchDropdownStoreType>((set) => (
           searchResult: [...state.searchResult, ...newResult]
         };
       } else {
-        console.log("replace");
         return {
           searchResult: newResult
         };

@@ -1,6 +1,6 @@
 import { ipcMain } from "electron/main";
 import type { ApiResponse, ProductsType } from "../../shared/types";
-import { productHistory, products } from "../db/schema";
+import { products } from "../db/schema";
 import { db } from "../db/db";
 import { like, sql } from "drizzle-orm";
 

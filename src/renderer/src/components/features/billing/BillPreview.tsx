@@ -85,7 +85,7 @@ const BillPreview = () => {
             {lineItems.map((item, idx) => {
               if (item.name === "") return <></>;
               return (
-                <div key={item.id} className="grid grid-cols-12 py-1">
+                <div key={idx} className="grid grid-cols-12 py-1">
                   <div className="col-span-1">{idx + 1}</div>
                   <div className="col-span-5">{item.name}</div>
                   <div className="col-span-2 text-center">{item.quantity}</div>

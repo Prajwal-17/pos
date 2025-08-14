@@ -63,13 +63,8 @@ const QuantityPresets = ({
 
   return (
     <>
-      <div className="bg-muted absolute top-full left-1/2 z-10 mt-2 w-max -translate-x-1/2 rounded-xl px-1 py-2 shadow-2xl">
-        <div
-          onClick={(e) => {
-            handlePresetClick(e);
-          }}
-          className="grid w-max grid-flow-row grid-cols-4 gap-1 px-1"
-        >
+      <div className="bg-muted absolute top-full left-1/2 z-50 mt-2 w-max -translate-x-1/2 rounded-xl px-1 py-2 shadow-2xl">
+        <div className="grid w-max grid-flow-row grid-cols-4 gap-1 px-1">
           {weights.map((w, idx) => (
             <Button
               key={idx}
@@ -78,6 +73,9 @@ const QuantityPresets = ({
               type="button"
               size="sm"
               className="col-span-1"
+              onClick={(e) => {
+                handlePresetClick(e);
+              }}
             >
               {w.label}
             </Button>
@@ -88,9 +86,6 @@ const QuantityPresets = ({
 
         <div
           className={`grid max-h-48 w-full grid-flow-row grid-cols-5 gap-1 overflow-y-auto scroll-smooth px-2 py-1 ${scrollStyles}`}
-          onClick={(e) => {
-            handlePresetClick(e);
-          }}
         >
           {numbers.map((i) => (
             <Button
@@ -99,6 +94,9 @@ const QuantityPresets = ({
               className="h-10 w-full hover:cursor-pointer"
               key={i}
               data-value={i}
+              onClick={(e) => {
+                handlePresetClick(e);
+              }}
             >
               {i}
             </Button>
