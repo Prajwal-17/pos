@@ -9,6 +9,7 @@ const BillPreview = () => {
   const navigate = useNavigate();
   const receiptRef = useRef<HTMLDivElement | null>(null);
   const lineItems = useBillingStore((state) => state.lineItems);
+  const setLineItems = useBillingStore((state) => state.setLineItems);
   const invoiceNo = useBillingStore((state) => state.invoiceNo);
   const customerName = useBillingStore((state) => state.customerName);
   const customerContact = useBillingStore((state) => state.customerContact);
@@ -37,6 +38,7 @@ const BillPreview = () => {
       const response = await window.salesApi.save(values);
       if (response.status === "success") {
         toast.success("Sale Saved successfully");
+        setLineItems([]);
         navigate("/");
       } else {
         toast.error(response.error.message);
@@ -85,7 +87,7 @@ const BillPreview = () => {
             {lineItems.map((item, idx) => {
               if (item.name === "") return <></>;
               return (
-                <div key={idx} className="grid grid-cols-12 py-1">
+                <div key={item.id} className="grid grid-cols-12 py-1">
                   <div className="col-span-1">{idx + 1}</div>
                   <div className="col-span-5">{item.name}</div>
                   <div className="col-span-2 text-center">{item.quantity}</div>

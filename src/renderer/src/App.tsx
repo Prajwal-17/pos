@@ -17,6 +17,8 @@ const App = () => {
         <Route element={<FullPageLayout />}>
           <Route path="/sales/new" element={<SalesPage />} />
           <Route path="/estimate/new" element={<EstimatePage />} />
+          <Route path="/sales/edit/:id" element={<SalesPage />} />
+          <Route path="/estimate/edit/:id" element={<EstimatePage />} />
         </Route>
       </Routes>
     </>

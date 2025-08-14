@@ -61,25 +61,25 @@ export type EstimateType = {
 export type SaleItemsType = {
   id: string;
   saleId: string;
-  productId: string;
+  productId: string | null;
   name: string;
-  mrp: number;
+  mrp: number | null;
   price: number;
-  weight: string;
-  unit: string;
+  weight: string | null;
+  unit: string | null;
   quantity: number;
   totalPrice: number;
 };
 
 export type EstimateItemsType = {
   id: string;
-  saleId: string;
-  productId: string;
+  estimateId: string;
+  productId: string | null;
   name: string;
-  mrp: number;
+  mrp: number | null;
   price: number;
-  weight: string;
-  unit: string;
+  weight: string | null;
+  unit: string | null;
   quantity: number;
   totalPrice: number;
 };
@@ -118,10 +118,14 @@ export interface SalesApi {
   getNextInvoiceNo: () => Promise<ApiResponse<number>>;
   save: (payload: SalePayload) => Promise<ApiResponse<string>>;
   getAllSales: () => Promise<ApiResponse<SalesType[]>>;
+  getTransactionById: (id: string) => Promise<ApiResponse<SalesType & { items: SaleItemsType[] }>>;
 }
 
 export interface EstimatesApi {
   getNextEstimateNo: () => Promise<ApiResponse<number>>;
   save: (payload: EstimatePayload) => Promise<ApiResponse<string>>;
   getAllEstimates: () => Promise<ApiResponse<EstimateType[]>>;
+  getTransactionById: (
+    id: string
+  ) => Promise<ApiResponse<EstimateType & { items: EstimateItemsType[] }>>;
 }

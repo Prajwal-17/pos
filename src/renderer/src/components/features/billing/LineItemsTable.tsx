@@ -21,6 +21,7 @@ const LineItemsTable = () => {
   const addEmptyLineItem = useBillingStore((state) => state.addEmptyLineItem);
   const updateLineItems = useBillingStore((state) => state.updateLineItems);
   const deleteLineItem = useBillingStore((state) => state.deleteLineItem);
+  const setLineItems = useBillingStore((state) => state.setLineItems);
 
   const setSearchParam = useSearchDropdownStore((state) => state.setSearchParam);
   const setSearchRow = useSearchDropdownStore((state) => state.setSearchRow);
@@ -31,6 +32,10 @@ const LineItemsTable = () => {
   }, 0);
 
   const [qtyPresetOpen, setQtyPresetOpen] = useState<number | null>(null);
+
+  useEffect(() => {
+    setLineItems([]);
+  }, [setLineItems]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

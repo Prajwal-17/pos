@@ -109,7 +109,7 @@ export const estimateItems = sqliteTable("estimate_items", {
     .primaryKey()
     .$defaultFn(() => uuidv4()),
   estimateId: text("estimate_id")
-    .references(() => estimateItems.id)
+    .references(() => estimates.id)
     .notNull(),
   productId: text("product_id").references(() => products.id),
   name: text("name").notNull(),

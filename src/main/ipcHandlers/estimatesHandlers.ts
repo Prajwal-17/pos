@@ -1,5 +1,10 @@
 import { ipcMain } from "electron/main";
-import type { ApiResponse, EstimatePayload, EstimateType } from "../../shared/types";
+import type {
+  ApiResponse,
+  EstimateItemsType,
+  EstimatePayload,
+  EstimateType
+} from "../../shared/types";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../db/db";
 import { estimateItems, estimates } from "../db/schema";
@@ -36,6 +41,33 @@ export function estimatesHandlers() {
       return { status: "error", error: { message: "Failed to retrieve sales" } };
     }
   });
+
+  ipcMain.handle(
+    "estimatesApi:getTransactionById",
+    async (
+      _event,
+      id: string
+    ): Promise<ApiResponse<EstimateType & { items: EstimateItemsType[] }>> => {
+      try {
+        const [estimateRecord] = await db.select().from(estimates).where(eq(estimates.id, id));
+        const estimateItemsList = await db
+          .select()
+          .from(estimateItems)
+          .where(eq(estimateItems.estimateId, id));
+
+        return {
+          status: "success",
+          data: {
+            ...estimateRecord,
+            items: estimateItemsList
+          }
+        };
+      } catch (error) {
+        console.log(error);
+        return { status: "error", error: { message: "Failed to retrieve estimate" } };
+      }
+    }
+  );
 
   ipcMain.handle(
     "estimatesApi:save",

@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import type { SalesType } from "src/shared/types";
 
 const Sale = () => {
   const [sales, setSales] = useState<SalesType[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchSales() {
@@ -42,7 +44,10 @@ const Sale = () => {
                   <td className="px-6 py-3">{row.invoiceNo}</td>
                   <td className="px-6 py-3">₹{row.grandTotal}</td>
                   <td className="px-6 py-3 text-center">
-                    <button className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-600">
+                    <button
+                      onClick={() => navigate(`/sales/edit/${row.id}`)}
+                      className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-600"
+                    >
                       View
                     </button>
                   </td>

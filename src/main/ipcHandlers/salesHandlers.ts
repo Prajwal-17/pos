@@ -1,5 +1,5 @@
 import { ipcMain } from "electron/main";
-import type { ApiResponse, SalePayload, SalesType } from "../../shared/types";
+import type { ApiResponse, SaleItemsType, SalePayload, SalesType } from "../../shared/types";
 import { db } from "../db/db";
 import { saleItems, sales } from "../db/schema";
 import { desc, eq } from "drizzle-orm";
@@ -32,6 +32,27 @@ export function salesHandlers() {
       return { status: "error", error: { message: "Failed to retrieve sales" } };
     }
   });
+
+  ipcMain.handle(
+    "salesApi:getTransactionById",
+    async (_event, id: string): Promise<ApiResponse<SalesType & { items: SaleItemsType[] }>> => {
+      try {
+        const [saleRecord] = await db.select().from(sales).where(eq(sales.id, id));
+        const saleItemsList = await db.select().from(saleItems).where(eq(saleItems.saleId, id));
+
+        return {
+          status: "success",
+          data: {
+            ...saleRecord,
+            items: saleItemsList
+          }
+        };
+      } catch (error) {
+        console.log(error);
+        return { status: "error", error: { message: "Failed to retrieve sales" } };
+      }
+    }
+  );
 
   ipcMain.handle(
     "salesApi:save",

@@ -15,16 +15,18 @@ type LineItemsType = {
 };
 
 type BillingStoreType = {
+  billingId: string | null;
+  setBillingId: (newId: string | null) => void;
   invoiceNo: number | null;
   setInvoiceNo: (newInvoiceNo: number | null) => void;
   customerName: string;
   setCustomerName: (newCustomerName: string) => void;
-  customerContact: string;
-  setCustomerContact: (newCustomerContact: string) => void;
+  customerContact: string | null;
+  setCustomerContact: (newCustomerContact: string | null) => void;
   paymentMethod: string;
   setPaymentMethod: (method: string) => void;
   lineItems: LineItemsType[] | [];
-  setLineItems: () => void;
+  setLineItems: (itemsArray: LineItemsType[]) => void;
   addEmptyLineItem: () => void;
   addLineItem: (index: number, newItem: ProductsType) => void;
   updateLineItems: (id: string, field: string, value: string | number) => void;
@@ -46,6 +48,12 @@ function initialLineItem() {
 }
 
 export const useBillingStore = create<BillingStoreType>((set) => ({
+  billingId: null,
+  setBillingId: (newId) =>
+    set(() => ({
+      billingId: newId
+    })),
+
   invoiceNo: null,
   setInvoiceNo: (newInvoiceNo) => set(() => ({ invoiceNo: newInvoiceNo })),
 
@@ -63,7 +71,28 @@ export const useBillingStore = create<BillingStoreType>((set) => ({
 
   lineItems: [initialLineItem()],
 
-  setLineItems: () => set(() => ({})),
+  setLineItems: (itemsArray) =>
+    set(() => {
+      if (!itemsArray || itemsArray.length === 0) {
+        return {
+          lineItems: [initialLineItem()]
+        };
+      }
+
+      return {
+        lineItems: itemsArray.map((item) => ({
+          id: uuidv4(),
+          productId: item.id,
+          name: item.name,
+          weight: item.weight,
+          unit: item.unit,
+          quantity: item.quantity,
+          mrp: item.mrp,
+          price: item.price,
+          totalPrice: item.quantity * item.price
+        }))
+      };
+    }),
 
   // add empty row
   addEmptyLineItem: () =>
