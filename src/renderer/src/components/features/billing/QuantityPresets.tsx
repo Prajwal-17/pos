@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useBillingStore } from "@/store/billingStore";
+import { useEffect, useRef } from "react";
 
 const QuantityPresets = ({
   itemId,
@@ -13,6 +14,7 @@ const QuantityPresets = ({
   qtyPresetOpen: number | null;
   setQtyPresetOpen: React.Dispatch<React.SetStateAction<number | null>>;
 }) => {
+  const popDownRef = useRef<HTMLDivElement | null>(null);
   const updateLineItems = useBillingStore((state) => state.updateLineItems);
   const numbers = Array.from({ length: 40 }, (_, i) => i + 1);
 
@@ -57,13 +59,39 @@ const QuantityPresets = ({
     }
   ];
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setQtyPresetOpen(null);
+      }
+    };
+
+    const handleMouseDown = (e: MouseEvent) => {
+      if (popDownRef.current && !popDownRef.current.contains(e.target as Node))
+        setQtyPresetOpen(null);
+    };
+
+    if (qtyPresetOpen != null) {
+      document.addEventListener("keydown", handleKeyDown);
+      document.addEventListener("mousedown", handleMouseDown);
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleMouseDown);
+    };
+  }, [qtyPresetOpen, setQtyPresetOpen]);
+
   if (qtyPresetOpen != idx) {
     return null;
   }
 
   return (
     <>
-      <div className="bg-muted absolute top-full left-1/2 z-50 mt-2 w-max -translate-x-1/2 rounded-xl px-1 py-2 shadow-2xl">
+      <div
+        ref={popDownRef}
+        className="bg-muted absolute top-full left-1/2 z-50 mt-2 w-max -translate-x-1/2 rounded-xl px-1 py-2 shadow-2xl"
+      >
         <div className="grid w-max grid-flow-row grid-cols-4 gap-1 px-1">
           {weights.map((w, idx) => (
             <Button
@@ -86,6 +114,7 @@ const QuantityPresets = ({
 
         <div
           className={`grid max-h-48 w-full grid-flow-row grid-cols-5 gap-1 overflow-y-auto scroll-smooth px-2 py-1 ${scrollStyles}`}
+          onClick={() => console.log("clicked div")}
         >
           {numbers.map((i) => (
             <Button
@@ -94,6 +123,7 @@ const QuantityPresets = ({
               className="h-10 w-full hover:cursor-pointer"
               key={i}
               data-value={i}
+              // onClick={() => console.log("clicked")}
               onClick={(e) => {
                 handlePresetClick(e);
               }}

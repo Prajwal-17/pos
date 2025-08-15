@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { GripVertical, IndianRupee, Minus, Plus, Trash2 } from "lucide-react";
 import { useBillingStore } from "@/store/billingStore";
 import SearchDropdown from "./SearchDropdown";
@@ -16,7 +16,6 @@ export type ItemType = {
 };
 
 const LineItemsTable = () => {
-  const popDownRef = useRef<HTMLDivElement | null>(null);
   const lineItems = useBillingStore((state) => state.lineItems);
   const addEmptyLineItem = useBillingStore((state) => state.addEmptyLineItem);
   const updateLineItems = useBillingStore((state) => state.updateLineItems);
@@ -37,32 +36,9 @@ const LineItemsTable = () => {
     setLineItems([]);
   }, [setLineItems]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setQtyPresetOpen(null);
-      }
-    };
-
-    const handleMouseDown = (e: MouseEvent) => {
-      if (popDownRef.current && !popDownRef.current.contains(e.target as Node))
-        setQtyPresetOpen(null);
-    };
-
-    if (qtyPresetOpen != null) {
-      document.addEventListener("keydown", handleKeyDown);
-      document.addEventListener("mousedown", handleMouseDown);
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("mousedown", handleMouseDown);
-    };
-  }, [qtyPresetOpen, setQtyPresetOpen]);
-
   return (
     <>
-      <div className="h-full w-full flex-1">
+      <div className="relative min-h-[150vh] w-full flex-1">
         <div className="w-full space-y-0 py-5">
           <div className="text-accent-foreground border-border grid grid-cols-20 items-center border bg-gray-100 text-base font-semibold">
             <div className="col-span-2 border-r border-gray-300 py-2 text-center">#</div>
@@ -104,7 +80,7 @@ const LineItemsTable = () => {
                       }}
                     />
                   </div>
-                  <div ref={popDownRef} className="col-span-3 h-full w-full border-r px-1 py-1">
+                  <div className="col-span-3 h-full w-full border-r px-1 py-1">
                     <div className="border-border relative flex h-full w-full items-center rounded-lg border bg-white font-bold shadow-sm">
                       <button
                         onClick={() => {
@@ -195,7 +171,7 @@ const LineItemsTable = () => {
           </div>
         </div>
       </div>
-      <div className="border-t-border flex h-16 w-full items-center justify-between border bg-white px-6 py-4">
+      <div className="border-t-border absolute bottom-0 flex h-16 w-3/4 items-center justify-between border bg-white px-6 py-4">
         <div className="text-xl font-bold">Total Amount:</div>
         <div className="text-primary text-3xl font-extrabold">₹ {totalAmount.toFixed(2)}</div>
       </div>
