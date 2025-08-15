@@ -138,7 +138,10 @@ const BillPreview = () => {
           <Button className="" onClick={handleSave}>
             Save
           </Button>
-          <Button className="" onClick={handlePrint}>
+          <Button className="" onClick={() => {
+            handleSave()
+            handlePrint()
+          }}>
             Print
           </Button>
         </div>

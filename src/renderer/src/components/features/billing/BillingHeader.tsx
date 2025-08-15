@@ -117,7 +117,8 @@ const BillingHeader = () => {
                   id="customer-contact"
                   className="pl-16"
                   placeholder="Contact Number"
-                  value={customerContact}
+                  // @ts-ignore
+                  value={customerContact ?? ""}
                   onChange={(e) => setCustomerContact(e.target.value)}
                 />
               </div>

@@ -41,6 +41,7 @@ export async function main() {
         invoiceNo: faker.number.int(),
         customerId: customer.id,
         customerName: customer.name,
+        customerContact: null,
         grandTotal: faker.number.int(),
         isPaid: faker.datatype.boolean(),
         totalQuantity: faker.number.int()
