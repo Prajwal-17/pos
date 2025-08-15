@@ -31,7 +31,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld("electronAPI", electronAPI);
     contextBridge.exposeInMainWorld("productsApi", productsApi);
     contextBridge.exposeInMainWorld("salesApi", salesApi);
-    contextBridge.exposeInMainWorld("estimatesAp", estimatesApi);
+    contextBridge.exposeInMainWorld("estimatesApi", estimatesApi);
   } catch (error) {
     console.error(error);
   }

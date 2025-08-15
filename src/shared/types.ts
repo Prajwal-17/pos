@@ -98,16 +98,50 @@ export type ApiResponse<T> =
     };
 
 export type SalePayload = {
+  billingId: string | null;
   invoiceNo: number;
   customerName: string;
-  customerContact: string;
+  customerContact: string | null;
   grandTotal: number;
-  totalQuantity: number;
+  totalQuantity: number | null;
   isPaid: boolean;
-  items: (ProductsType & { quantity: number; totalPrice: number })[];
+  items: SalePayloadItems[];
 };
 
-export type EstimatePayload = SalePayload;
+export type SalePayloadItems = {
+  id: string;
+  productId: string;
+  name: string;
+  mrp: number | null;
+  price: number;
+  weight: string | null;
+  unit: string | null;
+  quantity: number;
+  totalPrice: number;
+};
+
+export type EstimatePayload = {
+  billingId: string | null;
+  estimateNo: number;
+  customerName: string;
+  customerContact: string | null;
+  grandTotal: number;
+  totalQuantity: number | null;
+  isPaid: boolean;
+  items: EstimatePayloadItems[];
+};
+
+export type EstimatePayloadItems = {
+  id: string;
+  productId: string;
+  name: string;
+  mrp: number | null;
+  price: number;
+  weight: string | null;
+  unit: string | null;
+  quantity: number;
+  totalPrice: number;
+};
 
 export interface ProductsApi {
   getAllProducts: () => Promise<ApiResponse<ProductsType[]>>;

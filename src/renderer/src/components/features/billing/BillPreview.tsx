@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useBillingStore } from "@/store/billingStore";
 import { useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
 import { toast } from "sonner";
 
@@ -13,6 +13,10 @@ const BillPreview = () => {
   const invoiceNo = useBillingStore((state) => state.invoiceNo);
   const customerName = useBillingStore((state) => state.customerName);
   const customerContact = useBillingStore((state) => state.customerContact);
+  const billingId = useBillingStore((state) => state.billingId);
+
+  const location = useLocation();
+  const type = location.pathname.split("/")[1];
 
   const handlePrint = useReactToPrint({
     contentRef: receiptRef
@@ -23,25 +27,44 @@ const BillPreview = () => {
 
   async function handleSave() {
     try {
-      console.log("save");
-      const values = {
-        invoiceNo: Number(invoiceNo),
-        // customerId: "",
-        customerName,
-        customerContact,
-        grandTotal: totalAmount,
-        totalQuantity: 234,
-        isPaid: true,
-        items: lineItems
-      };
-
-      const response = await window.salesApi.save(values);
-      if (response.status === "success") {
-        toast.success("Sale Saved successfully");
-        setLineItems([]);
-        navigate("/");
+      if (type === "sales") {
+        const response = await window.salesApi.save({
+          billingId: billingId,
+          invoiceNo: Number(invoiceNo),
+          // customerId,
+          customerName,
+          customerContact,
+          grandTotal: totalAmount,
+          totalQuantity: 1,
+          isPaid: true,
+          items: [...lineItems]
+        });
+        if (response.status === "success") {
+          toast.success("Sale Saved successfully");
+          setLineItems([]);
+          navigate("/");
+        } else {
+          toast.error(response.error.message);
+        }
       } else {
-        toast.error(response.error.message);
+        const response = await window.estimatesApi.save({
+          billingId: billingId,
+          estimateNo: Number(invoiceNo),
+          // customerId,
+          customerName,
+          customerContact,
+          grandTotal: totalAmount,
+          totalQuantity: 1,
+          isPaid: true,
+          items: [...lineItems]
+        });
+        if (response.status === "success") {
+          toast.success("Estimate Saved successfully");
+          setLineItems([]);
+          navigate("/");
+        } else {
+          toast.error(response.error.message);
+        }
       }
     } catch (error) {
       console.log(error);
@@ -55,9 +78,11 @@ const BillPreview = () => {
           <div className="mb-2 space-y-2 py-4 text-center">
             <h1 className="text-lg font-bold tracking-tight">SRI MANJUNATHESHWARA STORES</h1>
             <p className="text-xs">6TH MAIN, RUKMINI NAGAR NAGASANDRA POST BANGALORE 560073</p>
-            <p className="text-xs">
-              <span className="font-semibold">GSTIN:</span>29BHBPR8333N2ZM
-            </p>
+            {type === "sales" && (
+              <p className="text-xs">
+                <span className="font-semibold">GSTIN:</span>29BHBPR8333N2ZM
+              </p>
+            )}
             <p className="text-xs">
               <span className="font-semibold">Ph.No.:</span>
               9945029729
@@ -66,14 +91,19 @@ const BillPreview = () => {
           <div className="mb-4 flex justify-between border-t border-b border-dashed border-black py-1 text-xs">
             <div>
               <div>
-                <span className="font-semibold">Date:</span> 23/02/2025
+                <span className="font-semibold">Date:</span>{" "}
+                {new Date().toLocaleDateString("en-IN", { dateStyle: "medium" })}
               </div>
               <div>
-                <span className="font-semibold">Invoice:</span> 355
+                <span className="font-semibold">
+                  {type === "sales" ? "Invoice No:" : "Estimate No:"}
+                </span>{" "}
+                {invoiceNo}
               </div>
             </div>
             <div>
-              <span className="font-semibold">Time:</span> 04:54pm
+              <span className="font-semibold">Time:</span>{" "}
+              {new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
             </div>
           </div>
           <div className="grid grid-cols-12 border-b border-dashed border-black pb-1 text-xs font-bold">
@@ -99,7 +129,7 @@ const BillPreview = () => {
           </div>
           <div className="py-3 text-right">
             <span className="text-base font-semibold">Total: </span>
-            <span className="text-lg font-semibold">₹3740.00</span>
+            <span className="text-lg font-semibold">{totalAmount}</span>
           </div>
           {/*<div className="py-4 text-center">*** You Saved ₹30 ***</div>*/}
           <div className="text-center">Thank You</div>

@@ -48,7 +48,7 @@ function initialLineItem() {
 }
 
 export const useBillingStore = create<BillingStoreType>((set) => ({
-  billingId: null,
+  billingId: null, // sales.id || estimates.id
   setBillingId: (newId) =>
     set(() => ({
       billingId: newId
@@ -82,7 +82,7 @@ export const useBillingStore = create<BillingStoreType>((set) => ({
       return {
         lineItems: itemsArray.map((item) => ({
           id: uuidv4(),
-          productId: item.id,
+          productId: item.productId,
           name: item.name,
           weight: item.weight,
           unit: item.unit,

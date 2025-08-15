@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import type { EstimateType } from "src/shared/types";
 
 const Estimate = () => {
-  const [estimate, setEstimate] = useState<EstimateType[]>([]);
+  const [estimates, setEstimates] = useState<EstimateType[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchEstimates() {
       try {
         const response = await window.estimatesApi.getAllEstimates();
         if (response.status === "success") {
-          setEstimate(response.data);
+          setEstimates(response.data);
         } else {
           toast.error("Could not retrieve sales");
         }
@@ -24,7 +26,7 @@ const Estimate = () => {
   return (
     <>
       <div className="px-10 py-20">
-        <div className="py-5 text-4xl font-bold">Estimate</div>
+        <div className="py-5 text-4xl font-bold">Estimates</div>
         <div className="overflow-x-auto rounded-lg shadow">
           <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50">
@@ -36,13 +38,16 @@ const Estimate = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {estimate.map((row, idx) => (
+              {estimates.map((row, idx) => (
                 <tr key={idx} className="transition hover:bg-gray-50">
                   <td className="px-6 py-3">{row.createdAt?.toLocaleString("en-IN")}</td>
-                  <td className="px-6 py-3">{row.invoiceNo}</td>
+                  <td className="px-6 py-3">{row.estimateNo}</td>
                   <td className="px-6 py-3">₹{row.grandTotal}</td>
                   <td className="px-6 py-3 text-center">
-                    <button className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-600">
+                    <button
+                      onClick={() => navigate(`/estimates/edit/${row.id}`)}
+                      className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-600"
+                    >
                       View
                     </button>
                   </td>

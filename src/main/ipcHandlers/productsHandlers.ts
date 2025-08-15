@@ -36,7 +36,14 @@ export function productHandlers() {
           `;
 
         const searchResult = await db
-          .select()
+          .select({
+            id: products.id,
+            name: products.name,
+            weight: products.weight,
+            unit: products.unit,
+            mrp: products.mrp,
+            price: products.price
+          })
           .from(products)
           .where(like(products.name, `%${query}%`))
           .orderBy(priorityOrder, products.name)

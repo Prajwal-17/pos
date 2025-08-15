@@ -58,53 +58,120 @@ export function salesHandlers() {
     "salesApi:save",
     async (_event, saleObj: SalePayload): Promise<ApiResponse<string>> => {
       try {
-        // for better-sqlite3 inside a transaction asynchronous is not required, only used for standalone queries
-        db.transaction((tx) => {
-          const invoiceNo = tx
-            .select()
-            .from(sales)
-            .where(eq(sales.invoiceNo, Number(saleObj.invoiceNo)))
-            .get();
-          if (invoiceNo) {
-            throw new Error("SaleExists");
-          }
-          const sale = tx
-            .insert(sales)
-            .values({
-              invoiceNo: Number(saleObj.invoiceNo),
-              customerName: "DEFAULT",
-              grandTotal: saleObj.grandTotal,
-              isPaid: true
-            })
-            .returning({ id: sales.id })
-            .get();
-
-          if (!sale || !sale.id) {
-            throw new Error("Failed to create sale record.");
-          }
-
-          for (const item of saleObj.items) {
-            if (item.name === "") return;
-            tx.insert(saleItems)
+        // --- CREATE SALE ---
+        if (!saleObj.billingId) {
+          const result = db.transaction((tx) => {
+            const sale = tx
+              .insert(sales)
               .values({
-                saleId: sale.id,
-                name: item.name,
-                price: item.price,
-                mrp: item.mrp,
-                quantity: item.quantity,
-                totalPrice: item.totalPrice
+                invoiceNo: Number(saleObj.invoiceNo),
+                customerName: "DEFAULT",
+                grandTotal: saleObj.grandTotal,
+                isPaid: true
               })
-              .run();
-          }
-        });
+              .returning({ id: sales.id })
+              .get();
 
-        return { status: "success", data: "Sale was saved successfully" };
-      } catch (error) {
-        if (error instanceof Error && error.message === "SaleExists") {
-          return { status: "error", error: { message: "Sale already exists" } };
+            if (!sale || !sale.id) {
+              throw new Error("SaleCreationFailure");
+            }
+
+            for (const item of saleObj.items) {
+              if (!item.name || !item.productId) {
+                continue;
+              }
+
+              tx.insert(saleItems)
+                .values({
+                  saleId: sale.id,
+                  productId: item.productId,
+                  name: item.name,
+                  mrp: item.mrp,
+                  price: item.price,
+                  weight: item.weight,
+                  unit: item.unit,
+                  quantity: item.quantity,
+                  totalPrice: item.totalPrice
+                })
+                .run();
+            }
+            return "Sale was saved successfully";
+          });
+          return { status: "success", data: result };
         }
-        console.error("Error in transaction:", error);
-        return { status: "error", error: { message: "Error occured while saving." } };
+        // --- UPDATE SALE ---
+        else {
+          const result = db.transaction((tx) => {
+            if (!saleObj.billingId) {
+              throw new Error("MissingBillingId");
+            }
+
+            const sale = tx.select().from(sales).where(eq(sales.id, saleObj.billingId)).get();
+
+            if (!sale) {
+              throw new Error("NoSaleFound");
+            }
+
+            tx.update(sales)
+              .set({
+                customerName: saleObj.customerName,
+                customerContact: saleObj.customerContact,
+                grandTotal: saleObj.grandTotal,
+                totalQuantity: saleObj.totalQuantity,
+                isPaid: saleObj.isPaid
+              })
+              .where(eq(sales.id, saleObj.billingId))
+              .run();
+
+            tx.delete(saleItems).where(eq(saleItems.saleId, sale.id)).run();
+
+            for (const item of saleObj.items) {
+              if (!item.name) {
+                continue;
+              }
+              tx.insert(saleItems)
+                .values({
+                  saleId: sale.id,
+                  productId: item.productId,
+                  name: item.name,
+                  mrp: item.mrp,
+                  price: item.price,
+                  weight: item.weight,
+                  unit: item.unit,
+                  quantity: item.quantity,
+                  totalPrice: item.totalPrice
+                })
+                .run();
+            }
+            return "Sale was updated successfully";
+          });
+          return { status: "success", data: result };
+        }
+      } catch (error) {
+        console.error("Error in salesApi:save transaction:", error);
+
+        if (error instanceof Error) {
+          if (error.message === "SaleCreationFailure") {
+            return {
+              status: "error",
+              error: { message: "Could not create the sale record in the database." }
+            };
+          }
+          if (error.message === "MissingBillingId") {
+            return { status: "error", error: { message: "Billing ID is missing for the update." } };
+          }
+          if (error.message === "NoSaleFound") {
+            return {
+              status: "error",
+              error: { message: "The sale you are trying to update could not be found." }
+            };
+          }
+        }
+
+        return {
+          status: "error",
+          error: { message: "An error occurred while saving the sale." }
+        };
       }
     }
   );

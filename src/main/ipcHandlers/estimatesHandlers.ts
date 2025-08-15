@@ -27,7 +27,7 @@ export function estimatesHandlers() {
       return { status: "success", data: nextEstimateNo };
     } catch (error) {
       console.log(error);
-      return { status: "error", error: { message: "Failed to retrieve next invoice number" } };
+      return { status: "error", error: { message: "Failed to retrieve next estimate number" } };
     }
   });
 
@@ -38,7 +38,7 @@ export function estimatesHandlers() {
       return { status: "success", data: estimatesArray };
     } catch (error) {
       console.log(error);
-      return { status: "error", error: { message: "Failed to retrieve sales" } };
+      return { status: "error", error: { message: "Failed to retrieve estimates" } };
     }
   });
 
@@ -73,53 +73,124 @@ export function estimatesHandlers() {
     "estimatesApi:save",
     async (_event, estimateObj: EstimatePayload): Promise<ApiResponse<string>> => {
       try {
-        // for better-sqlite3 inside a transaction asynchronous is not required, only used for standalone queries
-        db.transaction((tx) => {
-          const estimateNo = tx
-            .select()
-            .from(estimates)
-            .where(eq(estimates.estimateNo, Number(estimateObj.invoiceNo)))
-            .get();
-          if (estimateNo) {
-            throw new Error("EstimateExits");
-          }
-          const estimate = tx
-            .insert(estimates)
-            .values({
-              estimateNo: Number(estimateObj.invoiceNo),
-              customerName: "DEFAULT",
-              grandTotal: estimateObj.grandTotal,
-              isPaid: true
-            })
-            .returning({ id: estimates.id })
-            .get();
-
-          if (!estimate || !estimate.id) {
-            throw new Error("Failed to create estimate record.");
-          }
-
-          for (const item of estimateObj.items) {
-            if (item.name === "") return;
-            tx.insert(estimateItems)
+        // --- CREATE ESTIMATE ---
+        if (!estimateObj.billingId) {
+          const result = db.transaction((tx) => {
+            const estimate = tx
+              .insert(estimates)
               .values({
-                saleId: estimate.id,
-                name: item.name,
-                price: item.price,
-                mrp: item.mrp || null,
-                quantity: item.quantity,
-                totalPrice: item.totalPrice
+                estimateNo: Number(estimateObj.estimateNo),
+                customerName: "DEFAULT",
+                grandTotal: estimateObj.grandTotal,
+                isPaid: true
               })
-              .run();
-          }
-        });
+              .returning({ id: estimates.id })
+              .get();
 
-        return { status: "success", data: "Estimate was saved successfully" };
-      } catch (error) {
-        if (error instanceof Error && error.message === "EstimateExits") {
-          return { status: "error", error: { message: "Estimate already exists" } };
+            if (!estimate || !estimate.id) {
+              throw new Error("EstimateCreationFailure");
+            }
+
+            for (const item of estimateObj.items) {
+              if (!item.name || !item.productId) {
+                continue;
+              }
+
+              tx.insert(estimateItems)
+                .values({
+                  estimateId: estimate.id,
+                  productId: item.productId,
+                  name: item.name,
+                  mrp: item.mrp,
+                  price: item.price,
+                  weight: item.weight,
+                  unit: item.unit,
+                  quantity: item.quantity,
+                  totalPrice: item.totalPrice
+                })
+                .run();
+            }
+            return "Estimate saved successfully";
+          });
+          return { status: "success", data: result };
         }
-        console.error("Error in transaction:", error);
-        return { status: "error", error: { message: "Error occured while saving." } };
+        // --- UPDATE ESTIMATE ---
+        else {
+          const result = db.transaction((tx) => {
+            if (!estimateObj.billingId) {
+              throw new Error("MissingBillingId");
+            }
+
+            const estimate = tx
+              .select()
+              .from(estimates)
+              .where(eq(estimates.id, estimateObj.billingId))
+              .get();
+
+            if (!estimate || !estimate.id) {
+              throw new Error("NoEstimateFound");
+            }
+
+            tx.update(estimates)
+              .set({
+                customerName: estimateObj.customerName,
+                customerContact: estimateObj.customerContact,
+                grandTotal: estimateObj.grandTotal,
+                totalQuantity: estimateObj.totalQuantity,
+                isPaid: estimateObj.isPaid
+              })
+              .where(eq(estimates.id, estimateObj.billingId))
+              .run();
+
+            tx.delete(estimateItems).where(eq(estimateItems.estimateId, estimate.id)).run();
+
+            for (const item of estimateObj.items) {
+              if (!item.name) {
+                continue;
+              }
+              tx.insert(estimateItems)
+                .values({
+                  estimateId: estimate.id,
+                  productId: item.productId,
+                  name: item.name,
+                  mrp: item.mrp,
+                  price: item.price,
+                  weight: item.weight,
+                  unit: item.unit,
+                  quantity: item.quantity,
+                  totalPrice: item.totalPrice
+                })
+                .run();
+            }
+            return "Estimate updated successfully";
+          });
+          return { status: "success", data: result };
+        }
+      } catch (error) {
+        console.error("Error in estimatesApi:save transaction:", error);
+
+        if (error instanceof Error) {
+          if (error.message === "EstimateCreationFailure") {
+            return {
+              status: "error",
+              error: { message: "Could not create the estimate record in the database." }
+            };
+          }
+          if (error.message === "MissingBillingId") {
+            return { status: "error", error: { message: "Billing ID is missing for the update." } };
+          }
+          if (error.message === "NoEstimateFound") {
+            return {
+              status: "error",
+              error: { message: "The estimate you are trying to update could not be found." }
+            };
+          }
+        }
+
+        return {
+          status: "error",
+          error: { message: "An error occurred while saving the estimate." }
+        };
       }
     }
   );
