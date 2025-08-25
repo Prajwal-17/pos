@@ -1,4 +1,5 @@
-import { Menu } from "electron";
+import { Menu, MenuItem } from "electron";
+import { checkForUpdates } from "./update";
 
 // Menu setup examples
 // - https://www.electronjs.org/docs/latest/api/menu#examples
@@ -50,5 +51,11 @@ export function setupMenu() {
   ];
 
   const menu = Menu.buildFromTemplate(template);
+  menu.append(
+    new MenuItem({
+      label: "Check Updates",
+      click: (menuItem) => checkForUpdates(menuItem)
+    })
+  );
   Menu.setApplicationMenu(menu);
 }

@@ -1,5 +1,6 @@
 import { electronApp, is } from "@electron-toolkit/utils";
 import { app, BrowserWindow, screen } from "electron";
+import { autoUpdater } from "electron-updater";
 import { join } from "node:path";
 import { setupIpcHandlers } from "./setupIpcHandlers";
 import { setupMenu } from "./setupMenu";
@@ -22,6 +23,9 @@ if (!gotTheLock) {
     electronApp.setAppUserModelId("com.electron");
     setupIpcHandlers();
     createWindow();
+
+    // autoUpdater.checkForUpdatesAndNotify();
+    // checkForUpdates();
 
     app.on("activate", function () {
       if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -49,6 +53,7 @@ function createWindow(): void {
     setTimeout(() => {
       mainWindow.maximize();
     }, 25);
+    console.log(autoUpdater.checkForUpdates());
     mainWindow.show();
   });
 
@@ -76,3 +81,28 @@ app.on("window-all-closed", () => {
     app.quit();
   }
 });
+
+// autoUpdater.on("checking-for-update", () => {
+//   console.log("Checking for update...");
+// });
+
+// autoUpdater.on("update-available", (info) => {
+//   console.log("Update available:", info);
+// });
+
+// autoUpdater.on("update-not-available", (info) => {
+//   console.log("No update available:", info);
+// });
+
+// autoUpdater.on("error", (err) => {
+//   console.error("Error in auto-updater:", err);
+// });
+
+// autoUpdater.on("download-progress", (progressObj) => {
+//   console.log(`Downloaded ${progressObj.percent.toFixed(2)}% at ${progressObj.bytesPerSecond} b/s`);
+// });
+
+// autoUpdater.on("update-downloaded", () => {
+//   console.log("Update downloaded, will install now");
+//   autoUpdater.quitAndInstall(); // 🚀 restarts app with new version
+// });
