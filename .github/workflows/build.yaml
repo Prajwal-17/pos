@@ -31,7 +31,7 @@ jobs:
 
       - name: Build App
         run: |
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
+          if [ "$RUNNER_OS" == "Windows" ]; then
             pnpm run build:win
           else 
             pnpm run build:linux
