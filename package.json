@@ -87,5 +87,17 @@
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vite": "^7.0.5"
+  },
+  "build": {
+    "appId": "pos.quickcart",
+    "productName": "QuickCart",
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "${productName}.${ext}"
+    }
   }
 }

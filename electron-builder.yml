@@ -12,7 +12,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: lts
+  executableName: Quickcart
 nsis:
   artifactName: ${name}.${ext}
   shortcutName: ${productName}
@@ -20,8 +20,11 @@ nsis:
   createDesktopShortcut: always
 linux:
   target:
+    - AppImage
     - deb
   artifactName: ${name}.${ext}
   maintainer: prajwalkreddy17@gmail.com
   category: Office
+appImage:
+  artifactName: ${PRODUCT_NAME}.${ext}
 npmRebuild: false
