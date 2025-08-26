@@ -10,59 +10,59 @@ jobs:
     stratery:
       matrix:
         os: [ubuntu-latest, windows-latest]
-      runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
 
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-        - name: Setup Node JS
-          uses: actions/setup-node@v4
-          with:
-            node-version: "22.17.0"
+      - name: Setup Node JS
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.17.0"
 
-        - name: Install pnpm
-          uses: pnpm/action-setup@v3
-          with:
-            version: 10
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
 
-        - name: Install deps
-          run: pnpm install --frozen-lockfile
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
 
-        - name: Build App
-          run: |
-            if [[ "$RUNNER_OS" == "Windows" ]]; then
-              pnpm run build:win
-            else 
-              pnpm run build:linux
-            fi
+      - name: Build App
+        run: |
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            pnpm run build:win
+          else 
+            pnpm run build:linux
+          fi
 
-        - name: Get package version
-          id: package-version
-          shell: bash
-          run: |
-            version=$(jq -r .version package.json)
-            echo "current-version=$version" >> $GITHUB_OUTPUT
+      - name: Get package version
+        id: package-version
+        shell: bash
+        run: |
+          version=$(jq -r .version package.json)
+          echo "current-version=$version" >> $GITHUB_OUTPUT
 
-        - name: Create Github Release
-          id: create_release
-          uses: actions/create-release@v1
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            tag_name: v${{ steps.package-version.outputs.current-version }}
-            release_name: Release v${{ steps.package-version.outputs.current-version }}
-            body: Assets for the latest Windows build.
-            build: Build for ${{ matrix.os }}
-            draft: false
-            prerelease: false
+      - name: Create Github Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.package-version.outputs.current-version }}
+          release_name: Release v${{ steps.package-version.outputs.current-version }}
+          body: Assets for the latest Windows build.
+          build: Build for ${{ matrix.os }}
+          draft: false
+          prerelease: false
 
-        - name: Upload Release
-          uses: actions/upload-release-asset@v1
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            upload_url: ${{ steps.create_release.outputs.upload_url }}
-            asset_path: ${{ matrix.os == 'windows-latest' && './dist/QuickCart.exe' || './dist/QuickCart.AppImage' }}
-            asset_name: ${{ matrix.os == 'windows-latest' && 'QuickCart.exe' || 'QuickCart.AppImage' }}
-            asset_content_type: ${{ matrix.os == 'windows-latest' && 'application/vnd.microsoft.portable-executable' || 'application/octet-stream' }}
+      - name: Upload Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ matrix.os == 'windows-latest' && './dist/QuickCart.exe' || './dist/QuickCart.AppImage' }}
+          asset_name: ${{ matrix.os == 'windows-latest' && 'QuickCart.exe' || 'QuickCart.AppImage' }}
+          asset_content_type: ${{ matrix.os == 'windows-latest' && 'application/vnd.microsoft.portable-executable' || 'application/octet-stream' }}
