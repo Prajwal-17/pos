@@ -1,4 +1,4 @@
-name: Build Electron App for Windows
+name: Build and Release
 
 on:
   push:
@@ -30,6 +30,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build App
+        shell: bash
         run: |
           if [ "$RUNNER_OS" == "Windows" ]; then
             pnpm run build:win
