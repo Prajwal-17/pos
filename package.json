@@ -1,7 +1,7 @@
 {
   "name": "pos",
-  "version": "2.1.1",
-  "description": "An Electron application with React and TypeScript",
+  "version": "2.1.2",
+  "description": "A billing software for creating and managing invoices and customer accounts.",
   "main": "./out/main/index.js",
   "repository": {
     "type": "git",
@@ -87,17 +87,5 @@
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vite": "^7.0.5"
-  },
-  "build": {
-    "appId": "pos.quickcart",
-    "productName": "QuickCart",
-    "win": {
-      "target": "nsis"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "artifactName": "${productName}.${ext}"
-    }
   }
 }
