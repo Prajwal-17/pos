@@ -97,7 +97,7 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "${productName}.${ext}"
+      "artifactName": "${productName}-${version}.${ext}"
     }
   }
 }

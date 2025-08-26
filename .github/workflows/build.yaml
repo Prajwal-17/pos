@@ -60,12 +60,24 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload Release
+      - name: Upload Windows Release
+        if: matrix.os === "windows-latest"
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ matrix.os == 'windows-latest' && './dist/QuickCart.exe' || './dist/QuickCart.AppImage' }}
-          asset_name: ${{ matrix.os == 'windows-latest' && 'QuickCart.exe' || 'QuickCart.AppImage' }}
-          asset_content_type: ${{ matrix.os == 'windows-latest' && 'application/vnd.microsoft.portable-executable' || 'application/octet-stream' }}
+          asset_name: QuickCart-${{ steps.package-version.outputs.current-version }}.exe
+          asset_path: ./dist/QuickCart-${{ steps.package-version.outputs.current-version }}.exe
+          asset_content_type: application/vnd.microsoft.portable-executable
+
+      - name: Upload Linux Release
+        if: matrix.os === "ubuntu-latest"
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_name: QuickCart-${{ steps.package-version.outputs.current-version }}.AppImage
+          asset_path: ./dist/QuickCart-${{ steps.package-version.outputs.current-version }}.AppImage
+          asset_content_type: application/octet-stream
