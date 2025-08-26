@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node JS
         uses: actions/setup-node@v4
         with:
-          node-version: "22.17.0"
+          node-version: 22.17.0
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
@@ -36,7 +36,7 @@ jobs:
         run: |
           if [ "$RUNNER_OS" == "Windows" ]; then
             pnpm run build:win
-          else 
+          else
             pnpm run build:linux
           fi
 
@@ -47,7 +47,35 @@ jobs:
           version=$(jq -r .version package.json)
           echo "current-version=$version" >> $GITHUB_OUTPUT
 
-      - name: Create Github Release
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.os }}
+          path: |
+            ./dist/*.exe
+            ./dist/*.AppImage
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Get package version
+        id: package-version
+        shell: bash
+        run: |
+          version=$(jq -r .version package.json)
+          echo "current-version=$version" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -55,29 +83,26 @@ jobs:
         with:
           tag_name: v${{ steps.package-version.outputs.current-version }}
           release_name: Release v${{ steps.package-version.outputs.current-version }}
-          body: Assets for the latest Windows build.
-          build: Build for ${{ matrix.os }}
+          body: Windows + Linux builds
           draft: false
           prerelease: false
 
       - name: Upload Windows Release
-        if: matrix.os == 'windows-latest'
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/build-windows-latest/QuickCart-*.exe
           asset_name: QuickCart-${{ steps.package-version.outputs.current-version }}.exe
-          asset_path: ./dist/QuickCart-${{ steps.package-version.outputs.current-version }}.exe
           asset_content_type: application/vnd.microsoft.portable-executable
 
-      - name: Upload Linux Release
-        if: matrix.os == 'ubuntu-latest'
+      - name: Upload Linux AppImage
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/build-ubuntu-latest/QuickCart-*.AppImage
           asset_name: QuickCart-${{ steps.package-version.outputs.current-version }}.AppImage
-          asset_path: ./dist/QuickCart-${{ steps.package-version.outputs.current-version }}.AppImage
           asset_content_type: application/octet-stream
