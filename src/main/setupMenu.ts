@@ -1,4 +1,5 @@
 import { Menu } from "electron";
+import { checkForUpdates } from "./updater";
 
 // Menu setup examples
 // - https://www.electronjs.org/docs/latest/api/menu#examples
@@ -34,8 +35,19 @@ export function setupMenu() {
         // { role: "togglefullscreen" }
       ]
     },
+    { role: "window", submenu: [{ role: "minimize" }, { role: "close" }] },
+    {
+      label: "Help",
+      submenu: [
+        {
+          label: "Check for updates",
+          click(menuItem) {
+            checkForUpdates(menuItem);
+          }
+        }
+      ]
+    }
 
-    { role: "window", submenu: [{ role: "minimize" }, { role: "close" }] }
     // {
     //   role: "help",
     //   submenu: [
