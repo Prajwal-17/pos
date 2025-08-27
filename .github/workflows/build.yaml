@@ -37,7 +37,7 @@ jobs:
           if [ "$RUNNER_OS" == "Windows" ]; then
             pnpm run build:win
           else
-            pnpm run build:linux
+            pnpm run build:linux --publish always 
           fi
 
       - name: Get package version
