@@ -7,33 +7,9 @@ import { checkForUpdates } from "./updater";
 
 export function setupMenu() {
   const template: Electron.MenuItemConstructorOptions[] = [
-    // {
-    //   label: "Edit",
-    //   submenu: [
-    //     { role: "undo" },
-    //     { role: "redo" },
-    //     { type: "separator" },
-    //     { role: "cut" },
-    //     { role: "copy" },
-    //     { role: "paste" },
-    //     { role: "pasteAndMatchStyle" },
-    //     { role: "delete" },
-    //     { role: "selectAll" }
-    //   ]
-    // },
     {
       label: "View",
-      submenu: [
-        { role: "reload" },
-        { role: "forceReload" },
-        { role: "toggleDevTools" }
-        // { type: "separator" },
-        // { role: "resetZoom" },
-        // { role: "zoomIn" },
-        // { role: "zoomOut" },
-        // { type: "separator" },
-        // { role: "togglefullscreen" }
-      ]
+      submenu: [{ role: "reload" }, { role: "forceReload" }, { role: "toggleDevTools" }]
     },
     { role: "window", submenu: [{ role: "minimize" }, { role: "close" }] },
     {
@@ -47,18 +23,6 @@ export function setupMenu() {
         }
       ]
     }
-
-    // {
-    //   role: "help",
-    //   submenu: [
-    //     {
-    //       label: "Learn More",
-    //       click() {
-    //         electron.shell.openExternal("https://electron.atom.io");
-    //       }
-    //     }
-    //   ]
-    // }
   ];
 
   const menu = Menu.buildFromTemplate(template);

@@ -14,7 +14,7 @@ autoUpdater.on("update-available", () => {
       type: "info",
       title: "Found Updates",
       message: "Found updates, do you want update now?",
-      buttons: ["Sure", "No"]
+      buttons: ["Yes", "No"]
     })
     .then((buttonIndex) => {
       if (buttonIndex.response === 0) {
