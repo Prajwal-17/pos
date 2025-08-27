@@ -108,9 +108,11 @@ jobs:
           asset_path: ./artifacts/build-ubuntu-latest/QuickCart-${{ steps.package-version.outputs.current-version }}.AppImage
           asset_name: QuickCart-${{ steps.package-version.outputs.current-version }}.AppImage
           asset_content_type: application/octet-stream
-      
+
       - name: Upload Windows YML
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./artifacts/build-windows-latest/latest.yml
@@ -119,6 +121,8 @@ jobs:
 
       - name: Upload Linux YML
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./artifacts/build-ubuntu-latest/latest-linux.yml
