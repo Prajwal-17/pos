@@ -107,5 +107,11 @@
         "repo": "pos"
       }
     ]
+  },
+  "linux": {
+    "target": [
+      "AppImage"
+    ],
+    "category": "Office"
   }
 }
