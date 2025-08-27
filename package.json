@@ -1,6 +1,6 @@
 {
   "name": "pos",
-  "version": "2.1.9",
+  "version": "2.1.8",
   "description": "A billing software for creating and managing invoices and customer accounts.",
   "main": "./out/main/index.js",
   "repository": {
@@ -26,7 +26,7 @@
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win --publish never",
     "build:mac": "electron-vite build && electron-builder --mac",
-    "build:linux": "electron-vite build && electron-builder --linux"
+    "build:linux": "electron-vite build && electron-builder --linux --publish never"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
