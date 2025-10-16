@@ -219,6 +219,10 @@ export type TransactionType = (typeof TRANSACTION_TYPE)[keyof typeof TRANSACTION
 
 export type FilterType = "all" | "active" | "inactive";
 
+export interface DashboardApi {
+  getMetricsSummary: () => Promise<ApiResponse<string>>;
+}
+
 export interface ProductsApi {
   getAllProducts: () => Promise<ApiResponse<ProductsType[]>>;
   search: (
