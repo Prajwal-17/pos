@@ -2,6 +2,7 @@ import { electronApp, is } from "@electron-toolkit/utils";
 import dotenv from "dotenv";
 import { app, BrowserWindow, screen } from "electron";
 import { join } from "node:path";
+import { dbScripts } from "./scripts";
 import { setupIpcHandlers } from "./setupIpcHandlers";
 import { setupMenu } from "./setupMenu";
 
@@ -20,6 +21,8 @@ if (!gotTheLock) {
       mainWindow.focus();
     }
   });
+
+  dbScripts();
 
   app.whenReady().then(() => {
     electronApp.setAppUserModelId("com.electron");
