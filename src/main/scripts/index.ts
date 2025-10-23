@@ -8,6 +8,7 @@
 //   updateProductFieldsInEstimates,
 //   updateProductFieldsInSales
 // } from "./updateProductFields";
+// import { fixUtcFormat } from "./fixUtcFormats";
 
 export async function dbScripts() {
   // await trimProductSpaces();
@@ -24,4 +25,5 @@ export async function dbScripts() {
   // await updateProductFieldsInSales();
   // await updateProductFieldsInEstimates();
   // ----------------------------
+  // await fixUtcFormat();
 }
