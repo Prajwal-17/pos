@@ -1,29 +1,32 @@
-// import { trimProductSpaces } from "./products";
-// import { trimCustomerNameSpaces } from "./trim";
-// import { trimimateItemsNameSpaces, trimSaleItemsNameSpaces } from "./trim";
-// import { estimateUnpaid } from "./unpaid";
-// import { updateTotalPriceEstimates, updateTotalPriceSales } from "./updateTotalPrice";
-// import {
-//   updateProductFields,
-//   updateProductFieldsInEstimates,
-//   updateProductFieldsInSales
-// } from "./updateProductFields";
-// import { fixUtcFormat } from "./fixUtcFormats";
+import { fixUtcFormat } from "./fixUtcFormats";
+import {
+  trimCustomerNameSpaces,
+  trimEstimateItemsNameSpaces,
+  trimProductSpaces,
+  trimSaleItemsNameSpaces
+} from "./trim";
+import { estimateUnpaid } from "./unpaid";
+import {
+  updateProductFields,
+  updateProductFieldsInEstimates,
+  updateProductFieldsInSales
+} from "./updateProductFields";
+import { updateTotalPriceEstimates, updateTotalPriceSales } from "./updateTotalPrice";
 
 export async function dbScripts() {
-  // await trimProductSpaces();
-  // await trimCustomerNameSpaces();
-  // await trimSaleItemsNameSpaces();
-  // await trimEstimateItemsNameSpaces();
+  await trimProductSpaces();
+  await trimCustomerNameSpaces();
+  await trimSaleItemsNameSpaces();
+  await trimEstimateItemsNameSpaces();
   // ----------------------------
-  // await estimateUnpaid()
+  await estimateUnpaid();
   // ----------------------------
-  // await updateTotalPriceEstimates();
-  // await updateTotalPriceSales();
+  await updateTotalPriceEstimates();
+  await updateTotalPriceSales();
   // ----------------------------
-  // await updateProductFields();
-  // await updateProductFieldsInSales();
-  // await updateProductFieldsInEstimates();
+  await updateProductFields();
+  await updateProductFieldsInSales();
+  await updateProductFieldsInEstimates();
   // ----------------------------
-  // await fixUtcFormat();
+  await fixUtcFormat();
 }

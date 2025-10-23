@@ -24,9 +24,10 @@ if (!gotTheLock) {
 
   dbScripts();
 
-  app.whenReady().then(() => {
+  app.whenReady().then(async () => {
     electronApp.setAppUserModelId("com.electron");
     setupIpcHandlers();
+    await dbScripts();
     createWindow();
 
     app.on("activate", function () {
