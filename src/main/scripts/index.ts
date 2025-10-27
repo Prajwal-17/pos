@@ -1,4 +1,4 @@
-import { fillCSV } from "./fillCSV";
+// import { fillCSV } from "./fillCSV";
 // import { fixUtcFormat } from "./fixUtcFormats";
 // import {
 //   trimCustomerNameSpaces,
@@ -31,5 +31,5 @@ export async function dbScripts() {
   // ----------------------------
   // await fixUtcFormat();
   // ----------------------------
-  await fillCSV();
+  // await fillCSV();
 }
