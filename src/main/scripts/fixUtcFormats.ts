@@ -7,6 +7,8 @@ export async function fixUtcFormat() {
     const productsResult = await db
       .update(products)
       .set({
+        deletedAt: sql`STRFTIME('%Y-%m-%dT%H:%M:%S.000Z', ${products.deletedAt})`,
+        disabledAt: sql`STRFTIME('%Y-%m-%dT%H:%M:%S.000Z', ${products.disabledAt})`,
         createdAt: sql`STRFTIME('%Y-%m-%dT%H:%M:%S.000Z', ${products.createdAt})`,
         updatedAt: sql`STRFTIME('%Y-%m-%dT%H:%M:%S.000Z', ${products.updatedAt})`
       })
