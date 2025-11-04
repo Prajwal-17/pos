@@ -11,7 +11,7 @@ import { TRANSACTION_TYPE, type TransactionType } from "@shared/types";
 import { formatDateObjToHHmmss, formatDateObjToStringMedium } from "@shared/utils/dateUtils";
 import { useQuery } from "@tanstack/react-query";
 import { Check, PanelLeftOpen, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import toast from "react-hot-toast";
 import { Navigate, useParams } from "react-router-dom";
 import { CustomerNameInput } from "./CustomerInputBox";
@@ -56,12 +56,6 @@ const BillingHeader = () => {
 
   const { type, id } = useParams<{ type: TransactionType; id?: string }>();
 
-  useEffect(() => {
-    if (!id && (type === TRANSACTION_TYPE.SALES || type === TRANSACTION_TYPE.ESTIMATES)) {
-      setTransactionNo(null);
-    }
-  }, [type, id, setTransactionNo]);
-
   const { data, isFetched, isError, error } = useQuery({
     queryKey: [type, "getTransactionNo"],
     // null assertion - type cannot be null here
@@ -82,8 +76,16 @@ const BillingHeader = () => {
     }
   }, [isError, error]);
 
-  const handleTimeChange = (e) => {
-    const [hours, minutes] = e.target.value.split(":");
+  const handleTimeChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value === "") return;
+    const [hoursString, minutesString] = e.target.value.split(":");
+
+    const hours = parseInt(hoursString, 10);
+    const minutes = parseInt(minutesString, 10);
+
+    if (isNaN(hours) || isNaN(minutes)) {
+      return;
+    }
     const udpatedDate = new Date(billingDate);
     udpatedDate.setHours(hours);
     udpatedDate.setMinutes(minutes);

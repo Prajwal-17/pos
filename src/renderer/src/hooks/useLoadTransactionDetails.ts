@@ -7,7 +7,6 @@ import {
   type SalesType,
   type TransactionType
 } from "@shared/types";
-import { formatDateStrToISTDateObject } from "@shared/utils/dateUtils";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
@@ -45,15 +44,13 @@ const useLoadTransactionDetails = (type: TransactionType, id?: string) => {
     setCustomerContact,
     setBillingId,
     setCustomerId,
-    setBillingDate,
-    clearTransactionState
+    setBillingDate
   } = useTransactionState();
 
   const { data, isSuccess, isLoading, status, isFetched, isError, error } = useQuery({
     queryKey: [type, id],
     queryFn: async () => {
       if (!id) throw new Error("Transaction Id does not exist");
-      clearTransactionState();
       return fetchTransactionById(type, id);
     },
     enabled: !!id && (type === TRANSACTION_TYPE.SALES || type === TRANSACTION_TYPE.ESTIMATES)
@@ -72,11 +69,7 @@ const useLoadTransactionDetails = (type: TransactionType, id?: string) => {
         setTransactionNo(d.invoiceNo);
         setCustomerContact(d.customer.contact);
         setCustomerName(d.customer.name);
-        const dateObj = formatDateStrToISTDateObject(d.createdAt ?? "");
-        if (dateObj) {
-          setBillingDate(dateObj);
-          localStorage.setItem("bill-preview-date", dateObj.toISOString());
-        }
+        setBillingDate(new Date(d.createdAt as string));
         const items = d.items.map((item) => ({
           id: item.id,
           productId: item.productId ?? "",
@@ -103,11 +96,7 @@ const useLoadTransactionDetails = (type: TransactionType, id?: string) => {
         setTransactionNo(d.estimateNo);
         setCustomerContact(d.customer.contact);
         setCustomerName(d.customer.name);
-        const dateObj = formatDateStrToISTDateObject(d.createdAt ?? "");
-        if (dateObj) {
-          setBillingDate(dateObj);
-          localStorage.setItem("bill-preview-date", dateObj.toISOString());
-        }
+        setBillingDate(new Date(d.createdAt as string));
         const items = d.items.map((item) => ({
           id: item.id,
           productId: item.productId ?? "",

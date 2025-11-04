@@ -18,34 +18,25 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import type { MutationVariables } from "@/hooks/dashboard/useDashboard";
-import type { UnifiedTransaction } from "@/hooks/dashboard/useInfiniteScroll";
-import type { ApiResponse } from "@shared/types";
+import type { MutationVariables } from "@/hooks/customers/useCustomers";
+import type { UnifiedTransaction } from "@/hooks/customers/useCustomerTable";
+import { TRANSACTION_TYPE, type ApiResponse, type TransactionType } from "@shared/types";
 import { formatDateStrToISTDateStr } from "@shared/utils/dateUtils";
 import { IndianRupees } from "@shared/utils/utils";
 import type { UseMutationResult } from "@tanstack/react-query";
-import {
-  Download,
-  Edit,
-  Eye,
-  LoaderCircle,
-  MoreVertical,
-  Printer,
-  RefreshCcw,
-  Trash2
-} from "lucide-react";
+import { Download, Edit, Eye, LoaderCircle, MoreVertical, RefreshCcw, Trash2 } from "lucide-react";
 import { memo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
-const DashboardTableRow = ({
-  pathname,
+const CustomerTableRow = ({
+  type,
   transaction,
   isLoaderRow,
   hasNextPage,
   deleteMutation,
   convertMutation
 }: {
-  pathname: string;
+  type: TransactionType;
   transaction: UnifiedTransaction;
   isLoaderRow: boolean;
   hasNextPage: boolean;
@@ -54,18 +45,18 @@ const DashboardTableRow = ({
 }) => {
   const navigate = useNavigate();
   const handleView = useCallback(() => {
-    pathname === "sales"
+    type === TRANSACTION_TYPE.SALES
       ? navigate(`/billing/sales/edit/${transaction.id}`)
       : navigate(`/billing/estimates/edit/${transaction.id}`);
-  }, [navigate, transaction.id, pathname]);
+  }, [navigate, transaction.id, type]);
 
   const onDelete = useCallback(() => {
-    deleteMutation.mutate({ type: pathname, id: transaction.id });
-  }, [deleteMutation, pathname, transaction.id]);
+    deleteMutation.mutate({ type: type, id: transaction.id });
+  }, [deleteMutation, type, transaction.id]);
 
   const onConvert = useCallback(() => {
-    convertMutation.mutate({ type: pathname, id: transaction.id });
-  }, [convertMutation, pathname, transaction.id]);
+    convertMutation.mutate({ type: type, id: transaction.id });
+  }, [convertMutation, type, transaction.id]);
 
   return (
     <div>
@@ -79,7 +70,7 @@ const DashboardTableRow = ({
           ) : null}
         </div>
       ) : (
-        <div className="hover:bg-muted/40 bg-card border-border/50 grid grid-cols-12 gap-4 border-b px-6 py-2 text-lg">
+        <div className="hover:bg-muted/40 bg-card border-border/50 grid grid-cols-9 gap-4 border-b px-6 py-2 text-lg">
           <div className="col-span-2 flex flex-col items-start justify-start font-medium">
             <span className="text-xl font-semibold">
               {transaction.createdAt
@@ -91,12 +82,6 @@ const DashboardTableRow = ({
                 ? formatDateStrToISTDateStr(transaction.createdAt).timePart
                 : "-"}
             </span>
-          </div>
-          <div className="col-span-3 flex items-center gap-2 font-medium">
-            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-purple-200 text-purple-600">
-              {transaction.customerName.charAt(0)}
-            </div>
-            <span className="truncate">{transaction.customerName}</span>
           </div>
 
           <div className="text-muted-foreground col-span-2 flex items-center font-medium">
@@ -202,10 +187,6 @@ const DashboardTableRow = ({
                   <span className="text-lg">View</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem disabled>
-                  <Printer className="mr-1 h-4 w-4" />
-                  <span className="text-lg">Print</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem disabled>
                   <Download className="mr-1 h-4 w-4" />
                   <span className="text-lg">Download</span>
                 </DropdownMenuItem>
@@ -230,7 +211,6 @@ function memoComparator(prev: any, next: any) {
 
   if (p?.id !== n?.id) return false;
   if (p.transactionNo !== n.transactionNo) return false;
-  if (p.customerName !== n.customerName) return false;
   if (p.grandTotal !== n.grandTotal) return false;
   if (p.isPaid !== n.isPaid) return false;
   if (p.createdAt !== n.createdAt) return false;
@@ -241,4 +221,4 @@ function memoComparator(prev: any, next: any) {
   return true;
 }
 
-export default memo(DashboardTableRow, memoComparator);
+export default memo(CustomerTableRow, memoComparator);

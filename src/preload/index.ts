@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer } from "electron";
 import type {
   CustomersApi,
   CustomersType,
+  DashboardApi,
   DateRangeType,
   EstimatePayload,
   EstimatesApi,
@@ -11,8 +12,16 @@ import type {
   SalePayload,
   SalesApi,
   ShareApi,
-  SortType
+  SortType,
+  TransactionType
 } from "../shared/types";
+
+const dashboardApi: DashboardApi = {
+  getMetricsSummary: () => ipcRenderer.invoke("dashboardApi:getMetricsSummary"),
+  getChartMetrics: (timePeriod) => ipcRenderer.invoke("dashboardApi:getChartMetrics", timePeriod),
+  getRecentTransactions: (type) => ipcRenderer.invoke("dashboardApi:getRecentTransactions", type),
+  getTopProducts: () => ipcRenderer.invoke("dashboardApi:getTopProducts")
+};
 
 const productsApi: ProductsApi = {
   getAllProducts: () => ipcRenderer.invoke("productsApi:getAllProducts"),
@@ -59,8 +68,8 @@ const customersApi: CustomersApi = {
   getCustomerByName: (customerName: string) =>
     ipcRenderer.invoke("customersApi:getCustomerByName", customerName),
   getAllCustomers: () => ipcRenderer.invoke("customersApi:getAllCustomers"),
-  getAllTransactionsById: (customerId: string) =>
-    ipcRenderer.invoke("customersApi:getAllTransactionsById", customerId),
+  getAllTransactionsById: (customerId: string, type: TransactionType, pageNo: PageNo) =>
+    ipcRenderer.invoke("customersApi:getAllTransactionsById", customerId, type, pageNo),
   deleteCustomer: (customerId: string) =>
     ipcRenderer.invoke("customersApi:deleteCustomer", customerId),
   importContactsFromGoogle: () => ipcRenderer.invoke("customers:importContactsFromGoogle"),
@@ -70,8 +79,8 @@ const customersApi: CustomersApi = {
 };
 
 const shareApi: ShareApi = {
-  sendViaWhatsapp: (type: "sales" | "estimates", transactionId: string) =>
-    ipcRenderer.invoke("shareApi:sendViaWhatsapp", type, transactionId)
+  saveAsPDF: (transactionId: string, type: "sales" | "estimates") =>
+    ipcRenderer.invoke("shareApi:saveAsPDF", transactionId, type)
 };
 
 if (process.contextIsolated) {
@@ -79,6 +88,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld("electronAPI", {
       printReceipt: (html: string) => ipcRenderer.send("print-receipt", html)
     });
+    contextBridge.exposeInMainWorld("dashboardApi", dashboardApi);
     contextBridge.exposeInMainWorld("productsApi", productsApi);
     contextBridge.exposeInMainWorld("salesApi", salesApi);
     contextBridge.exposeInMainWorld("estimatesApi", estimatesApi);
@@ -90,6 +100,8 @@ if (process.contextIsolated) {
 } else {
   // @ts-ignore (define in dts)
   window.electron = electronAPI;
+  // @ts-ignore (define in dts)
+  window.dashboardApi = dashboardApi;
   // @ts-ignore (define in dts)
   window.productsApi = productsApi;
   // @ts-ignore (define in dts)

@@ -49,8 +49,7 @@ export const useTransactionActions = (transactionType: TransactionType) => {
     customerName,
     customerContact,
     billingId,
-    billingDate,
-    clearTransactionState
+    billingDate
   } = useTransactionState();
 
   const receiptRef = useReceiptRefStore((state) => state.receiptRef);
@@ -96,9 +95,9 @@ export const useTransactionActions = (transactionType: TransactionType) => {
   const handleActionMutation = useMutation<
     ApiResponse<{ id: string; type: TransactionType }>,
     Error,
-    "save" | "save&print" | "sendViaWhatsapp"
+    "save" | "save&print" | "saveAsPDF"
   >({
-    mutationFn: async (type: "save" | "save&print" | "sendViaWhatsapp") => {
+    mutationFn: async (type: "save" | "save&print" | "saveAsPDF") => {
       if (!transactionNo) {
         throw new Error("Missing transaction number");
       }
@@ -116,12 +115,24 @@ export const useTransactionActions = (transactionType: TransactionType) => {
           }
         }
       }
+
+      if (type === "saveAsPDF") {
+        const response = await window.shareApi.saveAsPDF(
+          saveResponse.data.id,
+          saveResponse.data.type
+        );
+
+        if (response.status === "success") {
+          toast.success("Receipt successfully saved as a PDF.");
+        } else {
+          toast.error(response.error.message || "Failed to save PDF");
+        }
+      }
       return saveResponse;
     },
     onSuccess: (response) => {
       if (response.status === "success") {
         toast.success(response.message ?? "Save Successfull");
-        clearTransactionState();
         navigate("/");
       } else if (response.status === "error") {
         toast.error(response.error.message);
