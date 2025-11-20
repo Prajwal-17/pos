@@ -36,7 +36,9 @@ export function ProductDialog() {
       <Dialog open={openProductDialog} onOpenChange={setOpenProductDialog}>
         <DialogContent
           onOpenAutoFocus={(e) => {
-            e.preventDefault();
+            if (actionType === "billing-page-edit" || actionType === "edit") {
+              e.preventDefault();
+            }
           }}
           onInteractOutside={(e) => {
             if (productMutation.isPending) e.preventDefault();
@@ -69,9 +71,9 @@ export function ProductDialog() {
                       value={formDataState.name}
                       onChange={(e) => handleInputChange("name", e.target.value)}
                       placeholder="Enter product name"
-                      className="px-4 py-6 !text-lg"
+                      className="px-4 py-6 !text-xl font-semibold"
                     />
-                    {errors.name && <div className="text-red-500">{errors.name}</div>}
+                    {errors.name && <div className="text-destructive">{errors.name}</div>}
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -85,9 +87,9 @@ export function ProductDialog() {
                           value={formDataState.weight ?? ""}
                           onChange={(e) => handleInputChange("weight", e.target.value)}
                           placeholder="e.g., 500"
-                          className="px-4 py-6 !text-base"
+                          className="px-4 py-6 !text-lg font-medium"
                         />
-                        {errors.weight && <div className="text-red-500">{errors.weight}</div>}
+                        {errors.weight && <div className="text-destructive">{errors.weight}</div>}
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="unit" className="text-base font-semibold">
@@ -104,13 +106,13 @@ export function ProductDialog() {
                           </SelectTrigger>
                           <SelectContent>
                             {PRODUCT_UNITS.map((unit) => (
-                              <SelectItem className="text-base" key={unit} value={unit}>
+                              <SelectItem className="text-base font-medium" key={unit} value={unit}>
                                 {unit}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
-                        {errors.unit && <div className="text-red-500">{errors.unit}</div>}
+                        {errors.unit && <div className="text-destructive">{errors.unit}</div>}
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -124,10 +126,10 @@ export function ProductDialog() {
                           const value = e.target.value;
                           handleInputChange("purchasePrice", value === "" ? null : value);
                         }}
-                        className="px-4 py-6 !text-base"
+                        className="px-4 py-6 !text-lg font-medium"
                       />
                       {errors.purchasePrice && (
-                        <div className="text-red-500">{errors.purchasePrice}</div>
+                        <div className="text-destructive">{errors.purchasePrice}</div>
                       )}
                     </div>
                   </div>
@@ -144,9 +146,9 @@ export function ProductDialog() {
                           const value = e.target.value;
                           handleInputChange("price", value === "" ? null : value);
                         }}
-                        className="px-4 py-6 !text-base"
+                        className="px-4 py-6 !text-lg font-medium"
                       />
-                      {errors.price && <div className="text-red-500">{errors.price}</div>}
+                      {errors.price && <div className="text-destructive">{errors.price}</div>}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="mrp" className="text-base font-semibold">
@@ -159,9 +161,9 @@ export function ProductDialog() {
                           const value = e.target.value;
                           handleInputChange("mrp", value === "" ? null : value);
                         }}
-                        className="px-4 py-6 !text-base"
+                        className="px-4 py-6 !text-lg font-medium"
                       />
-                      {errors.mrp && <div className="text-red-500">{errors.mrp}</div>}
+                      {errors.mrp && <div className="text-destructive">{errors.mrp}</div>}
                     </div>
                   </div>
 
@@ -185,7 +187,7 @@ export function ProductDialog() {
                           id="status"
                           checked={!formDataState.isDisabled}
                           onCheckedChange={(checked) => setFormDataState({ isDisabled: !checked })}
-                          className="scale-125 bg-green-500"
+                          className="scale-125"
                         />
                       </div>
                     </div>
@@ -217,27 +219,27 @@ export function ProductDialog() {
                     <div className="space-y-4">
                       <Separator />
                       <div className="space-y-4">
-                        <h4 className="text-lg font-semibold text-slate-900">Danger Zone</h4>
+                        <h4 className="text-foreground text-lg font-semibold">Danger Zone</h4>
 
                         {!showDeleteConfirm ? (
                           <Button
                             type="button"
                             variant="outline"
                             onClick={() => setShowDeleteConfirm(true)}
-                            className="border-destructive text-destructive hover:bg-destructive/80 hover:text-destructive-foreground h-12 w-full justify-center gap-2 bg-transparent text-base hover:cursor-pointer disabled:opacity-60"
+                            className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground h-12 w-full justify-center gap-2 bg-transparent text-base hover:cursor-pointer disabled:opacity-60"
                           >
                             <Trash2 className="h-5 w-5" />
                             Delete Product
                           </Button>
                         ) : (
-                          <div className="space-y-4 rounded-lg border border-red-200 bg-red-50/50 p-6">
+                          <div className="border-destructive bg-card text-card-foreground space-y-4 rounded-lg border p-6">
                             <div className="flex items-start gap-4">
                               <AlertTriangle className="text-destructive mt-0.5 h-6 w-6 flex-shrink-0" />
                               <div className="space-y-3">
-                                <p className="text-base font-semibold text-red-900">
+                                <p className="text-destructive text-base font-semibold">
                                   Are you sure you want to delete this product?
                                 </p>
-                                <p className="text-base text-red-700">
+                                <p className="text-muted-foreground text-base">
                                   This action cannot be undone. The product will be permanently
                                   removed from your inventory.
                                 </p>
@@ -250,7 +252,7 @@ export function ProductDialog() {
                                 size="default"
                                 disabled={deleteProductMutation.isPending}
                                 onClick={() => setShowDeleteConfirm(false)}
-                                className="h-12 flex-1 text-lg disabled:opacity-60"
+                                className="text-foreground border-border hover:bg-muted h-12 flex-1 cursor-pointer text-lg disabled:opacity-60"
                               >
                                 Cancel
                               </Button>
@@ -262,7 +264,7 @@ export function ProductDialog() {
                                 onClick={() => {
                                   deleteProductMutation.mutate(formDataState.id);
                                 }}
-                                className="h-12 flex-1 text-lg disabled:opacity-60"
+                                className="bg-destructive text-destructive-foreground h-12 flex-1 cursor-pointer text-lg hover:opacity-90 disabled:opacity-60"
                               >
                                 {deleteProductMutation.isPending
                                   ? "Deleting Product..."
