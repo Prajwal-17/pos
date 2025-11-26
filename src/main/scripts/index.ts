@@ -14,6 +14,7 @@
 //     updateProductFieldsInSales
 // } from "./updateProductFields";
 // import { updateTotalPriceEstimates, updateTotalPriceSales } from "./updateTotalPrice";
+// import { updateProductHistory } from "./productHistory";
 
 export async function dbScripts() {
   // await trimProductSpaces();
@@ -33,6 +34,8 @@ export async function dbScripts() {
   // await fixUtcFormat();
   // ----------------------------
   // await calculateTotalQuantityofProducts();
+  // ----------------------------
+  // await updateProductHistory();
   // ----------------------------
   // -- deprecated --
   // await fillCSV();
