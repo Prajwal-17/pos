@@ -15,6 +15,7 @@
 // } from "./updateProductFields";
 // import { updateTotalPriceEstimates, updateTotalPriceSales } from "./updateTotalPrice";
 // import { updateProductHistory } from "./productHistory";
+// import { updateProductSnapshot } from "./refactor-billing-page";
 
 export async function dbScripts() {
   // await trimProductSpaces();
@@ -36,6 +37,9 @@ export async function dbScripts() {
   // await calculateTotalQuantityofProducts();
   // ----------------------------
   // await updateProductHistory();
+  // ----------------------------
+  // refactor billing page
+  // updateProductSnapshot();
   // ----------------------------
   // -- deprecated --
   // await fillCSV();
