@@ -142,6 +142,7 @@ export const useProductDialog = () => {
       if (response.status === "success") {
         queryClient.invalidateQueries({ queryKey: [filterType, searchParam] });
         setErrors({});
+        setProductId(null);
         setFormDataState({});
         setOpenProductDialog();
         toast.success(response.data);
