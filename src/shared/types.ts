@@ -1,10 +1,19 @@
+import type z from "zod";
+import type { createCustomerSchema } from "./schemas/customers.schema";
+import type { createProductSchema, updateProductSchema } from "./schemas/products.schema";
+import type {
+  lineItemSchema,
+  payloadDataSchema,
+  txnPayloadSchema
+} from "./schemas/transaction.schema";
+
 export type UsersType = {
   id: string;
   name: string;
   role: string;
 };
 
-export type CustomersType = {
+export type Customer = {
   id: string;
   name: string;
   contact: string | null;
@@ -13,9 +22,10 @@ export type CustomersType = {
   createdAt?: string;
 };
 
-export type ProductsType = {
+export type Product = {
   id: string;
   name: string;
+  productSnapshot: string;
   weight: string | null;
   unit: string | null;
   mrp: number | null;
@@ -23,13 +33,22 @@ export type ProductsType = {
   purchasePrice: number | null;
   totalQuantitySold: number | null;
   isDisabled?: boolean;
+  disabledAt?: string;
+  updatedAt?: string;
+  createdAt?: string;
 };
 
-export type ProductHistoryType = {
+export type ProductWithDeletion = Product & {
+  isDeleted?: boolean;
+  deletedAt?: string | null;
+};
+
+export type ProductHistory = {
   id: string;
   name: string;
-  weight: string;
-  unit: string;
+  productSnapshot: string;
+  weight: string | null;
+  unit: string | null;
   productId: string;
   oldPrice: number;
   newPrice: number;
@@ -39,7 +58,41 @@ export type ProductHistoryType = {
   newMrp: number;
 };
 
-export type SalesType = {
+export type UnifiedTransaction = {
+  type: TransactionType;
+  id: string;
+  transactionNo: number;
+  customerId: string | null;
+  customer: Customer;
+  grandTotal: number | null;
+  totalQuantity: number | null;
+  isPaid: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type UnifiedTransactionItem = {
+  id: string;
+  productId: string | null;
+  name: string;
+  productSnapshot: string;
+  weight: string | null;
+  unit: string | null;
+  price: number;
+  mrp: number | null;
+  quantity: number;
+  totalPrice: number;
+  purchasePrice: number | null;
+  checkedQty: number;
+};
+
+export type UnifiedTransctionWithItems = UnifiedTransaction & {
+  items: UnifiedTransactionItem[];
+};
+
+export type CustomerTransaction = Omit<UnifiedTransaction, "customer">;
+
+export type Sale = {
   id: string;
   invoiceNo: number;
   customerId: string | null;
@@ -50,7 +103,7 @@ export type SalesType = {
   updatedAt?: string;
 };
 
-export type EstimateType = {
+export type Estimate = {
   id: string;
   estimateNo: number;
   customerId: string | null;
@@ -61,11 +114,12 @@ export type EstimateType = {
   updatedAt?: string;
 };
 
-export type SaleItemsType = {
+export type SaleItem = {
   id: string;
   saleId: string;
   productId: string | null;
   name: string;
+  productSnapshot: string;
   mrp: number | null;
   price: number;
   purchasePrice: number | null;
@@ -76,11 +130,12 @@ export type SaleItemsType = {
   checkedQty: number;
 };
 
-export type EstimateItemsType = {
+export type EstimateItem = {
   id: string;
   estimateId: string;
   productId: string | null;
   name: string;
+  productSnapshot: string;
   mrp: number | null;
   price: number;
   purchasePrice: number | null;
@@ -132,10 +187,10 @@ export type SalePayload = {
   totalQuantity: number | null;
   isPaid: boolean;
   createdAt?: string;
-  items: SalePayloadItems[];
+  items: SalePayloadItem[];
 };
 
-export type SalePayloadItems = {
+export type SalePayloadItem = {
   id: string;
   productId: string;
   name: string;
@@ -158,10 +213,10 @@ export type EstimatePayload = {
   totalQuantity: number | null;
   isPaid: boolean;
   createdAt: string;
-  items: EstimatePayloadItems[];
+  items: EstimatePayloadItem[];
 };
 
-export type EstimatePayloadItems = {
+export type EstimatePayloadItem = {
   id: string;
   productId: string;
   name: string;
@@ -174,7 +229,15 @@ export type EstimatePayloadItems = {
   totalPrice: number;
 };
 
-export type ProductPayload = Omit<ProductsType, "id"> & { isDisabled?: boolean };
+export type CreateCustomerPayload = z.infer<typeof createCustomerSchema>;
+export type UpdateCustomerPayload = z.infer<typeof updateProductSchema>;
+
+export type CreateProductPayload = z.infer<typeof createProductSchema>;
+export type UpdateProductPayload = z.infer<typeof updateProductSchema>;
+
+export type TxnPayload = z.infer<typeof txnPayloadSchema>;
+export type TxnPayloadData = z.infer<typeof payloadDataSchema>;
+export type LineItemSchema = z.infer<typeof lineItemSchema>;
 
 export type FilteredGoogleContactsType = {
   id: number;
@@ -182,19 +245,13 @@ export type FilteredGoogleContactsType = {
   contact: string | null;
 };
 
-export type SaleSummaryType = {
+export type TransactionListResponse = {
   totalRevenue: number;
   totalTransactions: number;
-  sales: (SalesType & { customerName: string })[];
+  transactions: (Omit<UnifiedTransaction, "customer"> & { customerName: string })[];
 };
 
-export type EstimateSummaryType = {
-  totalRevenue: number;
-  totalTransactions: number;
-  estimates: (EstimateType & { customerName: string })[];
-};
-
-export type AllTransactionsType = (SalesType | EstimateType)[];
+export type AllTransactionsType = (Sale | Estimate)[];
 
 export type DateRangeType = {
   from: Date;
@@ -202,16 +259,20 @@ export type DateRangeType = {
 };
 
 export const TRANSACTION_TYPE = {
+  SALE: "sale",
+  ESTIMATE: "estimate"
+} as const;
+
+export const DASHBOARD_TYPE = {
   SALES: "sales",
   ESTIMATES: "estimates"
 } as const;
 
-export const DASHBOARD_TYPE = TRANSACTION_TYPE;
-
 export const PRODUCT_FILTER = {
   ALL: "all",
   ACTIVE: "active",
-  INACTIVE: "inactive"
+  INACTIVE: "inactive",
+  DELETED: "deleted"
 } as const;
 
 export const SortOption = {
@@ -296,100 +357,39 @@ export const BATCH_CHECK_ACTION = {
 
 export type BatchCheckAction = (typeof BATCH_CHECK_ACTION)[keyof typeof BATCH_CHECK_ACTION];
 
+export type UpdateResponseItem = UnifiedTransactionItem & {
+  rowId: string;
+};
+
+export type UpdateSaleResponse = Omit<UnifiedTransctionWithItems, "customer"> & {
+  items: UpdateResponseItem[];
+};
+
+export type UpdateEstimateResponse = Omit<UnifiedTransctionWithItems, "customer"> & {
+  items: UpdateResponseItem[];
+};
+
+export const BILLSTATUS = {
+  IDLE: "idle",
+  SAVING: "saving",
+  SAVED: "saved",
+  UNSAVED: "unsaved",
+  ERROR: "error"
+} as const;
+
+export type BillStatus = (typeof BILLSTATUS)[keyof typeof BILLSTATUS];
+
 export interface DashboardApi {
   getMetricsSummary: () => Promise<ApiResponse<MetricsSummary>>;
   getChartMetrics: (timePeriod: TimePeriodType) => Promise<ApiResponse<ChartDataType[]>>;
   getRecentTransactions: (
     type: TransactionType
   ) => Promise<
-    ApiResponse<
-      (SalesType & { customerName: string })[] | (EstimateType & { customerName: string })[] | []
-    >
+    ApiResponse<(Sale & { customerName: string })[] | (Estimate & { customerName: string })[] | []>
   >;
   getTopProducts: () => Promise<ApiResponse<TopProductDataPoint[]>>;
 }
 
-export interface ProductsApi {
-  getAllProducts: () => Promise<ApiResponse<ProductsType[]>>;
-  search: (
-    query: string,
-    pageNo: PageNo,
-    limit: number,
-    filterType?: ProductFilterType
-  ) => Promise<PaginatedApiResponse<ProductsType[] | []>>;
-  addNewProduct: (payload: ProductPayload) => Promise<ApiResponse<string>>;
-  updateProduct: (
-    productId: string,
-    payload: Partial<ProductPayload>
-  ) => Promise<ApiResponse<string>>;
-  deleteProduct: (productId: string) => Promise<ApiResponse<string>>;
-}
-
-export interface SalesApi {
-  getNextInvoiceNo: () => Promise<ApiResponse<number>>;
-  save: (payload: SalePayload) => Promise<ApiResponse<{ id: string; type: TransactionType }>>;
-  getAllSales: () => Promise<ApiResponse<SalesType[]>>;
-  getTransactionById: (
-    id: string
-  ) => Promise<ApiResponse<SalesType & { customer: CustomersType; items: SaleItemsType[] }>>;
-  getSalesDateRange: (
-    range: DateRangeType,
-    sortBy: SortType,
-    pageNo: PageNo
-  ) => Promise<PaginatedApiResponse<SaleSummaryType>>;
-  deleteSale: (saleId: string) => Promise<ApiResponse<string>>;
-  convertSaletoEstimate: (saleId: string) => Promise<ApiResponse<string>>;
-  registerSaleItemQty: (
-    saleItemId: string,
-    action: UpdateQtyAction
-  ) => Promise<ApiResponse<string>>;
-  markAllSaleItemsChecked: (
-    saleid: string,
-    action: BatchCheckAction
-  ) => Promise<ApiResponse<{ isAllChecked: boolean }>>;
-}
-
-export interface EstimatesApi {
-  getNextEstimateNo: () => Promise<ApiResponse<number>>;
-  save: (payload: EstimatePayload) => Promise<ApiResponse<{ id: string; type: TransactionType }>>;
-  getAllEstimates: () => Promise<ApiResponse<EstimateType[]>>;
-  getTransactionById: (
-    id: string
-  ) => Promise<ApiResponse<EstimateType & { customer: CustomersType; items: EstimateItemsType[] }>>;
-  getEstimatesDateRange: (
-    range: DateRangeType,
-    sortBy: SortType,
-    pageNo: PageNo
-  ) => Promise<PaginatedApiResponse<EstimateSummaryType>>;
-  deleteEstimate: (estimateId: string) => Promise<ApiResponse<string>>;
-  convertEstimateToSale: (estimateId: string) => Promise<ApiResponse<string>>;
-  registerEstimateItemQty: (
-    estimateItemId: string,
-    action: UpdateQtyAction
-  ) => Promise<ApiResponse<string>>;
-  markAllEstimateItemsChecked: (
-    estimateId: string,
-    action: BatchCheckAction
-  ) => Promise<ApiResponse<{ isAllChecked: boolean }>>;
-}
-
-export interface CustomersApi {
-  addNewCustomer: (payload: CustomersType) => Promise<ApiResponse<CustomersType>>;
-  updateCustomer: (payload: CustomersType) => Promise<ApiResponse<CustomersType>>;
-  getCustomerById: (customerId: string) => Promise<ApiResponse<CustomersType>>;
-  getCustomerByName: (customerName: string) => Promise<ApiResponse<CustomersType | null>>;
-  getAllCustomers: () => Promise<ApiResponse<CustomersType[]>>;
-  getAllTransactionsById: (
-    customerId: string,
-    type: TransactionType,
-    pageNo: PageNo
-  ) => Promise<PaginatedApiResponse<SalesType[] | EstimateType[] | []>>;
-  deleteCustomer: (customerId: string) => Promise<ApiResponse<string>>;
-  importContactsFromGoogle: () => Promise<ApiResponse<FilteredGoogleContactsType[] | []>>;
-  importContacts: (customerPayload: FilteredGoogleContactsType[]) => Promise<ApiResponse<string>>;
-  searchCustomers: (query: string) => Promise<ApiResponse<CustomersType[]>>;
-}
-
 export interface ShareApi {
-  saveAsPDF: (transactionId: string, type: "sales" | "estimates") => Promise<ApiResponse<string>>;
+  saveAsPDF: (transactionId: string, type: TransactionType) => Promise<ApiResponse<string>>;
 }

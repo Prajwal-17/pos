@@ -1,19 +1,24 @@
-import { useTransactionActions } from "@/hooks/useTransactionActions";
-import useTransactionState from "@/hooks/useTransactionState";
+import useTransaction from "@/hooks/transaction/useTransaction";
+import { useBillingStore } from "@/store/billingStore";
+import { useLineItemsStore } from "@/store/lineItemsStore";
 import { useReceiptRefStore } from "@/store/useReceiptRefStore";
 import { TRANSACTION_TYPE } from "@shared/types";
-import { formatDateObjToStringMedium } from "@shared/utils/dateUtils";
-import { IndianRupees } from "@shared/utils/utils";
+import { formatDateStrToISTDateStr } from "@shared/utils/dateUtils";
+import { formatToRupees } from "@shared/utils/utils";
+import { Check } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { Navigate, useParams } from "react-router-dom";
 
 const BillPreview = () => {
   const { type } = useParams();
+  const formattedType = type?.slice(0, -1);
 
-  const { lineItems, transactionNo, customerName } = useTransactionState();
-  const { calcTotalAmount } = useTransactionActions(
-    type === TRANSACTION_TYPE.SALES ? TRANSACTION_TYPE.SALES : TRANSACTION_TYPE.ESTIMATES
-  );
+  const lineItems = useLineItemsStore((state) => state.lineItems);
+  const transactionNo = useBillingStore((state) => state.transactionNo);
+  const billingDate = useBillingStore((state) => state.billingDate);
+  const customerName = useBillingStore((state) => state.customerName);
+  const { subtotal, grandTotal } = useTransaction();
+
   const { setReceiptRef } = useReceiptRefStore();
   const localReceiptRef = useRef<HTMLDivElement | null>(null);
 
@@ -37,7 +42,7 @@ const BillPreview = () => {
           <div className="mb-2 space-y-2 pb-4 text-center">
             <h1 className="text-lg font-bold tracking-tight">SRI MANJUNATHESHWARA STORES</h1>
             <p className="text-xs">6TH MAIN, RUKMINI NAGAR NAGASANDRA POST BANGALORE 560073</p>
-            {type === TRANSACTION_TYPE.SALES && (
+            {formattedType === TRANSACTION_TYPE.SALE && (
               <p className="text-xs">
                 <span className="font-semibold">GSTIN:</span>29BHBPR8333N2ZM
               </p>
@@ -50,18 +55,19 @@ const BillPreview = () => {
           <div className="mb-4 flex justify-between border-t border-b border-dashed border-black py-1 text-xs">
             <div>
               <div>
-                <span className="font-semibold">Date:</span> {formatDateObjToStringMedium(value)}
+                <span className="font-semibold">Date:</span>{" "}
+                {formatDateStrToISTDateStr(billingDate.toString()).fullDate}
               </div>
               <div>
                 <span className="font-semibold">
-                  {type === TRANSACTION_TYPE.SALES ? "Invoice No:" : "Estimate No:"}
+                  {formattedType === TRANSACTION_TYPE.SALE ? "Invoice No:" : "Estimate No:"}
                 </span>{" "}
                 {transactionNo}
               </div>
               <div>
                 <span className="font-semibold">Name:</span>{" "}
                 {customerName === "DEFAULT" || customerName === ""
-                  ? type === TRANSACTION_TYPE.SALES
+                  ? formattedType === TRANSACTION_TYPE.SALE
                     ? "Sale"
                     : "Estimate"
                   : customerName}
@@ -69,7 +75,7 @@ const BillPreview = () => {
             </div>
             <div>
               <span className="font-semibold">Time:</span>
-              {value.toLocaleTimeString("en-IN", { timeStyle: "short" })}
+              {formatDateStrToISTDateStr(billingDate.toString()).timePart}
             </div>
           </div>
           <div className="grid grid-cols-12 border-b border-dashed border-black pb-1 text-xs font-bold">
@@ -81,17 +87,24 @@ const BillPreview = () => {
           </div>
           <div className="border-b border-dashed border-black text-xs font-medium">
             {lineItems.map((item, idx) => {
-              if (item.name === "") return;
+              if (item.productSnapshot === "") return;
               return (
                 <div key={idx} className="grid grid-cols-12 py-1">
                   <div className="col-span-1">{idx + 1}.</div>
-                  <div className="col-span-5">{item.name}</div>
-                  <div className="col-span-2 text-center tracking-tight">{item.quantity}</div>
-                  <div className="col-span-2 text-right tracking-tight">
-                    {item.price.toFixed(2)}
+                  <div className="col-span-5">{item.productSnapshot}</div>
+                  <div className="col-span-2 text-center tracking-tight">
+                    {item.quantity}
+                    {(item.checkedQty || 0) > 0 && (
+                      <span className="ml-1 inline-flex items-center">
+                        {item.checkedQty !== parseFloat(item.quantity || "0") &&
+                          `(${item.checkedQty})`}
+                        <Check size={12} className="ml-0.5" strokeWidth={4} />
+                      </span>
+                    )}
                   </div>
+                  <div className="col-span-2 text-right tracking-tight">{item.price}</div>
                   <div className="col-span-2 text-right tracking-tight">
-                    {item.totalPrice.toFixed(2)}
+                    {formatToRupees(item.totalPrice).toFixed(2)}
                   </div>
                 </div>
               );
@@ -99,13 +112,11 @@ const BillPreview = () => {
           </div>
           <div className="py-1 text-right">
             <span className="text-xs font-semibold">SubTotal: </span>
-            <span className="text-xs font-semibold">{calcTotalAmount.toFixed(2)}</span>
+            <span className="text-xs font-semibold">{subtotal}</span>
           </div>
           <div className="mb-8 text-right">
             <span className="text-base font-semibold">Total: </span>
-            <span className="text-lg font-semibold">
-              {IndianRupees.format(Math.round(calcTotalAmount))}
-            </span>
+            <span className="text-lg font-semibold">{grandTotal}</span>
             <div className="pb-4 text-center">Thank You</div>
           </div>
           {/* <div className="break-after-page"></div> */}

@@ -1,8 +1,14 @@
-import { PRODUCT_FILTER, type ProductFilterType, type ProductsType } from "@shared/types";
+import { PRODUCT_FILTER, type Product, type ProductFilterType } from "@shared/types";
 import { create } from "zustand";
 
-export type ProductsFormType = Omit<ProductsType, "price" | "id"> & {
+export type ProductsFormType = Omit<
+  Product,
+  "id" | "price" | "productSnapshot" | "totalQuantitySold" | "mrp" | "purchasePrice"
+> & {
+  mrp: string | null;
   price: string;
+  purchasePrice: string | null;
+  isDeleted: boolean;
 };
 
 type ProductsStoreType = {
@@ -14,8 +20,8 @@ type ProductsStoreType = {
   setActionType: (action: "add" | "edit" | "billing-page-edit") => void;
   searchParam: string;
   setSearchParam: (param: string) => void;
-  searchResult: ProductsType[] | [];
-  setSearchResult: (mode: "append" | "replace", newResult: ProductsType[]) => void;
+  searchResult: Product[] | [];
+  setSearchResult: (mode: "append" | "replace", newResult: Product[]) => void;
   productId: string | null;
   setProductId: (id: string | null) => void;
   formDataState: ProductsFormType;
@@ -26,7 +32,7 @@ type ProductsStoreType = {
   setErrors: (errObj: Record<string, string>) => void;
 };
 
-function initialFormData() {
+function initialFormData(): ProductsFormType {
   return {
     name: "",
     weight: null,
@@ -34,8 +40,8 @@ function initialFormData() {
     mrp: null,
     price: "",
     purchasePrice: null,
-    totalQuantitySold: 0,
-    isDisabled: false
+    isDisabled: false,
+    isDeleted: false
   };
 }
 
@@ -86,24 +92,17 @@ export const useProductsStore = create<ProductsStoreType>((set) => ({
 
   formDataState: initialFormData(),
   setFormDataState: (data) =>
-    set((state) => {
-      if (Object.keys(data).length === 0) {
-        return {
-          formDataState: initialFormData()
-        };
-      }
-
-      return {
-        formDataState: { ...state.formDataState, ...data }
-      };
-    }),
+    set((state) => ({
+      formDataState:
+        Object.keys(data).length === 0 ? initialFormData() : { ...state.formDataState, ...data }
+    })),
 
   dirtyFields: {},
   setDirtyFields: (data) =>
     set((state) => {
       if (Object.keys(data).length === 0) {
         return {
-          dirtyFields: initialFormData()
+          dirtyFields: {}
         };
       }
 
