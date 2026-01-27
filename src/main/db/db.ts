@@ -33,14 +33,14 @@ fs.mkdirSync(path.dirname(dbPath), { recursive: true });
 
 const sqlite = new Database(dbPath);
 
-// sqlite.pragma("foreign_keys = OFF");
+sqlite.pragma("foreign_keys = OFF");
 export const db = drizzle(sqlite, { schema, logger: false });
 
 const migrationsFolder = getMigrationsFolder();
 
 if (fs.existsSync(migrationsFolder)) {
   migrate(db, { migrationsFolder });
-  // sqlite.pragma("foreign_keys = ON");
+  sqlite.pragma("foreign_keys = ON");
 } else {
   console.error("Migration folder not found");
 }

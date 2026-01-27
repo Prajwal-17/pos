@@ -15,11 +15,11 @@
 // } from "./updateProductFields";
 // import { updateTotalPriceEstimates, updateTotalPriceSales } from "./updateTotalPrice";
 // import { updateProductHistory } from "./productHistory";
-// import { updateProductSnapshot } from "./refactor-billing-page";
+import { updateProductSnapshot } from "./refactor-billing-page";
 
 export async function dbScripts() {
   // refactor billing page
-  // updateProductSnapshot();
+  await updateProductSnapshot();
   //
   // -- Used Scripts --
   // await trimProductSpaces();

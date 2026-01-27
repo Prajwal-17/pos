@@ -1,49 +1,57 @@
 import { eq } from "drizzle-orm";
-import type { ProductsType } from "../../../shared/types";
 import { formatToRupees } from "../../../shared/utils/utils";
 import { db } from "../../db/db";
 import { estimateItems, products, saleItems } from "../../db/schema";
 
 const ignoredWeight = ["", "1ml", "1g", "none", "1pc", "1kg"];
 
-function generateSnapshotName(product: ProductsType) {
-  let name = product.name;
+type SnapshotPayload = {
+  name: string;
+  weight: string | null;
+  unit: string | null;
+  mrp: number | null;
+};
+
+// update name & conver to rs
+
+export const generateProductSnapshot = (item: SnapshotPayload) => {
+  let name = item.name;
 
   // weight && mrp && weight+unit does not equal to ignoredWeights
   if (
-    product.weight !== null &&
-    product.unit !== null &&
-    product.mrp &&
-    !ignoredWeight.some((w) => `${product.weight}${product.unit}` === w)
+    item.weight !== null &&
+    item.mrp &&
+    !ignoredWeight.some((w) => `${item.weight}${item.unit}` === w)
   ) {
-    name += ` ${product.weight}${product.unit}`;
-    name += ` ${formatToRupees(product.mrp)}Rs`;
+    name += ` ${item.weight}${item.unit}`;
+    if (item.mrp) {
+      name += ` ${formatToRupees(item.mrp)}Rs`;
+    }
   }
 
   // weight && mrp && weight+unit equal to ignoredWeights
   if (
-    product.weight !== null &&
-    product.unit !== null &&
-    product.mrp &&
-    ignoredWeight.some((w) => `${product.weight}${product.unit}` === w)
+    item.weight !== null &&
+    item.mrp &&
+    ignoredWeight.some((w) => `${item.weight}${item.unit}` === w)
   ) {
-    if (product.mrp) {
-      name += ` ${formatToRupees(product.mrp)}Rs`;
+    if (item.mrp) {
+      name += ` ${formatToRupees(item.mrp)} Rs`;
     }
   }
 
-  // weight = null, unit = null && mrp
-  if (product.weight === null && product.mrp) {
-    name += ` ${formatToRupees(product.mrp)}Rs`;
+  // weight = null && mrp
+  if (item.weight === null && item.mrp) {
+    name += ` ${formatToRupees(item.mrp)}Rs`;
   }
 
   // weight && mrp = null
-  if (product.weight !== null && product.unit !== null && !product.mrp) {
-    name += ` ${product.weight}${product.unit}`;
+  if (item.weight !== null && !item.mrp) {
+    name += ` ${item.weight}${item.unit}`;
   }
 
   return name;
-}
+};
 
 export async function updateProductSnapshot() {
   try {
@@ -52,7 +60,7 @@ export async function updateProductSnapshot() {
     const updatedProducts = existingProducts.map((item, index) => {
       return {
         ...item,
-        productSnapshot: generateSnapshotName(item)
+        productSnapshot: generateProductSnapshot(item)
       };
     });
 
@@ -60,7 +68,6 @@ export async function updateProductSnapshot() {
       for (const item of updatedProducts) {
         tx.update(products)
           .set({
-            // ...item,
             productSnapshot: item.productSnapshot
           })
           .where(eq(products.id, item.id))
@@ -77,18 +84,35 @@ export async function updateProductSnapshot() {
     // FIX: update product names
     const existingSaleItems = db.select().from(saleItems).all();
 
-    const updatedSaleItems = existingSaleItems.map((saleItem, index) => {
-      return {
-        ...saleItem,
-        productSnapshot: generateSnapshotName(saleItem as any)
-      };
-    });
+    const updatedSaleItems = await Promise.all(
+      existingSaleItems.map(async (saleItem, index) => {
+        if (!saleItem.productId) {
+          return {
+            ...saleItem,
+            productSnapshot: saleItem.name
+          };
+        }
+
+        const product = db.select().from(products).where(eq(products.id, saleItem.productId)).get();
+
+        return {
+          ...saleItem,
+          name: product?.name,
+          productSnapshot: generateProductSnapshot({
+            name: product.name,
+            weight: saleItem.weight,
+            unit: saleItem.unit,
+            mrp: saleItem.mrp
+          })
+        };
+      })
+    );
 
     const result2 = db.transaction((tx) => {
       for (const saleItem of updatedSaleItems) {
         tx.update(saleItems)
           .set({
-            // ...saleItem,
+            name: saleItem.name,
             productSnapshot: saleItem.productSnapshot
           })
           .where(eq(saleItems.id, saleItem.id))
@@ -101,17 +125,37 @@ export async function updateProductSnapshot() {
     // FIX: update product names
     const existingEstimateItems = db.select().from(estimateItems).all();
 
-    const updatedEstimateItems = existingEstimateItems.map((estimateItem, index) => {
-      return {
-        ...estimateItem,
-        productSnapshot: generateSnapshotName(estimateItem as any)
-      };
-    });
+    const updatedEstimateItems = await Promise.all(
+      existingEstimateItems.map((estimateItem, index) => {
+        if (!estimateItem.productId) {
+          return {
+            ...estimateItem,
+            productSnapshot: estimateItem.name
+          };
+        }
+        const product = db
+          .select()
+          .from(products)
+          .where(eq(products.id, estimateItem.productId))
+          .get();
+        return {
+          ...estimateItem,
+          name: product?.name,
+          productSnapshot: generateProductSnapshot({
+            name: product.name,
+            weight: estimateItem.weight,
+            unit: estimateItem.unit,
+            mrp: estimateItem.mrp
+          })
+        };
+      })
+    );
 
     const result3 = db.transaction((tx) => {
       for (const estimateItem of updatedEstimateItems) {
         tx.update(estimateItems)
           .set({
+            name: estimateItem.name,
             productSnapshot: estimateItem.productSnapshot
           })
           .where(eq(estimateItems.id, estimateItem.id))
