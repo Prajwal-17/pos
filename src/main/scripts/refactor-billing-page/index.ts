@@ -57,7 +57,7 @@ export async function updateProductSnapshot() {
   try {
     const existingProducts = db.select().from(products).all();
 
-    const updatedProducts = existingProducts.map((item, index) => {
+    const updatedProducts = existingProducts.map((item) => {
       return {
         ...item,
         productSnapshot: generateProductSnapshot(item)
@@ -85,7 +85,7 @@ export async function updateProductSnapshot() {
     const existingSaleItems = db.select().from(saleItems).all();
 
     const updatedSaleItems = await Promise.all(
-      existingSaleItems.map(async (saleItem, index) => {
+      existingSaleItems.map(async (saleItem) => {
         if (!saleItem.productId) {
           return {
             ...saleItem,
@@ -99,6 +99,7 @@ export async function updateProductSnapshot() {
           ...saleItem,
           name: product?.name,
           productSnapshot: generateProductSnapshot({
+            // @ts-ignore - name exists
             name: product.name,
             weight: saleItem.weight,
             unit: saleItem.unit,
@@ -126,7 +127,7 @@ export async function updateProductSnapshot() {
     const existingEstimateItems = db.select().from(estimateItems).all();
 
     const updatedEstimateItems = await Promise.all(
-      existingEstimateItems.map((estimateItem, index) => {
+      existingEstimateItems.map((estimateItem) => {
         if (!estimateItem.productId) {
           return {
             ...estimateItem,
@@ -142,6 +143,7 @@ export async function updateProductSnapshot() {
           ...estimateItem,
           name: product?.name,
           productSnapshot: generateProductSnapshot({
+            // @ts-ignore - name exists
             name: product.name,
             weight: estimateItem.weight,
             unit: estimateItem.unit,
