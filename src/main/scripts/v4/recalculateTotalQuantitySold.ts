@@ -52,9 +52,9 @@ export const recalculateTotalQuantitySold = async () => {
         const currentTotal = product.totalQuantitySold || 0;
 
         if (calculatedTotal !== currentTotal) {
-          console.log(
-            `Product '${product.name}' (ID: ${product.id}): Mismatch! Old: ${currentTotal}, New: ${calculatedTotal}. Updating...`
-          );
+          // console.log(
+          //   `Product '${product.name}' (ID: ${product.id}): Mismatch! Old: ${currentTotal}, New: ${calculatedTotal}. Updating...`
+          // );
 
           await tx
             .update(products)
