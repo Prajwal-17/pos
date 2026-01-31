@@ -1,14 +1,17 @@
 import { asc, desc, type SQL } from "drizzle-orm";
 import {
+  BATCH_CHECK_ACTION,
   SortOption,
   TRANSACTION_TYPE,
   type ApiResponse,
+  type BatchCheckAction,
   type PaginatedApiResponse,
   type TransactionListResponse,
   type TxnPayloadData,
   type UnifiedTransactionItem,
   type UnifiedTransctionWithItems,
-  type UpdateEstimateResponse
+  type UpdateEstimateResponse,
+  type UpdateQtyAction
 } from "../../../shared/types";
 import { estimates } from "../../db/schema";
 import { estimatesRepository } from "./estimates.repository";
@@ -27,10 +30,13 @@ const getEstimateById = async (id: string): Promise<ApiResponse<UnifiedTransctio
       };
     }
 
-    const items: UnifiedTransactionItem[] = estimate.estimateItems.map((item) => ({
-      ...item,
-      checkedQty: item.checkedQty ?? 0
-    }));
+    const items: UnifiedTransactionItem[] = estimate.estimateItems.map(
+      // eslint-disable-next-line
+      ({ estimateId, ...rest }) => ({
+        ...rest,
+        checkedQty: rest.checkedQty ?? 0
+      })
+    );
 
     return {
       status: "success",
@@ -155,10 +161,10 @@ const filterEstimateByDate = async (
 const createEstimate = async (payload: TxnPayloadData): Promise<ApiResponse<{ id: string }>> => {
   try {
     const finalItems = payload.items.map((item) => {
-      const rawTotal = item.price * item.quantity;
+      const total = Math.round((item.price * item.quantity) / 1000);
       return {
         ...item,
-        totalPrice: Math.round(rawTotal)
+        totalPrice: total
       };
     });
 
@@ -167,7 +173,7 @@ const createEstimate = async (payload: TxnPayloadData): Promise<ApiResponse<{ id
     }, 0);
 
     const totalQuantity = finalItems.reduce((sum, currentItem) => {
-      return sum + (Number(currentItem.quantity) || 0);
+      return sum + currentItem.quantity;
     }, 0);
 
     const finalPayload = {
@@ -202,26 +208,20 @@ const updateEstimate = async (
 ): Promise<ApiResponse<UpdateEstimateResponse>> => {
   try {
     const finalItems = payload.items.map((item) => {
-      const rawTotal = item.price * item.quantity;
+      const total = Math.round((item.price * item.quantity) / 1000);
       return {
         ...item,
-        totalPrice: Math.round(rawTotal)
+        totalPrice: total
       };
     });
 
-    const total =
-      finalItems.length > 0
-        ? finalItems.reduce((sum, currentItem) => {
-            return sum + Number(currentItem.totalPrice || 0);
-          }, 0)
-        : 0;
+    const total = finalItems.reduce((sum, currentItem) => {
+      return sum + Number(currentItem.totalPrice || 0);
+    }, 0);
 
-    const totalQuantity =
-      finalItems.length > 0
-        ? finalItems.reduce((sum, currentItem) => {
-            return sum + (Number(currentItem.quantity) || 0);
-          }, 0)
-        : 0;
+    const totalQuantity = finalItems.reduce((sum, currentItem) => {
+      return sum + currentItem.quantity;
+    }, 0);
 
     const finalPayload: UpdateEstimateParams = {
       ...payload,
@@ -278,6 +278,54 @@ const convertEstimateToSale = async (id: string): Promise<ApiResponse<string>> =
   }
 };
 
+const updateCheckedQtyService = async (
+  estimateItemId: string,
+  action: UpdateQtyAction
+): Promise<ApiResponse<string>> => {
+  try {
+    await estimatesRepository.updateCheckedQty(estimateItemId, action);
+    return {
+      status: "success",
+      data: "Successfully updated checkedQty"
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: "error",
+      error: {
+        message: (error as Error).message ?? "Something went wrong while updating checkedQty"
+      }
+    };
+  }
+};
+
+const batchCheckItemsService = async (id: string, action: BatchCheckAction) => {
+  try {
+    const result = await estimatesRepository.batchCheckItems(id, action);
+    if (result.changes > 0) {
+      return {
+        status: "success",
+        data: {
+          isAllChecked: action === BATCH_CHECK_ACTION.MARK_ALL
+        },
+        message:
+          action === BATCH_CHECK_ACTION.MARK_ALL
+            ? "All items have been marked as checked."
+            : "All items have been unchecked."
+      };
+    }
+    throw new Error("No Estimate Items were updated");
+  } catch (error) {
+    console.log(error);
+    return {
+      status: "error",
+      error: {
+        message: (error as Error).message ?? "Something went wrong"
+      }
+    };
+  }
+};
+
 const deleteEstimateById = async (id: string): Promise<ApiResponse<string>> => {
   try {
     const result = await estimatesRepository.deleteEstimateById(id);
@@ -313,5 +361,7 @@ export const estimatesService = {
   createEstimate,
   updateEstimate,
   convertEstimateToSale,
+  updateCheckedQtyService,
+  batchCheckItemsService,
   deleteEstimateById
 };

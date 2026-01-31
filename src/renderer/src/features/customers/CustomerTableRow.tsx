@@ -26,7 +26,7 @@ import {
   type TransactionType
 } from "@shared/types";
 import { formatDateStrToISTDateStr } from "@shared/utils/dateUtils";
-import { formatToRupees, IndianRupees } from "@shared/utils/utils";
+import { convertToRupees } from "@shared/utils/utils";
 import type { UseMutationResult } from "@tanstack/react-query";
 import { Download, Edit, Eye, LoaderCircle, MoreVertical, RefreshCcw, Trash2 } from "lucide-react";
 import { memo, useCallback } from "react";
@@ -50,8 +50,8 @@ const CustomerTableRow = ({
   const navigate = useNavigate();
   const handleView = useCallback(() => {
     type === TRANSACTION_TYPE.SALE
-      ? navigate(`/billing/sales/edit/${transaction.id}`)
-      : navigate(`/billing/estimates/edit/${transaction.id}`);
+      ? navigate(`/billing/sales/${transaction.id}/edit`)
+      : navigate(`/billing/estimates/${transaction.id}/edit`);
   }, [navigate, transaction.id, type]);
 
   const onDelete = useCallback(() => {
@@ -92,7 +92,7 @@ const CustomerTableRow = ({
             # {transaction.transactionNo}
           </div>
           <div className="col-span-2 flex items-center font-semibold">
-            {transaction.grandTotal && IndianRupees.format(formatToRupees(transaction.grandTotal))}
+            {transaction.grandTotal && convertToRupees(transaction.grandTotal)}
           </div>
           <div className="col-span-2 flex items-center">
             {transaction.isPaid ? (
