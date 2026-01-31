@@ -11,6 +11,15 @@ import { convertToRupees } from "../../../shared/utils/utils";
 import { db } from "../../db/db";
 import { estimates, sales } from "../../db/schema";
 
+/**
+ * Registers an IPC handler that generates and saves a PDF receipt or estimate for a transaction.
+ *
+ * The handler listens on "shareApi:saveAsPDF", retrieves the specified sale or estimate by id,
+ * produces a formatted PDF (header, itemized table, totals, footer) and saves it to the
+ * user's Documents/Receipts directory.
+ *
+ * @returns An ApiResponse containing a success message when the PDF is generated, or an error payload when generation fails.
+ */
 export function saveAsPDF() {
   ipcMain.handle(
     "shareApi:saveAsPDF",

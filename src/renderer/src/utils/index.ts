@@ -70,11 +70,16 @@ export const filterValidLineItems = (items: LineItem[]) => {
 };
 
 /**
- * Normalize Line Items for Api Payload construction
- * - Do not use for zustand actions, This does not inject rowId()
- * 1. Validation - Filter out invalid LineItems using `filterValidLineItems` func
- * 2. Convert `price` string to (Paisa).
- * 3. Transform `price` & `quantity` from string to number.
+ * Normalize an array of LineItem for API payloads.
+ *
+ * Filters out invalid items, converts each item's `price` to paisa (integer)
+ * and parses `quantity` to a number.
+ *
+ * Note: this function does not add or modify `rowId` (intended for payload
+ * construction, not for zustand actions that require `rowId` injection).
+ *
+ * @param lineItems - The line items to validate and normalize
+ * @returns An array of line items with `price` in paisa and `quantity` as a number
  */
 export function normalizeLineItems(lineItems: LineItem[]): NormalizedLineItem[] {
   const filteredLineitems = filterValidLineItems(lineItems);
@@ -87,11 +92,12 @@ export function normalizeLineItems(lineItems: LineItem[]): NormalizedLineItem[] 
 }
 
 /**
- * Normalize Original Line Items for comparision
- * - Do not use for zustand actions, This does not inject rowId()
- * 1. Validation - Filter out invalid original LineItems using `filterValidLineItems` func
- * 2. Convert `price` string to (Paisa).
- * 3. Transform `price` & `quantity` from string to number.
+ * Normalize a list of original LineItem objects for comparison by converting price to paisa and quantity to numbers.
+ *
+ * Invalid or empty items are removed. This function does not add row identifiers (`rowId`), so it is not suitable for workflows that require row IDs.
+ *
+ * @param lineItems - The original line items to normalize
+ * @returns An array of line items with `price` converted to paisa (number) and `quantity` converted to a numeric value
  */
 export function normalizeOriginalLineItems(lineItems: LineItem[]) {
   const filteredLineitems = filterValidLineItems(lineItems);

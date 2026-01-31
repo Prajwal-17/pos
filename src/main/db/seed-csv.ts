@@ -13,6 +13,12 @@ const readable = fs.createReadStream("/home/prajwal/Documents/Products.csv", {
   encoding: "utf-8"
 });
 
+/**
+ * Seed the products table by reading products from a CSV file and inserting mapped records into the database.
+ *
+ * Each CSV row is transformed into a product record: a UUID is generated for `id`, a snapshot is created,
+ * `weight` is set to `null` when the CSV value is the string "nil", and monetary fields are converted to paisa before insertion.
+ */
 async function main() {
   try {
     console.log("Start CSV seeding Products");

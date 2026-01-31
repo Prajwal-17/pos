@@ -58,6 +58,12 @@ function initialLineItem() {
   return lineItem;
 }
 
+/**
+ * Produce an array of LineItem objects suitable for the store from UnifiedTransactionItem inputs.
+ *
+ * @param itemsArray - Source unified transaction items to normalize; may be empty or undefined.
+ * @returns An array of mapped LineItem objects with a trailing empty initial line item. If `itemsArray` is empty or falsy, returns an array containing a single initial line item.
+ */
 function normalizeLineItems(itemsArray: UnifiedTransactionItem[]) {
   if (!itemsArray || itemsArray.length === 0) {
     return [initialLineItem()];

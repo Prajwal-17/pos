@@ -8,6 +8,17 @@ import { formatDateStr } from "@shared/utils/dateUtils";
 import { convertToRupees, formatToRupees } from "@shared/utils/utils";
 import { Edit, LoaderCircle, Package, Search } from "lucide-react";
 
+/**
+ * Render a virtualized list of product search results with status badges and edit actions.
+ *
+ * Displays a loading view while fetching, a friendly empty state when no results are found,
+ * and a scrollable, virtualized list of product rows when results are available. Each row
+ * shows product metadata (name, weight, MRP, sold quantity, purchase price, current price),
+ * status indicators (Active/Inactive/Deleted), and an edit button that populates product data
+ * into the products store and opens the product dialog.
+ *
+ * @returns The rendered ProductResults UI element
+ */
 export default function ProductResults() {
   const setProductId = useProductsStore((state) => state.setProductId);
   const setActionType = useProductsStore((state) => state.setActionType);
