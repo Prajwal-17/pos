@@ -16,6 +16,7 @@
 // import { updateTotalPriceEstimates, updateTotalPriceSales } from "./updateTotalPrice";
 // import { updateProductHistory } from "./productHistory";
 import { updateProductSnapshot } from "./v4";
+import { recalculateTotalQuantitySold } from "./v4/recalculateTotalQuantitySold";
 import { updateCheckedQtyToMilliUnits } from "./v4/updateCheckedQtyToMilliUnits";
 import { updatePurchasePrice } from "./v4/updatePurchasePrice";
 import { updateQuantityToMilliUnits } from "./v4/updateQuantityToMilliUnits";
@@ -23,11 +24,12 @@ import { updateTotalQuantityToMilliUnits } from "./v4/updateTotalQuantityToMilli
 
 export async function dbScripts() {
   // db scripts for above v4.0.0
-  await updateProductSnapshot();
-  await updatePurchasePrice();
+  await updateProductSnapshot(); // update product snapshot using product object
+  await updatePurchasePrice(); // recalculate purchase price of saleItems & estimateItems and update
   await updateQuantityToMilliUnits();
   await updateTotalQuantityToMilliUnits();
   await updateCheckedQtyToMilliUnits();
+  await recalculateTotalQuantitySold();
   //
   // -- Used Scripts --
   // await trimProductSpaces();
