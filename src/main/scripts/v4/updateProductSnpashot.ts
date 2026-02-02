@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { formatToRupees } from "../../../shared/utils/utils";
+import { convertToRupees } from "../../../shared/utils/utils";
 import { db } from "../../db/db";
 import { estimateItems, products, saleItems } from "../../db/schema";
 
@@ -25,7 +25,7 @@ export const generateProductSnapshot = (item: SnapshotPayload) => {
   ) {
     name += ` ${item.weight}${item.unit}`;
     if (item.mrp) {
-      name += ` ${formatToRupees(item.mrp)}Rs`;
+      name += ` ${convertToRupees(item.mrp)}Rs`;
     }
   }
 
@@ -36,13 +36,13 @@ export const generateProductSnapshot = (item: SnapshotPayload) => {
     ignoredWeight.some((w) => `${item.weight}${item.unit}` === w)
   ) {
     if (item.mrp) {
-      name += ` ${formatToRupees(item.mrp)} Rs`;
+      name += ` ${convertToRupees(item.mrp)} Rs`;
     }
   }
 
   // weight = null && mrp
   if (item.weight === null && item.mrp) {
-    name += ` ${formatToRupees(item.mrp)}Rs`;
+    name += ` ${convertToRupees(item.mrp)}Rs`;
   }
 
   // weight && mrp = null

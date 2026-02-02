@@ -15,7 +15,7 @@
 // } from "./updateProductFields";
 // import { updateTotalPriceEstimates, updateTotalPriceSales } from "./updateTotalPrice";
 // import { updateProductHistory } from "./productHistory";
-import { updateProductSnapshot } from "./v4";
+import { updateProductSnapshot } from "./v4/updateProductSnpashot";
 import { recalculateTotalQuantitySold } from "./v4/recalculateTotalQuantitySold";
 import { updateCheckedQtyToMilliUnits } from "./v4/updateCheckedQtyToMilliUnits";
 import { updatePurchasePrice } from "./v4/updatePurchasePrice";
