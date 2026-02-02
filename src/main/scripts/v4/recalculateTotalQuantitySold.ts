@@ -7,24 +7,24 @@ export const recalculateTotalQuantitySold = async () => {
 
   try {
     // 1. Fetch all products
-    const allProducts = await db.select().from(products).all();
+    const allProducts = db.select().from(products).all();
     console.log(`Found ${allProducts.length} products.`);
 
     // 2. Fetch all sale items
-    const allSaleItems = await db
+    const allSaleItems = db
       .select({
         productId: saleItems.productId,
-        quantity: saleItems.quantity,
+        quantity: saleItems.quantity
       })
       .from(saleItems)
       .where(isNotNull(saleItems.productId))
       .all();
 
     // 3. Fetch all estimate items
-    const allEstimateItems = await db
+    const allEstimateItems = db
       .select({
         productId: estimateItems.productId,
-        quantity: estimateItems.quantity,
+        quantity: estimateItems.quantity
       })
       .from(estimateItems)
       .where(isNotNull(estimateItems.productId))
@@ -46,7 +46,7 @@ export const recalculateTotalQuantitySold = async () => {
     // 5. Update products if mismatched
     let updateCount = 0;
 
-    await db.transaction(async (tx) => {
+    db.transaction((tx) => {
       for (const product of allProducts) {
         const calculatedTotal = productSoldMap.get(product.id) || 0;
         const currentTotal = product.totalQuantitySold || 0;
@@ -56,8 +56,7 @@ export const recalculateTotalQuantitySold = async () => {
           //   `Product '${product.name}' (ID: ${product.id}): Mismatch! Old: ${currentTotal}, New: ${calculatedTotal}. Updating...`
           // );
 
-          await tx
-            .update(products)
+          tx.update(products)
             .set({ totalQuantitySold: calculatedTotal })
             .where(eq(products.id, product.id))
             .run();
