@@ -5,7 +5,11 @@ import path from "path";
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin()]
+    plugins: [
+      externalizeDepsPlugin({
+        exclude: ["electron-updater"]
+      })
+    ]
   },
   preload: {
     plugins: [externalizeDepsPlugin()]

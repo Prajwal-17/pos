@@ -1,18 +1,30 @@
 import { createMiddleware } from "hono/factory";
 import pino from "pino";
 
-export const loggerInstance = pino({
-  level: "info",
-  transport: {
-    target: "pino-pretty",
-    options: {
-      colorize: true,
-      translateTime: "SYS:standard",
-      ignore: "pid,hostname,reqId",
-      messageFormat: "{msg}"
-    }
+// pino-pretty uses worker threads (thread-stream) which cannot load files
+// from inside an asar archive. Only use the transport in development.
+const isPackaged = (() => {
+  try {
+    return require("electron").app.isPackaged;
+  } catch {
+    return false;
   }
-});
+})();
+
+export const loggerInstance = isPackaged
+  ? pino({ level: "info" })
+  : pino({
+      level: "info",
+      transport: {
+        target: "pino-pretty",
+        options: {
+          colorize: true,
+          translateTime: "SYS:standard",
+          ignore: "pid,hostname,reqId",
+          messageFormat: "{msg}"
+        }
+      }
+    });
 
 export const logger = createMiddleware(async (c, next) => {
   const start = Date.now();
