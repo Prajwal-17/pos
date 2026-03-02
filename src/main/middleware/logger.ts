@@ -1,10 +1,10 @@
 import { createMiddleware } from "hono/factory";
 import pino from "pino";
 
-// pino-pretty uses worker threads (thread-stream) which cannot load files
-// from inside an asar archive. Only use the transport in development.
 const isPackaged = (() => {
   try {
+    // ubuntu build fix
+    // eslint-disable-next-line
     return require("electron").app.isPackaged;
   } catch {
     return false;
