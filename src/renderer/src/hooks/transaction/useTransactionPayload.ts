@@ -1,12 +1,6 @@
 import { useBillingStore } from "@/store/billingStore";
 import { useLineItemsStore } from "@/store/lineItemsStore";
-import {
-  buildTransactionPayload,
-  normalizeLineItems,
-  normalizeOriginalLineItems,
-  stripLineItems
-} from "@/utils";
-import deepEqual from "fast-deep-equal";
+import { buildTransactionPayload, normalizeLineItems } from "@/utils";
 import { useMemo } from "react";
 import useDebounce from "../useDebounce";
 
@@ -19,14 +13,14 @@ const useTransactionPayload = () => {
   const customerId = useBillingStore((state) => state.customerId);
   const originalCustomerId = useBillingStore((state) => state.originalCustomerId);
   const lineItems = useLineItemsStore((state) => state.lineItems);
-  const originalLineItems = useLineItemsStore((state) => state.originalLineItems);
+  // const originalLineItems = useLineItemsStore((state) => state.originalLineItems);
 
   const normalizedLineItems = useMemo(() => normalizeLineItems(lineItems), [lineItems]);
 
-  const normalizedOriginalLineItems = useMemo(
-    () => normalizeOriginalLineItems(originalLineItems),
-    [originalLineItems]
-  );
+  // const normalizedOriginalLineItems = useMemo(
+  //   () => normalizeOriginalLineItems(originalLineItems),
+  //   [originalLineItems]
+  // );
 
   // debounce building payload every time
   const dependencyState = useMemo(
@@ -40,28 +34,28 @@ const useTransactionPayload = () => {
 
   const debouncedState = useDebounce(dependencyState, 800);
 
-  const { originalCleaned, currentCleaned } = useMemo(
-    () => stripLineItems(normalizedOriginalLineItems, debouncedState.normalizedLineItems),
-    [debouncedState.normalizedLineItems, normalizedOriginalLineItems]
-  );
+  // const { originalCleaned, currentCleaned } = useMemo(
+  //   () => stripLineItems(normalizedOriginalLineItems, debouncedState.normalizedLineItems),
+  //   [debouncedState.normalizedLineItems, normalizedOriginalLineItems]
+  // );
 
-  const isDirty = useMemo(() => {
-    const isLineItemsDirty = !deepEqual(originalCleaned, currentCleaned);
-    const isCustomerDirty = debouncedState.customerId !== originalCustomerId;
-    const isBillingDateDirty =
-      debouncedState.billingDate instanceof Date && originalBillingDate instanceof Date
-        ? debouncedState.billingDate.getTime() !== originalBillingDate.getTime()
-        : debouncedState.billingDate !== originalBillingDate;
+  // const isDirty = useMemo(() => {
+  //   // const isLineItemsDirty = !deepEqual(originalCleaned, currentCleaned);
+  //   const isCustomerDirty = debouncedState.customerId !== originalCustomerId;
+  //   const isBillingDateDirty =
+  //     debouncedState.billingDate instanceof Date && originalBillingDate instanceof Date
+  //       ? debouncedState.billingDate.getTime() !== originalBillingDate.getTime()
+  //       : debouncedState.billingDate !== originalBillingDate;
 
-    return isLineItemsDirty || isCustomerDirty || isBillingDateDirty;
-  }, [
-    originalCleaned,
-    currentCleaned,
-    originalCustomerId,
-    debouncedState.customerId,
-    debouncedState.billingDate,
-    originalBillingDate
-  ]);
+  //   return isLineItemsDirty || isCustomerDirty || isBillingDateDirty;
+  // }, [
+  //   originalCleaned,
+  //   currentCleaned,
+  //   originalCustomerId,
+  //   debouncedState.customerId,
+  //   debouncedState.billingDate,
+  //   originalBillingDate
+  // ]);
 
   const payload = useMemo(() => {
     if (!transactionNo || !debouncedState.customerId) return null;
@@ -88,7 +82,7 @@ const useTransactionPayload = () => {
   ]);
 
   return {
-    isDirty,
+    // isDirty,
     payload
   };
 };

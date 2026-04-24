@@ -1,4 +1,4 @@
-import type { LineItem } from "@/store/lineItemsStore";
+import { SYNCSTATUS, type LineItem, type SyncStatus } from "@/store/lineItemsStore";
 import {
   TRANSACTION_TYPE,
   UPDATE_QTY_ACTION,
@@ -10,6 +10,7 @@ import { convertToPaisa, toMilliUnits } from "@shared/utils/utils";
 type NormalizedLineItem = Omit<LineItem, "price" | "quantity"> & {
   price: number;
   quantity: number;
+  syncStatus: SyncStatus;
 };
 
 export const updateCheckedQuantity = (
@@ -70,6 +71,16 @@ export const filterValidLineItems = (items: LineItem[]) => {
 };
 
 /**
+ * Filters an array of line items, returning only those marked as "dirty" for autosave sync
+ *
+ * @param items - Array of LineItems to filter
+ * @returns A new array of LineItems whose `syncStatus` is "IS_DIRTY"
+ */
+export const filterDirtyLineItems = (items: LineItem[]) => {
+  return items.filter((item) => item.syncStatus === SYNCSTATUS.IS_DIRTY);
+};
+
+/**
  * Normalize Line Items for Api Payload construction
  * - Do not use for zustand actions, This does not inject rowId()
  * 1. Validation - Filter out invalid LineItems using `filterValidLineItems` func
@@ -83,7 +94,8 @@ export function normalizeLineItems(lineItems: LineItem[]): NormalizedLineItem[] 
     ...item,
     price: convertToPaisa(parseFloat(item.price || "0")),
     quantity: toMilliUnits(item.quantity),
-    checkedQty: toMilliUnits(item.checkedQty)
+    checkedQty: toMilliUnits(item.checkedQty),
+    syncStatus: "synced"
   }));
 }
 

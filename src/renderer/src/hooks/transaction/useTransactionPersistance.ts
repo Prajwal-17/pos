@@ -11,11 +11,9 @@ import {
   type UpdateSaleResponse
 } from "@shared/types";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
-import useTransactionPayload from "./useTransactionPayload";
 
 export type MutationVariables = {
   type: TransactionType;
@@ -37,7 +35,7 @@ const useTransactionPersistance = () => {
   const setStatus = useBillingStore((state) => state.setStatus);
   const setBillingId = useBillingStore((state) => state.setBillingId);
   const syncOriginals = useBillingStore((state) => state.syncOriginals);
-  const updateInternalIds = useLineItemsStore((state) => state.updateInternalIds);
+  // const updateInternalIds = useLineItemsStore((state) => state.updateInternalIds);
   const lineItems = useLineItemsStore((state) => state.lineItems);
 
   // print ref
@@ -45,8 +43,9 @@ const useTransactionPersistance = () => {
   const handlePrint = useReactToPrint({ contentRef: receiptRef || undefined });
 
   // autosave payload
-  const { isDirty, payload: debouncedPayload } = useTransactionPayload();
+  // const { isDirty, payload: debouncedPayload } = useTransactionPayload();
 
+  // save mutation
   const saveMutation = useMutation<
     { id: string } | UpdateSaleResponse | UpdateEstimateResponse,
     Error,
@@ -75,7 +74,7 @@ const useTransactionPersistance = () => {
       // update internal ids (only present on update responses)
       if ("items" in response && response.items) {
         setBillingDate(new Date(response.createdAt!));
-        updateInternalIds(response.items);
+        // updateInternalIds(response.items);
       }
     },
     onError: (error) => {
@@ -85,30 +84,30 @@ const useTransactionPersistance = () => {
   });
 
   // Autosave
-  useEffect(() => {
-    if (!isDirty) {
-      if (status !== BILLSTATUS.SAVED && !saveMutation.isPending) {
-        setStatus(BILLSTATUS.SAVED);
-      }
-      return;
-    }
-    if (saveMutation.isPending) return;
+  // useEffect(() => {
+  //   if (!isDirty) {
+  //     if (status !== BILLSTATUS.SAVED && !saveMutation.isPending) {
+  //       setStatus(BILLSTATUS.SAVED);
+  //     }
+  //     return;
+  //   }
+  //   if (saveMutation.isPending) return;
 
-    setStatus(BILLSTATUS.UNSAVED);
+  //   setStatus(BILLSTATUS.UNSAVED);
 
-    const handler = setTimeout(() => {
-      if (debouncedPayload) {
-        saveMutation.mutate({
-          type: debouncedPayload.billingType,
-          id: debouncedPayload.id,
-          payload: debouncedPayload.payload
-        });
-      }
-    }, 3000);
+  //   const handler = setTimeout(() => {
+  //     if (debouncedPayload) {
+  //       saveMutation.mutate({
+  //         type: debouncedPayload.billingType,
+  //         id: debouncedPayload.id,
+  //         payload: debouncedPayload.payload
+  //       });
+  //     }
+  //   }, 3000);
 
-    return () => clearTimeout(handler);
-    // eslint-disable-next-line
-  }, [isDirty, debouncedPayload, saveMutation.isPending, status]);
+  //   return () => clearTimeout(handler);
+  //   // eslint-disable-next-line
+  // }, [isDirty, debouncedPayload, saveMutation.isPending, status]);
 
   // Manual Save Action
   const handleManualAction = async (action: "save" | "save&print" | "saveAsPDF") => {
@@ -175,20 +174,20 @@ const useTransactionPersistance = () => {
     }
   };
 
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (saveMutation.isPending || isDirty) {
-        e.preventDefault();
-        e.returnValue = ""; // Chrome requires returnValue to be set
-      }
-    };
+  // useEffect(() => {
+  //   const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+  //     // if (saveMutation.isPending || isDirty) {
+  //     //   e.preventDefault();
+  //     //   e.returnValue = ""; // Chrome requires returnValue to be set
+  //     // }
+  //   };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
+  //   window.addEventListener("beforeunload", handleBeforeUnload);
 
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [saveMutation.isPending, isDirty]);
+  //   return () => {
+  //     window.removeEventListener("beforeunload", handleBeforeUnload);
+  //   };
+  // }, [saveMutation.isPending, isDirty]);
 
   return {
     status,

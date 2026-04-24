@@ -76,6 +76,7 @@ const LineItemRow = memo(
               onChange={(e) => {
                 setItemQuery(e.target.value);
                 updateLineItem(item.rowId, "productSnapshot", e.target.value);
+                // sync func
               }}
             />
           </div>
@@ -87,6 +88,7 @@ const LineItemRow = memo(
                   if (currentQty >= 0) {
                     const newQty = fromMilliUnits(toMilliUnits(currentQty + 1));
                     updateLineItem(item.rowId, "quantity", newQty.toString());
+                    // sync func
                   }
                 }}
                 className="hover:bg-primary/80 bg-primary text-foreground flex h-full w-20 cursor-pointer items-center justify-center rounded-lg rounded-r-none transition-all active:scale-95"
@@ -107,6 +109,7 @@ const LineItemRow = memo(
                   // allow only number and three decimal points
                   if (val === "" || /^\d*\.?\d{0,3}$/.test(val)) {
                     updateLineItem(item.rowId, "quantity", val);
+                    // sync func
                   }
                 }}
                 placeholder="0"
@@ -119,6 +122,7 @@ const LineItemRow = memo(
                   if (currentQty >= 1) {
                     const newQty = fromMilliUnits(toMilliUnits(currentQty - 1));
                     updateLineItem(item.rowId, "quantity", newQty.toString());
+                    // sync func
                   }
                 }}
               >
@@ -146,6 +150,7 @@ const LineItemRow = memo(
                   // allow only number and two decimal points
                   if (val === "" || /^\d*\.?\d{0,2}$/.test(val)) {
                     updateLineItem(item.rowId, "price", val);
+                    // sync func
                   }
                 }}
                 className="focus:border-ring focus:ring-ring bg-background text-foreground placeholder-muted-foreground h-full w-full appearance-none rounded-lg border py-2 pr-7 pl-10 text-right text-base font-semibold focus:ring-2 focus:outline-none disabled:cursor-not-allowed"
@@ -168,6 +173,7 @@ const LineItemRow = memo(
                 const currentQty = parseFloat(item.quantity || "0");
                 const newCheckedAt = checked ? 0 : currentQty;
                 updateLineItem(item.rowId, "checkedQty", newCheckedAt);
+                // sync func
               }}
               className={`flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded border-2 transition-all ${
                 checked
@@ -196,6 +202,7 @@ const LineItemRow = memo(
                       item.checkedQty
                     );
                     updateLineItem(item.rowId, "checkedQty", newCheckedAt);
+                    // sync func
                   }}
                   disabled={checked}
                   className="flex h-10 w-10 cursor-pointer items-center justify-center bg-transparent p-0"
@@ -213,6 +220,7 @@ const LineItemRow = memo(
                       item.checkedQty
                     );
                     updateLineItem(item.rowId, "checkedQty", newCheckedAt);
+                    // sync func
                   }}
                   disabled={item.checkedQty === 0}
                   className="flex h-10 w-10 cursor-pointer items-center justify-center bg-transparent p-0"
