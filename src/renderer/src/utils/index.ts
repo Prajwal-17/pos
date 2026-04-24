@@ -1,4 +1,4 @@
-import { SYNCSTATUS, type LineItem, type SyncStatus } from "@/store/lineItemsStore";
+import { SYNCSTATUS, type LineItem } from "@/store/lineItemsStore";
 import {
   TRANSACTION_TYPE,
   UPDATE_QTY_ACTION,
@@ -7,10 +7,9 @@ import {
 } from "@shared/types";
 import { convertToPaisa, toMilliUnits } from "@shared/utils/utils";
 
-type NormalizedLineItem = Omit<LineItem, "price" | "quantity"> & {
+type NormalizedLineItem = Omit<LineItem, "price" | "quantity" | "syncStatus"> & {
   price: number;
   quantity: number;
-  syncStatus: SyncStatus;
 };
 
 export const updateCheckedQuantity = (
@@ -90,13 +89,17 @@ export const filterDirtyLineItems = (items: LineItem[]) => {
 export function normalizeLineItems(lineItems: LineItem[]): NormalizedLineItem[] {
   const filteredLineitems = filterValidLineItems(lineItems);
 
-  return filteredLineitems.map((item) => ({
-    ...item,
-    price: convertToPaisa(parseFloat(item.price || "0")),
-    quantity: toMilliUnits(item.quantity),
-    checkedQty: toMilliUnits(item.checkedQty),
-    syncStatus: "synced"
-  }));
+  return filteredLineitems.map((item) => {
+    // eslint-disable-next-line
+    const { syncStatus, ...rest } = item;
+
+    return {
+      ...rest,
+      price: convertToPaisa(parseFloat(item.price || "0")),
+      quantity: toMilliUnits(item.quantity),
+      checkedQty: toMilliUnits(item.checkedQty)
+    };
+  });
 }
 
 /**
@@ -132,34 +135,25 @@ export function stripLineItems(originalLineItems: any[], currentLineItems: any[]
 
 export function buildTransactionPayload({
   billingType,
-  billingId,
-  isAutoSave,
   transactionNo,
   customerId,
   items,
   createdAt
 }: {
   billingType: TransactionType;
-  billingId: string | null;
-  isAutoSave: boolean;
   transactionNo: number | null;
   customerId: string | null;
   items: NormalizedLineItem[];
   createdAt: string;
 }) {
   return {
-    billingType: billingType,
-    id: billingId,
-    payload: {
-      isAutoSave: isAutoSave,
-      data: {
-        transactionNo: transactionNo,
-        transactionType: billingType,
-        customerId,
-        isPaid: billingType === TRANSACTION_TYPE.SALE,
-        items,
-        createdAt
-      }
+    data: {
+      transactionNo: transactionNo,
+      transactionType: billingType,
+      customerId,
+      isPaid: billingType === TRANSACTION_TYPE.SALE,
+      items,
+      createdAt
     }
   };
 }

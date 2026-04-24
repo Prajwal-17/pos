@@ -27,6 +27,6 @@ export const payloadDataSchema = z.object({
 });
 
 export const txnPayloadSchema = z.object({
-  isAutoSave: z.boolean(),
+  // isAutoSave: z.boolean(),
   data: payloadDataSchema
 });

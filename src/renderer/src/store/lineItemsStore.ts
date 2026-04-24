@@ -1,6 +1,5 @@
-import { normalizeLineItems } from "@/utils";
 import type { Product, UnifiedTransactionItem, UpdateResponseItem } from "@shared/types";
-import { convertToPaisa, convertToRupees, toMilliUnits } from "@shared/utils/utils";
+import { convertToPaisa, convertToRupees, fromMilliUnits, toMilliUnits } from "@shared/utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
@@ -49,6 +48,32 @@ type LineItemsStore = {
   setAllChecked: (checked: boolean) => void;
   reset: () => void;
 };
+
+function normalizeLineItems(itemsArray: UnifiedTransactionItem[]) {
+  if (!itemsArray || itemsArray.length === 0) {
+    return [initialLineItem()];
+  }
+
+  const lineItemsArray: LineItem[] = itemsArray.map((item) => ({
+    id: item.id,
+    rowId: uuidv4(),
+    productId: item.productId,
+    name: item.name,
+    productSnapshot: item.productSnapshot,
+    weight: item.weight,
+    unit: item.unit,
+    mrp: item.mrp,
+    price: item.price ? convertToRupees(Number(item.price)).toString() : "",
+    purchasePrice: item.purchasePrice,
+    quantity: fromMilliUnits(item.quantity).toString(),
+    totalPrice: item.totalPrice,
+    checkedQty: fromMilliUnits(item.checkedQty),
+    isInventoryItem: item.productId ? true : false,
+    syncStatus: SYNCSTATUS.SYNCED
+  }));
+
+  return [...lineItemsArray, initialLineItem()];
+}
 
 function initialLineItem() {
   const lineItem: LineItem = {
@@ -196,7 +221,7 @@ export const useLineItemsStore = create<LineItemsStore>()(
               totalPrice: parseFloat((oldItemQuantity * newItem.price).toFixed(2)),
               checkedQty: oldItemCheckedQty,
               isInventoryItem: true,
-              syncStatus: SYNCSTATUS.SYNCED
+              syncStatus: SYNCSTATUS.IS_DIRTY
             };
 
             currLineItems[index] = { ...updatedItem };

@@ -1,7 +1,12 @@
 import { apiClient } from "@/lib/apiClient";
 import { useBillingStore } from "@/store/billingStore";
 import { useLineItemsStore, type LineItem } from "@/store/lineItemsStore";
-import { filterDirtyLineItems, filterValidLineItems } from "@/utils";
+import {
+  buildTransactionPayload,
+  filterDirtyLineItems,
+  filterValidLineItems,
+  normalizeLineItems
+} from "@/utils";
 import type { UpdateResponseItem } from "@shared/types";
 import debounce from "lodash.debounce";
 
@@ -13,18 +18,31 @@ const syncLogic = async () => {
 
   const { lineItems, markItemAsSaving, markItemAsSynced, updateLineItemId } =
     useLineItemsStore.getState();
-  const { billingId, billingType } = useBillingStore.getState();
+  const { billingId, billingType, transactionNo, customerId, billingDate } =
+    useBillingStore.getState();
 
   const validLineItems = filterValidLineItems(lineItems);
   const dirtyItems = filterDirtyLineItems(validLineItems);
 
+  console.log("dirtyitems", dirtyItems);
   if (dirtyItems.length === 0 || !billingId) return;
 
   isSyncing = true;
   markItemAsSaving(dirtyItems);
 
+  const normalizedItems = normalizeLineItems(dirtyItems); // here strip of the sync status
+  const payload = buildTransactionPayload({
+    billingType,
+    transactionNo,
+    customerId,
+    items: normalizedItems,
+    createdAt: billingDate ? billingDate.toISOString() : new Date().toISOString()
+  });
+  console.log("payload", payload);
+
   try {
-    const response = await apiClient.post(`/api/${billingType}s/${billingId}/save`, dirtyItems);
+    const response = await apiClient.post(`/api/${billingType}s/${billingId}/save`, payload);
+    console.log("api response", response);
 
     markItemAsSynced(response as LineItem[]);
     updateLineItemId(response as UpdateResponseItem[]);

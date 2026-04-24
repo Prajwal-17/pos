@@ -1,4 +1,4 @@
-import { and, count, desc, eq, gte, lte, notInArray, sql, sum, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, gte, lte, sql, sum, type SQL } from "drizzle-orm";
 import {
   BATCH_CHECK_ACTION,
   UPDATE_QTY_ACTION,
@@ -130,34 +130,34 @@ const updateSale = async (saleId: string, payload: UpdateSaleParams) => {
 
     const resultItems: any = [];
 
-    const quantitySoldAdjustments = new Map<string, number>();
+    // const quantitySoldAdjustments = new Map<string, number>();
 
-    const existingSaleItems = tx.select().from(saleItems).where(eq(saleItems.saleId, saleId)).all();
+    // const existingSaleItems = tx.select().from(saleItems).where(eq(saleItems.saleId, saleId)).all();
 
-    for (const saleItem of existingSaleItems) {
-      if (saleItem.productId) {
-        const current = quantitySoldAdjustments.get(saleItem.productId) || 0;
-        quantitySoldAdjustments.set(saleItem.productId, current - saleItem.quantity);
-      }
-    }
+    // for (const saleItem of existingSaleItems) {
+    //   if (saleItem.productId) {
+    //     const current = quantitySoldAdjustments.get(saleItem.productId) || 0;
+    //     quantitySoldAdjustments.set(saleItem.productId, current - saleItem.quantity);
+    //   }
+    // }
 
-    for (const item of payload.items) {
-      if (item.productId) {
-        const current = quantitySoldAdjustments.get(item.productId) || 0;
-        quantitySoldAdjustments.set(item.productId, current + item.quantity);
-      }
-    }
+    // for (const item of payload.items) {
+    //   if (item.productId) {
+    //     const current = quantitySoldAdjustments.get(item.productId) || 0;
+    //     quantitySoldAdjustments.set(item.productId, current + item.quantity);
+    //   }
+    // }
 
-    for (const [productId, netChange] of quantitySoldAdjustments) {
-      if (netChange !== 0) {
-        tx.update(products)
-          .set({
-            totalQuantitySold: sql`${products.totalQuantitySold} + ${netChange}`
-          })
-          .where(eq(products.id, productId))
-          .run();
-      }
-    }
+    // for (const [productId, netChange] of quantitySoldAdjustments) {
+    //   if (netChange !== 0) {
+    //     tx.update(products)
+    //       .set({
+    //         totalQuantitySold: sql`${products.totalQuantitySold} + ${netChange}`
+    //       })
+    //       .where(eq(products.id, productId))
+    //       .run();
+    //   }
+    // }
 
     for (const item of payload.items) {
       const values = {
@@ -198,20 +198,20 @@ const updateSale = async (saleId: string, payload: UpdateSaleParams) => {
       });
     }
 
-    const keptItemIds = resultItems.map((item) => item.id);
+    // const keptItemIds = resultItems.map((item) => item.id);
 
     // delete items NOT in the payload
-    if (keptItemIds.length > 0) {
-      tx.delete(saleItems)
-        .where(and(eq(saleItems.saleId, saleId), notInArray(saleItems.id, keptItemIds)))
-        .run();
-    } else {
-      // delete all items if item array is empty
-      tx.delete(saleItems).where(eq(saleItems.saleId, saleId)).run();
-    }
+    // if (keptItemIds.length > 0) {
+    //   tx.delete(saleItems)
+    //     .where(and(eq(saleItems.saleId, saleId), notInArray(saleItems.id, keptItemIds)))
+    //     .run();
+    // } else {
+    //   // delete all items if item array is empty
+    //   tx.delete(saleItems).where(eq(saleItems.saleId, saleId)).run();
+    // }
 
     return {
-      ...payload,
+      // ...payload,
       items: resultItems
     };
   });
