@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { processSyncQueue } from "@/hooks/transaction/worker";
+import { processSyncQueue } from "@/utils/syncWorker";
 import { useLineItemsStore, type LineItem } from "@/store/lineItemsStore";
 import { useSearchDropdownStore } from "@/store/searchDropdownStore";
 import { getCheckStatusColor, updateCheckedQuantity } from "@/utils";

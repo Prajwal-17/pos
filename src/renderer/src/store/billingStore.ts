@@ -21,7 +21,6 @@ type BillingStore = {
   setIsNewCustomer: (isNew: boolean) => void;
   originalCustomerId: string | null;
   setOriginalCustomerId: (id: string | null) => void;
-  syncOriginals: () => void;
   status: BillStatus;
   setStatus: (newStatus: BillStatus) => void;
   reset: () => void;
@@ -100,15 +99,6 @@ export const useBillingStore = create<BillingStore>()(
           }),
           false,
           "billing/setOriginalCustomerId"
-        ),
-      syncOriginals: () =>
-        set(
-          (state) => ({
-            originalBillingDate: state.billingDate,
-            originalCustomerId: state.customerId
-          }),
-          false,
-          "billing/syncOriginals"
         ),
 
       status: BILLSTATUS.IDLE,

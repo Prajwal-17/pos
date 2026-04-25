@@ -1,17 +1,10 @@
+import { SYNCSTATUS, type SyncStatus } from "@/types";
 import type { Product, UnifiedTransactionItem } from "@shared/types";
 import { convertToPaisa, convertToRupees, fromMilliUnits, toMilliUnits } from "@shared/utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
-
-export const SYNCSTATUS = {
-  SAVING: "saving",
-  IS_DIRTY: "is_dirty",
-  SYNCED: "synced"
-} as const;
-
-export type SyncStatus = (typeof SYNCSTATUS)[keyof typeof SYNCSTATUS];
 
 export type LineItem = {
   id: string | null; // saleItem.id | estimateItem.id
@@ -39,12 +32,12 @@ type LineItemsStore = {
   addEmptyLineItem: (type?: "button") => void;
   addLineItem: (rowId: string, newItem: Product) => void;
   updateLineItem: (id: string, field: keyof LineItem, value: string | number) => void;
-  updateLineItemId: (idMap: Map<string, string>) => void;
   deleteLineItem: (rowId: string) => void;
-  purgeDeletedItems: (rowIds: Set<string>) => void;
+  setAllChecked: (checked: boolean) => void;
   markItemAsSaving: (items: LineItem[]) => void;
   markItemAsSynced: (rowIds: Set<string>) => void;
-  setAllChecked: (checked: boolean) => void;
+  updateLineItemId: (idMap: Map<string, string>) => void; // <rowId, id(i.e saleItem.id || estimateItem.id)>
+  purgeDeletedItems: (rowIds: Set<string>) => void;
   reset: () => void;
 };
 
@@ -169,7 +162,7 @@ export const useLineItemsStore = create<LineItemsStore>()(
             const oldItemCheckedQty = oldItem.checkedQty > 1 ? oldItem.checkedQty : 0;
 
             const updatedItem: LineItem = {
-              id: null,
+              id: oldItem.id,
               rowId: uuidv4(),
               productId: newItem.id,
               name: newItem.name,
@@ -259,37 +252,16 @@ export const useLineItemsStore = create<LineItemsStore>()(
           "lineItems/deleteLineItem"
         ),
 
-      purgeDeletedItems: (rowIds) =>
-        set((state) => {
-          console.log("purge ids rowids", rowIds);
-          state.lineItems = state.lineItems.filter((item) => !rowIds.has(item.rowId));
-        }),
-
-      setAllChecked: (checked) =>
-        set(
-          (state) => ({
-            lineItems: state.lineItems.map((item: LineItem) => ({
-              ...item,
-              checkedQty: checked ? parseFloat(item.quantity || "0") : 0
-            }))
-          }),
-          false,
-          "lineItems/setAllChecked"
-        ),
-
-      updateLineItemId: (idMap) =>
+      setAllChecked: (checked: boolean) =>
         set(
           (state) => {
-            // const newerIds = new Map(responseItems.map((i) => [i.rowId, i.id])); // map => <rowId, id(i.e saleItem.id || estimateItem.id)>
-
             state.lineItems.forEach((item) => {
-              if (idMap.has(item.rowId)) {
-                item.id = idMap.get(item.rowId)!; // type assertion - this value never be undefined
-              }
+              item.syncStatus = SYNCSTATUS.IS_DIRTY;
+              item.checkedQty = checked ? parseFloat(item.quantity || "0") : 0;
             });
           },
           false,
-          "lineItems/updateLineItemId"
+          "lineItems/setAllChecked"
         ),
 
       markItemAsSaving: (items) =>
@@ -320,12 +292,29 @@ export const useLineItemsStore = create<LineItemsStore>()(
           "lineItems/markItemsAsSynced"
         ),
 
+      updateLineItemId: (idMap) =>
+        set(
+          (state) => {
+            state.lineItems.forEach((item) => {
+              if (idMap.has(item.rowId)) {
+                item.id = idMap.get(item.rowId)!; // type assertion - this value never be undefined
+              }
+            });
+          },
+          false,
+          "lineItems/updateLineItemId"
+        ),
+
+      purgeDeletedItems: (rowIds) =>
+        set((state) => {
+          state.lineItems = state.lineItems.filter((item) => !rowIds.has(item.rowId));
+        }),
+
       reset: () =>
         set(
           () => ({
             isCountColumnVisible: false,
-            lineItems: [initialLineItem()],
-            originalLineItems: []
+            lineItems: [initialLineItem()]
           }),
           false,
           "lineItems/reset"

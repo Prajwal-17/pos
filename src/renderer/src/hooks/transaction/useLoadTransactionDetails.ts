@@ -11,17 +11,18 @@ import { useEffect } from "react";
 import toast from "react-hot-toast";
 
 const useLoadTransactionDetails = (type: TransactionType, id?: string) => {
-  // Billing store setters
-  const setBillingId = useBillingStore((state) => state.setBillingId);
-  const setBillingType = useBillingStore((state) => state.setBillingType);
-  const setTransactionNo = useBillingStore((state) => state.setTransactionNo);
-  const setBillingDate = useBillingStore((state) => state.setBillingDate);
-  const setOriginalBillingDate = useBillingStore((state) => state.setOriginalBillingDate);
-  const setCustomerId = useBillingStore((state) => state.setCustomerId);
-  const setCustomerName = useBillingStore((state) => state.setCustomerName);
+  const {
+    setBillingId,
+    setBillingType,
+    setTransactionNo,
+    setBillingDate,
+    setOriginalBillingDate,
+    setCustomerId,
+    setCustomerName
+  } = useBillingStore.getState();
 
   // Line items store setters
-  const setLineItems = useLineItemsStore((state) => state.setLineItems);
+  const { setLineItems } = useLineItemsStore.getState();
 
   const { data, isSuccess, isLoading, status, isFetched, isError, error } = useQuery({
     queryKey: [type, id],
@@ -46,18 +47,8 @@ const useLoadTransactionDetails = (type: TransactionType, id?: string) => {
       setCustomerName(data.customer.name);
       setLineItems(data.items);
     }
-  }, [
-    isSuccess,
-    data,
-    setBillingId,
-    setBillingType,
-    setTransactionNo,
-    setBillingDate,
-    setOriginalBillingDate,
-    setCustomerId,
-    setCustomerName,
-    setLineItems
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSuccess, data]);
   return { status, isLoading, isFetched };
 };
 

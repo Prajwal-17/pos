@@ -13,18 +13,17 @@ import debounce from "lodash.debounce";
 let isSyncing = false;
 
 const syncLogic = async () => {
-  // drop if still in still in flight
   if (isSyncing) return;
 
   const { lineItems, markItemAsSaving, markItemAsSynced, updateLineItemId, purgeDeletedItems } =
     useLineItemsStore.getState();
-  const { billingId, billingType, transactionNo, customerId, billingDate } =
+  const { billingId, setBillingId, billingType, transactionNo, customerId, billingDate } =
     useBillingStore.getState();
 
   const validLineItems = filterValidLineItems(lineItems);
   const dirtyItems = filterDirtyLineItems(validLineItems);
 
-  if (dirtyItems.length === 0 || !billingId) return;
+  if (dirtyItems.length === 0) return;
 
   isSyncing = true;
   markItemAsSaving(dirtyItems);
@@ -37,28 +36,29 @@ const syncLogic = async () => {
     items: normalizedItems,
     createdAt: billingDate ? billingDate.toISOString() : new Date().toISOString()
   });
-  console.log("payload", payload);
+
+  const isNewBill = !billingId;
+  const endpoint = isNewBill
+    ? `/api/${billingType}s/create`
+    : `/api/${billingType}s/${billingId}/sync`;
 
   try {
-    // throw new Error("here");
-    const response = await apiClient.post(`/api/${billingType}s/${billingId}/save`, payload);
-    console.log("api response", response);
+    const response = (await apiClient.post(endpoint, payload)) as SyncResponse;
+
+    if (isNewBill && response.billingId) {
+      setBillingId(response.billingId);
+    }
 
     const updateIdsMap: Map<string, string> = new Map(
-      (response as SyncResponse).syncedItems.map((i) => [i.rowId, i.id])
+      response.syncedItems.map((i) => [i.rowId, i.id])
     );
-    const syncIds: Set<string> = new Set(
-      (response as SyncResponse).syncedItems.map((i) => i.rowId)
-    );
-    const purgeIds: Set<string> = new Set((response as SyncResponse).deletedRowIds);
+    const syncIds: Set<string> = new Set(response.syncedItems.map((i) => i.rowId));
+    const purgeIds: Set<string> = new Set(response.deletedRowIds);
 
-    // @ts-ignore - temp fix
     updateLineItemId(updateIdsMap);
-    // @ts-ignore - temp fix
     markItemAsSynced(syncIds);
     purgeDeletedItems(purgeIds);
   } catch (error) {
-    console.log("dirtyItem", dirtyItems);
     console.error("Sync error:", error); // here error
     // Note: You should ideally have a revertItemToDirty action here
     // to ensure failed items are retried in the next cycle.

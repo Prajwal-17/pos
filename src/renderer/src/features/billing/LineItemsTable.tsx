@@ -5,6 +5,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { processSyncQueue } from "@/utils/syncWorker";
 import { useLineItemsStore, type LineItem } from "@/store/lineItemsStore";
 import { fromMilliUnits, toMilliUnits } from "@shared/utils/utils";
 import { CheckCheck, ChevronDown, PanelRightClose, PanelRightOpen, X } from "lucide-react";
@@ -160,6 +161,7 @@ const LineItemsTable = () => {
                   <DropdownMenuItem
                     onClick={() => {
                       setAllChecked(true);
+                      processSyncQueue();
                     }}
                     className="text-success/70 focus:text-success/90 cursor-pointer text-base font-medium"
                   >
@@ -170,6 +172,7 @@ const LineItemsTable = () => {
                   <DropdownMenuItem
                     onClick={() => {
                       setAllChecked(false);
+                      processSyncQueue();
                     }}
                     className="text-destructive/70 focus:text-destructive/90 cursor-pointer text-base font-medium"
                   >
@@ -181,7 +184,7 @@ const LineItemsTable = () => {
             </div>
           </div>
         </div>
-        <div className="h-[500px] w-full" />
+        <div className="h-125 w-full" />
       </div>
     </>
   );

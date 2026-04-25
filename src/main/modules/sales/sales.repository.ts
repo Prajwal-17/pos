@@ -12,7 +12,7 @@ import { db } from "../../db/db";
 import { estimateItems, estimates, products, saleItems, sales } from "../../db/schema";
 import { AppError } from "../../utils/appError";
 import { updateCheckedQuantityUtil } from "../../utils/product.utils";
-import type { CreateSaleParams, FilterSalesParams } from "./sales.types";
+import type { FilterSalesParams } from "./sales.types";
 
 const getSaleById = async (id: string) => {
   return await db.query.sales.findFirst({
@@ -62,21 +62,16 @@ const filterSalesByDate = async (
   };
 };
 
-const createSale = async (payload: CreateSaleParams) => {
+const createSale = async (payload: TxnPayloadData) => {
   return db.transaction((tx) => {
+    const syncedItems: SyncedItems[] = [];
     const newSale = tx
       .insert(sales)
       .values({
         invoiceNo: Number(payload.transactionNo),
-        customerId: payload.customerId,
-        grandTotal: payload.grandTotal,
-        totalQuantity: payload.totalQuantity,
-        isPaid: payload.isPaid,
-        createdAt: payload.createdAt
-          ? payload.createdAt
-          : sql`(STRFTIME('%Y-%m-%dT%H:%M:%fZ', 'now'))`
+        customerId: payload.customerId
       })
-      .returning({ id: sales.id })
+      .returning()
       .get();
 
     if (!newSale || !newSale.id) {
@@ -84,43 +79,50 @@ const createSale = async (payload: CreateSaleParams) => {
     }
 
     for (const item of payload.items) {
-      tx.insert(saleItems)
-        .values({
-          saleId: newSale.id,
-          productId: item.productId ? item.productId : null,
-          name: item.name,
-          productSnapshot: item.productSnapshot,
-          mrp: item.mrp,
-          price: item.price,
-          purchasePrice: item.purchasePrice,
-          weight: item.weight,
-          unit: item.unit,
-          quantity: item.quantity,
-          totalPrice: item.totalPrice
-        })
-        .run();
+      const values = {
+        saleId: newSale.id,
+        productId: item.productId,
+        name: item.name,
+        productSnapshot: item.productSnapshot,
+        mrp: item.mrp,
+        price: item.price,
+        weight: item.weight,
+        unit: item.unit,
+        quantity: item.quantity,
+        totalPrice: Math.round((item.price * item.quantity) / 1000),
+        checkedQty: item.checkedQty
+      };
 
-      if (item.productId) {
+      // insert new
+      const newItem = tx.insert(saleItems).values(values).returning().get();
+
+      if (newItem.productId) {
         tx.update(products)
           .set({
-            totalQuantitySold: sql`${products.totalQuantitySold} + ${item.quantity}`
+            totalQuantitySold: newItem.quantity
           })
-          .where(eq(products.id, item.productId))
+          .where(eq(products.id, newItem.productId))
           .run();
       }
+
+      syncedItems.push({
+        rowId: item.rowId,
+        id: newItem.id,
+        updatedAt: newItem.updatedAt
+      });
     }
 
-    return newSale.id;
-    // return "Successfully created Sale";
+    updateSaleTotals(tx, newSale.id);
+
+    return {
+      billingId: newSale.id,
+      syncedItems: syncedItems,
+      deletedRowIds: []
+    };
   });
 };
 
 const syncSaleWithItems = async (saleId: string, payload: TxnPayloadData) => {
-  // if no id & !idDeleted -> add -> increment totalQtySold
-  // if id & !idDeleted -> update -> net change -> update both item & product totalQtySold
-  // if idDeleted -> delete => reduce totalQtysold
-  // calc totalamt & totalQty -> db query
-  // update sales tables with totalamt & totalQty
   return db.transaction((tx) => {
     const syncedItems: SyncedItems[] = [];
     const deletedRowIds: string[] = [];
@@ -141,15 +143,12 @@ const syncSaleWithItems = async (saleId: string, payload: TxnPayloadData) => {
       };
 
       if (item.isDeleted && item.id) {
-        console.log("here", item);
         // delete item
         tx.delete(saleItems).where(eq(saleItems.id, item.id)).run();
         deletedRowIds.push(item.rowId);
-        console.log("deledrowids", deletedRowIds);
       } else {
         if (item.id) {
           // update existing
-
           const oldItem = tx.select().from(saleItems).where(eq(saleItems.id, item.id)).get();
 
           if (!oldItem) {
@@ -171,7 +170,10 @@ const syncSaleWithItems = async (saleId: string, payload: TxnPayloadData) => {
 
           const updatedItem = tx
             .update(saleItems)
-            .set(values)
+            .set({
+              ...values,
+              updatedAt: sql`(STRFTIME('%Y-%m-%dT%H:%M:%fZ', 'now'))`
+            })
             .where(eq(saleItems.id, item.id))
             .returning()
             .get();
@@ -203,27 +205,33 @@ const syncSaleWithItems = async (saleId: string, payload: TxnPayloadData) => {
       }
     }
 
-    const totals = tx
-      .select({
-        grandTotal: sum(saleItems.totalPrice).mapWith(Number),
-        totalQuantity: sum(saleItems.quantity).mapWith(Number)
-      })
-      .from(saleItems)
-      .where(eq(saleItems.saleId, saleId))
-      .get();
-
-    tx.update(sales)
-      .set({
-        grandTotal: totals?.grandTotal ?? 0,
-        totalQuantity: totals?.totalQuantity ?? 0
-      })
-      .run();
+    updateSaleTotals(tx, saleId);
 
     return {
       syncedItems,
       deletedRowIds
     };
   });
+};
+
+// pass tx in param to be included in the same atomic transaction
+const updateSaleTotals = async (tx: any, saleId: string) => {
+  const totals = tx
+    .select({
+      grandTotal: sum(saleItems.totalPrice).mapWith(Number),
+      totalQuantity: sum(saleItems.quantity).mapWith(Number)
+    })
+    .from(saleItems)
+    .where(eq(saleItems.saleId, saleId))
+    .get();
+
+  tx.update(sales)
+    .set({
+      grandTotal: totals?.grandTotal ?? 0,
+      totalQuantity: totals?.totalQuantity ?? 0
+    })
+    .where(eq(sales.id, saleId))
+    .run();
 };
 
 const deleteSaleById = async (id: string) => {
@@ -383,6 +391,7 @@ export const salesRepository = {
   convertSaleToEstimate,
   updateCheckedQty,
   batchCheckItems,
+  updateSaleTotals,
   deleteSaleById,
   updateSaleStatus
 };

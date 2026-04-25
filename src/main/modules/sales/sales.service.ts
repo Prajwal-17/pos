@@ -112,34 +112,9 @@ const filterSalesByDate = async (
   };
 };
 
-const computeItemsAndTotals = (items: TxnPayloadData["items"]) => {
-  const finalItems = items.map((item) => {
-    const total = Math.round((item.price * item.quantity) / 1000);
-    return {
-      ...item,
-      totalPrice: total
-    };
-  });
-
-  const grandTotal = finalItems.reduce((sum, item) => sum + Number(item.totalPrice || 0), 0);
-  const totalQuantity = finalItems.reduce((sum, item) => sum + item.quantity, 0);
-
-  return { finalItems, grandTotal, totalQuantity };
-};
-
-const createSale = async (payload: TxnPayloadData): Promise<{ id: string }> => {
-  const { finalItems, grandTotal, totalQuantity } = computeItemsAndTotals(payload.items);
-
-  const finalPayload = {
-    ...payload,
-    items: finalItems,
-    grandTotal,
-    totalQuantity
-  };
-
-  const newSaleId = await salesRepository.createSale(finalPayload);
-
-  return { id: newSaleId };
+const createSale = async (payload: TxnPayloadData): Promise<SyncResponse> => {
+  const result = await salesRepository.createSale(payload);
+  return result;
 };
 
 const syncSale = async (id: string, payload: TxnPayloadData): Promise<SyncResponse> => {
@@ -151,9 +126,7 @@ const syncSale = async (id: string, payload: TxnPayloadData): Promise<SyncRespon
 
   const result = await salesRepository.syncSaleWithItems(id, payload);
 
-  return {
-    ...result
-  };
+  return result;
 };
 
 const convertSaleToEstimate = async (id: string): Promise<{ id: string }> => {
