@@ -123,9 +123,6 @@ const SearchDropdown = ({ rowId }: { rowId: string }) => {
                                   ? convertToRupees(product.mrp, { asString: true })
                                   : null,
                                 price: convertToRupees(product.price, { asString: true }),
-                                purchasePrice: product.purchasePrice
-                                  ? convertToRupees(product.purchasePrice, { asString: true })
-                                  : null,
                                 isDisabled: product.isDisabled,
                                 isDeleted: product.isDeleted
                               });

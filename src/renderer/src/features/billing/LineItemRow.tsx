@@ -61,7 +61,10 @@ const LineItemRow = memo(
               <Trash2
                 className="text-destructive hover:bg-accent invisible rounded-md px-1 py-1 group-hover:visible hover:scale-103 hover:cursor-pointer active:scale-98"
                 size={33}
-                onClick={() => deleteLineItem(item.rowId)}
+                onClick={() => {
+                  deleteLineItem(item.rowId);
+                  processSyncQueue();
+                }}
               />
             </div>
           </div>

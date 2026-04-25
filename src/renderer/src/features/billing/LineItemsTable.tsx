@@ -72,14 +72,17 @@ const LineItemsTable = () => {
           </div>
 
           <div className="relative space-y-1 pt-2">
-            {lineItems.map((item: LineItem, idx: number) => (
-              <LineItemRow
-                key={item.rowId}
-                idx={idx}
-                item={item}
-                isCountColumnVisible={isCountColumnVisible}
-              />
-            ))}
+            {lineItems.map(
+              (item: LineItem, idx: number) =>
+                !item.isDeleted && (
+                  <LineItemRow
+                    key={item.rowId}
+                    idx={idx}
+                    item={item}
+                    isCountColumnVisible={isCountColumnVisible}
+                  />
+                )
+            )}
 
             <div className="flex items-center justify-between px-4 py-2">
               <Button

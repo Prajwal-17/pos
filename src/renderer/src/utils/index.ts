@@ -70,13 +70,13 @@ export const filterValidLineItems = (items: LineItem[]) => {
 };
 
 /**
- * Filters an array of line items, returning only those marked as "dirty" for autosave sync
+ * Filters an array of line items, returning only those marked as "dirty" & "isDeleted:true" for autosave sync
  *
  * @param items - Array of LineItems to filter
  * @returns A new array of LineItems whose `syncStatus` is "IS_DIRTY"
  */
 export const filterDirtyLineItems = (items: LineItem[]) => {
-  return items.filter((item) => item.syncStatus === SYNCSTATUS.IS_DIRTY);
+  return items.filter((item) => item.syncStatus === SYNCSTATUS.IS_DIRTY || item.isDeleted);
 };
 
 /**
@@ -109,29 +109,29 @@ export function normalizeLineItems(lineItems: LineItem[]): NormalizedLineItem[] 
  * 2. Convert `price` string to (Paisa).
  * 3. Transform `price` & `quantity` from string to number.
  */
-export function normalizeOriginalLineItems(lineItems: LineItem[]) {
-  const filteredLineitems = filterValidLineItems(lineItems);
+// export function normalizeOriginalLineItems(lineItems: LineItem[]) {
+//   const filteredLineitems = filterValidLineItems(lineItems);
 
-  return filteredLineitems.map((item) => ({
-    ...item,
-    price: convertToPaisa(parseFloat(item.price || "0")),
-    quantity: toMilliUnits(item.quantity),
-    checkedQty: toMilliUnits(item.checkedQty)
-  }));
-}
+//   return filteredLineitems.map((item) => ({
+//     ...item,
+//     price: convertToPaisa(parseFloat(item.price || "0")),
+//     quantity: toMilliUnits(item.quantity),
+//     checkedQty: toMilliUnits(item.checkedQty)
+//   }));
+// }
 
 /** Strip off `id` & `rowId` fields in an array of objects for comparision */
-export function stripLineItems(originalLineItems: any[], currentLineItems: any[]) {
-  /* eslint-disable */
-  const stripedOriginal = originalLineItems.map(({ id, rowId, isInventoryItem, ...rest }) => rest);
-  const stripedCurrent = currentLineItems.map(({ id, rowId, isInventoryItem, ...rest }) => rest);
-  /* eslint-enable */
+// export function stripLineItems(originalLineItems: any[], currentLineItems: any[]) {
+//   /* eslint-disable */
+//   const stripedOriginal = originalLineItems.map(({ id, rowId, isInventoryItem, ...rest }) => rest);
+//   const stripedCurrent = currentLineItems.map(({ id, rowId, isInventoryItem, ...rest }) => rest);
+//   /* eslint-enable */
 
-  return {
-    originalCleaned: stripedOriginal,
-    currentCleaned: stripedCurrent
-  };
-}
+//   return {
+//     originalCleaned: stripedOriginal,
+//     currentCleaned: stripedCurrent
+//   };
+// }
 
 export function buildTransactionPayload({
   billingType,

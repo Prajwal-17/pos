@@ -365,8 +365,19 @@ export type UpdateResponseItem = UnifiedTransactionItem & {
   rowId: string;
 };
 
-export type UpdateSaleResponse = Omit<UnifiedTransctionWithItems, "customer"> & {
-  items: UpdateResponseItem[];
+// export type UpdateSaleResponse = Omit<UnifiedTransctionWithItems, "customer"> & {
+//   items: UpdateResponseItem[];
+// };
+
+export type SyncedItems = {
+  rowId: string;
+  id: string;
+  updatedAt: string;
+};
+
+export type SyncResponse = {
+  syncedItems: SyncedItems[];
+  deletedRowIds: string[];
 };
 
 export type UpdateEstimateResponse = Omit<UnifiedTransctionWithItems, "customer"> & {

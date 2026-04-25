@@ -4,17 +4,17 @@ import {
   TRANSACTION_TYPE,
   type BatchCheckAction,
   type PaginatedApiResponse,
+  type SyncResponse,
   type TransactionListResponse,
   type TxnPayloadData,
   type UnifiedTransactionItem,
   type UnifiedTransctionWithItems,
-  type UpdateQtyAction,
-  type UpdateSaleResponse
+  type UpdateQtyAction
 } from "../../../shared/types";
 import { sales } from "../../db/schema";
 import { AppError } from "../../utils/appError";
 import { salesRepository } from "./sales.repository";
-import type { FilterSalesParams, UpdateSaleParams } from "./sales.types";
+import type { FilterSalesParams } from "./sales.types";
 
 const getSaleById = async (id: string): Promise<UnifiedTransctionWithItems> => {
   const sale = await salesRepository.getSaleById(id);
@@ -142,23 +142,17 @@ const createSale = async (payload: TxnPayloadData): Promise<{ id: string }> => {
   return { id: newSaleId };
 };
 
-const updateSale = async (id: string, payload: TxnPayloadData): Promise<UpdateSaleResponse> => {
-  const { finalItems, grandTotal, totalQuantity } = computeItemsAndTotals(payload.items);
+const syncSale = async (id: string, payload: TxnPayloadData): Promise<SyncResponse> => {
+  const existingSale = await salesRepository.getSaleById(id);
 
-  const finalPayload: UpdateSaleParams = {
-    ...payload,
-    items: finalItems,
-    grandTotal,
-    totalQuantity
-  };
+  if (!existingSale) {
+    throw new AppError("Sale does not exist", 404);
+  }
 
-  const result = await salesRepository.updateSale(id, finalPayload);
+  const result = await salesRepository.syncSaleWithItems(id, payload);
 
   return {
-    id,
-    type: TRANSACTION_TYPE.SALE,
-    ...result,
-    createdAt: result.createdAt
+    ...result
   };
 };
 
@@ -199,7 +193,7 @@ export const salesService = {
   getNextInvoiceNo,
   filterSalesByDate,
   createSale,
-  updateSale,
+  syncSale,
   convertSaleToEstimate,
   updateCheckedQtyService,
   batchCheckItemsService,

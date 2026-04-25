@@ -42,8 +42,7 @@ salesController.post(
   async (c) => {
     const { id } = c.req.valid("param");
     const payload = c.req.valid("json");
-    console.log("payload", payload);
-    const result = await salesService.updateSale(id, payload.data);
+    const result = await salesService.syncSale(id, payload.data);
     return c.json(result, 200);
   }
 );

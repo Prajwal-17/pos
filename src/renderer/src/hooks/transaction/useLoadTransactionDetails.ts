@@ -22,7 +22,6 @@ const useLoadTransactionDetails = (type: TransactionType, id?: string) => {
 
   // Line items store setters
   const setLineItems = useLineItemsStore((state) => state.setLineItems);
-  // const setOriginalLineItems = useLineItemsStore((state) => state.setOriginalLineItems);
 
   const { data, isSuccess, isLoading, status, isFetched, isError, error } = useQuery({
     queryKey: [type, id],
@@ -45,9 +44,7 @@ const useLoadTransactionDetails = (type: TransactionType, id?: string) => {
       setOriginalBillingDate(new Date(data.createdAt as string));
       setCustomerId(data.customerId);
       setCustomerName(data.customer.name);
-      // console.log("lineitems", data.items);
       setLineItems(data.items);
-      // setOriginalLineItems();
     }
   }, [
     isSuccess,
@@ -60,7 +57,6 @@ const useLoadTransactionDetails = (type: TransactionType, id?: string) => {
     setCustomerId,
     setCustomerName,
     setLineItems
-    // setOriginalLineItems
   ]);
   return { status, isLoading, isFetched };
 };

@@ -1,4 +1,4 @@
-import type { Product, UnifiedTransactionItem, UpdateResponseItem } from "@shared/types";
+import type { Product, UnifiedTransactionItem } from "@shared/types";
 import { convertToPaisa, convertToRupees, fromMilliUnits, toMilliUnits } from "@shared/utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import { create } from "zustand";
@@ -23,12 +23,12 @@ export type LineItem = {
   unit: string | null;
   mrp: number | null;
   price: string;
-  purchasePrice: number | null;
   quantity: string;
-  totalPrice: number;
+  totalPrice: number; // UI-only
   checkedQty: number;
   isInventoryItem: boolean;
-  syncStatus: SyncStatus;
+  syncStatus: SyncStatus; // FE-only
+  isDeleted: boolean; // delete item flag
 };
 
 type LineItemsStore = {
@@ -36,15 +36,14 @@ type LineItemsStore = {
   setIsCountControlsVisible: () => void;
   lineItems: LineItem[] | [];
   setLineItems: (itemsArray: UnifiedTransactionItem[]) => void;
-  // originalLineItems: LineItem[] | [];
-  // setOriginalLineItems: () => void;
   addEmptyLineItem: (type?: "button") => void;
   addLineItem: (rowId: string, newItem: Product) => void;
   updateLineItem: (id: string, field: keyof LineItem, value: string | number) => void;
-  updateLineItemId: (responseItems: UpdateResponseItem[]) => void;
-  deleteLineItem: (id: string) => void;
+  updateLineItemId: (idMap: Map<string, string>) => void;
+  deleteLineItem: (rowId: string) => void;
+  purgeDeletedItems: (rowIds: Set<string>) => void;
   markItemAsSaving: (items: LineItem[]) => void;
-  markItemAsSynced: (items: LineItem[]) => void;
+  markItemAsSynced: (rowIds: Set<string>) => void;
   setAllChecked: (checked: boolean) => void;
   reset: () => void;
 };
@@ -64,12 +63,12 @@ function normalizeLineItems(itemsArray: UnifiedTransactionItem[]) {
     unit: item.unit,
     mrp: item.mrp,
     price: item.price ? convertToRupees(Number(item.price)).toString() : "",
-    purchasePrice: item.purchasePrice,
     quantity: fromMilliUnits(item.quantity).toString(),
     totalPrice: item.totalPrice,
     checkedQty: fromMilliUnits(item.checkedQty),
     isInventoryItem: item.productId ? true : false,
-    syncStatus: SYNCSTATUS.SYNCED
+    syncStatus: SYNCSTATUS.SYNCED,
+    isDeleted: false
   }));
 
   return [...lineItemsArray, initialLineItem()];
@@ -86,41 +85,16 @@ function initialLineItem() {
     unit: null,
     mrp: null,
     price: "",
-    purchasePrice: null,
     quantity: "",
     totalPrice: 0,
     checkedQty: 0,
     isInventoryItem: false,
-    syncStatus: SYNCSTATUS.SYNCED
+    syncStatus: SYNCSTATUS.SYNCED,
+    isDeleted: false
   };
 
   return lineItem;
 }
-
-// function normalizeLineItems(itemsArray: UnifiedTransactionItem[]) {
-//   if (!itemsArray || itemsArray.length === 0) {
-//     return [initialLineItem()];
-//   }
-
-//   const lineItemsArray: LineItem[] = itemsArray.map((item) => ({
-//     id: item.id,
-//     rowId: uuidv4(),
-//     productId: item.productId,
-//     name: item.name,
-//     productSnapshot: item.productSnapshot,
-//     weight: item.weight,
-//     unit: item.unit,
-//     mrp: item.mrp,
-//     price: item.price ? convertToRupees(Number(item.price)).toString() : "",
-//     purchasePrice: item.purchasePrice,
-//     quantity: fromMilliUnits(item.quantity).toString(),
-//     totalPrice: item.totalPrice,
-//     checkedQty: fromMilliUnits(item.checkedQty),
-//     isInventoryItem: item.productId ? true : false
-//   }));
-
-//   return [...lineItemsArray, initialLineItem()];
-// }
 
 const reCalculateLineItem = (item: LineItem): LineItem => {
   const priceInRupees = parseFloat(item.price) || 0;
@@ -147,7 +121,6 @@ export const useLineItemsStore = create<LineItemsStore>()(
           "lineItems/setIsCountControlsVisible"
         ),
 
-      // live state
       lineItems: [initialLineItem()],
 
       setLineItems: (itemsArray) =>
@@ -158,17 +131,6 @@ export const useLineItemsStore = create<LineItemsStore>()(
           false,
           "lineItems/setLineItems"
         ),
-
-      // // recently saved result from DB
-      // originalLineItems: [],
-      // setOriginalLineItems: () =>
-      //   set(
-      //     (state) => ({
-      //       originalLineItems: state.lineItems
-      //     }),
-      //     false,
-      //     "lineItems/setOriginalLineItems"
-      //   ),
 
       // add empty row
       addEmptyLineItem: (type) =>
@@ -216,12 +178,12 @@ export const useLineItemsStore = create<LineItemsStore>()(
               unit: newItem.unit,
               mrp: newItem.mrp,
               price: newItem.price ? convertToRupees(newItem.price).toString() : "",
-              purchasePrice: newItem.purchasePrice,
               quantity: oldItemQuantity.toString(),
               totalPrice: parseFloat((oldItemQuantity * newItem.price).toFixed(2)),
               checkedQty: oldItemCheckedQty,
               isInventoryItem: true,
-              syncStatus: SYNCSTATUS.IS_DIRTY
+              syncStatus: SYNCSTATUS.IS_DIRTY,
+              isDeleted: false
             };
 
             currLineItems[index] = { ...updatedItem };
@@ -258,8 +220,7 @@ export const useLineItemsStore = create<LineItemsStore>()(
                   name: "",
                   weight: null,
                   unit: null,
-                  mrp: null,
-                  purchasePrice: null
+                  mrp: null
                 };
                 isInventoryItem = false;
               }
@@ -285,52 +246,24 @@ export const useLineItemsStore = create<LineItemsStore>()(
           "lineItems/updateLineItem"
         ),
 
-      /**
-       * Update Internal Id's of LineItems array & update original LineItems
-       */
-      // updateInternalIds: (responseItems) =>
-      //   set(
-      //     (state) => {
-      //       const updatedLineItems = state.lineItems.map((lineItem: LineItem) => {
-      //         const current = responseItems.find((item) => item.rowId === lineItem.rowId);
-
-      //         if (!current) return lineItem;
-      //         if (current.id === lineItem.id) {
-      //           return lineItem;
-      //         }
-
-      //         return {
-      //           ...lineItem,
-      //           id: current?.id
-      //         };
-      //       });
-
-      //       return {
-      //         lineItems: updatedLineItems,
-      //         originalLineItems: filterValidLineItems(updatedLineItems)
-      //       };
-      //     },
-      //     false,
-      //     "lineItems/updateInternalIds"
-      //   ),
-
       // delete a row
-      deleteLineItem: (id) =>
+      deleteLineItem: (rowId) =>
         set(
           (state) => {
-            const updatedLineItems = state.lineItems.filter((item) => item.rowId !== id);
-            if (updatedLineItems.length === 0) {
-              return {
-                lineItems: [initialLineItem()]
-              };
+            const itemToBeDeleted = state.lineItems.find((item) => item.rowId === rowId);
+            if (itemToBeDeleted) {
+              itemToBeDeleted.isDeleted = true;
             }
-            return {
-              lineItems: updatedLineItems
-            };
           },
           false,
           "lineItems/deleteLineItem"
         ),
+
+      purgeDeletedItems: (rowIds) =>
+        set((state) => {
+          console.log("purge ids rowids", rowIds);
+          state.lineItems = state.lineItems.filter((item) => !rowIds.has(item.rowId));
+        }),
 
       setAllChecked: (checked) =>
         set(
@@ -344,37 +277,48 @@ export const useLineItemsStore = create<LineItemsStore>()(
           "lineItems/setAllChecked"
         ),
 
-      updateLineItemId: (responseItems) =>
-        set((state) => {
-          const newerIds = new Map(responseItems.map((i) => [i.rowId, i.id])); // map => <rowId, id(i.e saleItem.id || estimateItem.id)>
+      updateLineItemId: (idMap) =>
+        set(
+          (state) => {
+            // const newerIds = new Map(responseItems.map((i) => [i.rowId, i.id])); // map => <rowId, id(i.e saleItem.id || estimateItem.id)>
 
-          state.lineItems.forEach((item) => {
-            if (newerIds.has(item.rowId)) {
-              item.id = newerIds.get(item.rowId)!; // type assertion - this value never be undefined
-            }
-          });
-        }),
+            state.lineItems.forEach((item) => {
+              if (idMap.has(item.rowId)) {
+                item.id = idMap.get(item.rowId)!; // type assertion - this value never be undefined
+              }
+            });
+          },
+          false,
+          "lineItems/updateLineItemId"
+        ),
 
       markItemAsSaving: (items) =>
-        set((state) => {
-          const ids = new Set(items.map((i) => i.id));
+        set(
+          (state) => {
+            const ids = new Set(items.map((i) => i.id));
 
-          state.lineItems.forEach((item) => {
-            if (ids.has(item.id)) {
-              item.syncStatus = SYNCSTATUS.SAVING;
-            }
-          });
-        }),
+            state.lineItems.forEach((item) => {
+              if (ids.has(item.id)) {
+                item.syncStatus = SYNCSTATUS.SAVING;
+              }
+            });
+          },
+          false,
+          "lineItems/markItemsAsSaved"
+        ),
 
-      markItemAsSynced: (items) =>
-        set((state) => {
-          const ids = new Set(items.map((i) => i.id));
-          state.lineItems.forEach((item) => {
-            if (ids.has(item.id)) {
-              item.syncStatus = SYNCSTATUS.SYNCED;
-            }
-          });
-        }),
+      markItemAsSynced: (rowIds) =>
+        set(
+          (state) => {
+            state.lineItems.forEach((item) => {
+              if (rowIds.has(item.rowId)) {
+                item.syncStatus = SYNCSTATUS.SYNCED;
+              }
+            });
+          },
+          false,
+          "lineItems/markItemsAsSynced"
+        ),
 
       reset: () =>
         set(
