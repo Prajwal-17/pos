@@ -8,7 +8,6 @@ export const SummaryFooter = () => {
   const { type } = useParams();
 
   const { subtotal, grandTotal } = useTransaction();
-  // const { handleManualAction, isSaving } = useTransactionPersistance();
   const isSaving = true;
 
   if (!type) {
