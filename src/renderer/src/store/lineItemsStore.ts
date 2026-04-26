@@ -27,7 +27,7 @@ export type LineItem = {
 type LineItemsStore = {
   isCountColumnVisible: boolean;
   setIsCountControlsVisible: () => void;
-  lineItems: LineItem[] | [];
+  lineItems: LineItem[];
   setLineItems: (itemsArray: UnifiedTransactionItem[]) => void;
   addEmptyLineItem: (type?: "button") => void;
   addLineItem: (rowId: string, newItem: Product) => void;
@@ -107,9 +107,9 @@ export const useLineItemsStore = create<LineItemsStore>()(
       isCountColumnVisible: false,
       setIsCountControlsVisible: () =>
         set(
-          (state) => ({
-            isCountColumnVisible: !state.isCountColumnVisible
-          }),
+          (state) => {
+            state.isCountColumnVisible = !state.isCountColumnVisible;
+          },
           false,
           "lineItems/setIsCountControlsVisible"
         ),
@@ -118,9 +118,9 @@ export const useLineItemsStore = create<LineItemsStore>()(
 
       setLineItems: (itemsArray) =>
         set(
-          () => ({
-            lineItems: normalizeLineItems(itemsArray)
-          }),
+          (state) => {
+            state.lineItems = normalizeLineItems(itemsArray);
+          },
           false,
           "lineItems/setLineItems"
         ),
@@ -131,11 +131,9 @@ export const useLineItemsStore = create<LineItemsStore>()(
           (state) => {
             const length = state.lineItems.length;
             if (type !== "button" && state.lineItems[length - 1].name === "") {
-              return state;
+              return;
             }
-            return {
-              lineItems: [...state.lineItems, initialLineItem()]
-            };
+            state.lineItems.push(initialLineItem());
           },
           false,
           "lineItems/addEmptyLineItem"
@@ -145,23 +143,16 @@ export const useLineItemsStore = create<LineItemsStore>()(
       addLineItem: (rowId, newItem) =>
         set(
           (state) => {
-            /**
-             * always create a new array to update the existing state array, coz react/zustand does
-             * shallow comparison hence the array reference remains the same, so creating new array creates new reference
-             * where react/zustand notices change
-             */
-            const currLineItems = [...state.lineItems];
-
             // get index of item at rowId
-            const index = currLineItems.findIndex((item) => item.rowId === rowId);
+            const index = state.lineItems.findIndex((item) => item.rowId === rowId);
+            if (index === -1) return;
+            const oldItem = state.lineItems[index];
 
-            // existing line item at rowId
-            const oldItem = currLineItems[index];
             const oldQtyNum = parseFloat(oldItem.quantity || "0");
             const oldItemQuantity = oldQtyNum >= 1 ? oldQtyNum : 1;
             const oldItemCheckedQty = oldItem.checkedQty > 1 ? oldItem.checkedQty : 0;
 
-            const updatedItem: LineItem = {
+            const newLineItem: LineItem = {
               id: oldItem.id,
               rowId: uuidv4(),
               productId: newItem.id,
@@ -172,18 +163,14 @@ export const useLineItemsStore = create<LineItemsStore>()(
               mrp: newItem.mrp,
               price: newItem.price ? convertToRupees(newItem.price).toString() : "",
               quantity: oldItemQuantity.toString(),
-              totalPrice: parseFloat((oldItemQuantity * newItem.price).toFixed(2)),
+              totalPrice: 0, // temporary
               checkedQty: oldItemCheckedQty,
               isInventoryItem: true,
               syncStatus: SYNCSTATUS.IS_DIRTY,
               isDeleted: false
             };
 
-            currLineItems[index] = { ...updatedItem };
-
-            return {
-              lineItems: currLineItems
-            };
+            state.lineItems[index] = reCalculateLineItem(newLineItem);
           },
           false,
           "lineItems/addLineItem"
@@ -193,52 +180,52 @@ export const useLineItemsStore = create<LineItemsStore>()(
       updateLineItem: (rowId, field, value) =>
         set(
           (state) => {
-            const updatedLineItems = state.lineItems.map((item: LineItem) => {
-              if (rowId !== item.rowId) return item;
+            const index = state.lineItems.findIndex((item) => item.rowId === rowId);
+            if (index === -1) return;
 
-              let updatedItem = item;
-              let finalValue: any;
-              let isInventoryItem: boolean = item.isInventoryItem;
-              if (field === "price" || field === "quantity") {
-                finalValue = value;
-                isInventoryItem = true;
-              } else {
-                finalValue = value;
-              }
+            // item to be updated
+            let item = state.lineItems[index];
 
-              if (field === "productSnapshot") {
-                updatedItem = {
-                  ...item,
-                  productId: null,
-                  name: "",
-                  weight: null,
-                  unit: null,
-                  mrp: null
-                };
-                isInventoryItem = false;
-              }
+            let finalValue: any = value;
+            let isInventoryItem = item.isInventoryItem;
 
-              const draftItem = {
+            if (field === "price" || field === "quantity") {
+              finalValue = value;
+              isInventoryItem = true;
+            } else {
+              finalValue = value;
+            }
+
+            let updatedItem = { ...item };
+
+            if (field === "productSnapshot") {
+              updatedItem = {
                 ...updatedItem,
-                [field]: finalValue,
-                isInventoryItem,
-                syncStatus: SYNCSTATUS.IS_DIRTY
+                productId: null,
+                name: "",
+                weight: null,
+                unit: null,
+                mrp: null
               };
+              isInventoryItem = false;
+            }
 
-              if (["quantity", "price"].includes(field)) {
-                return reCalculateLineItem(draftItem);
-              }
-              return draftItem;
-            });
+            // apply the changed field
+            (updatedItem as any)[field] = finalValue;
+            updatedItem.isInventoryItem = isInventoryItem;
+            updatedItem.syncStatus = SYNCSTATUS.IS_DIRTY;
 
-            return {
-              lineItems: updatedLineItems
-            };
+            // if price or quantity changed, recalculate totalPrice
+            if (["quantity", "price"].includes(field)) {
+              updatedItem = reCalculateLineItem(updatedItem);
+            }
+
+            // replace the old item with the new one
+            state.lineItems[index] = updatedItem;
           },
           false,
           "lineItems/updateLineItem"
         ),
-
       // delete a row
       deleteLineItem: (rowId) =>
         set(
