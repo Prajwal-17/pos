@@ -7,7 +7,7 @@ import {
   filterValidLineItems,
   normalizeLineItems
 } from "@/utils";
-import type { SyncResponse } from "@shared/types";
+import { BILLSTATUS, type SyncResponse } from "@shared/types";
 import debounce from "lodash.debounce";
 
 let isSyncing = false;
@@ -17,15 +17,25 @@ const syncLogic = async () => {
 
   const { lineItems, markItemAsSaving, markItemAsSynced, updateLineItemId, purgeDeletedItems } =
     useLineItemsStore.getState();
-  const { billingId, setBillingId, billingType, transactionNo, customerId, billingDate } =
-    useBillingStore.getState();
+  const {
+    billingId,
+    setBillingId,
+    billingType,
+    transactionNo,
+    customerId,
+    setStatus,
+    billingDate,
+    isMetaDataDirty,
+    markMetaDataSynced
+  } = useBillingStore.getState();
 
   const validLineItems = filterValidLineItems(lineItems);
   const dirtyItems = filterDirtyLineItems(validLineItems);
 
-  if (dirtyItems.length === 0) return;
+  if (dirtyItems.length === 0 && !isMetaDataDirty) return;
 
   isSyncing = true;
+  setStatus(BILLSTATUS.SAVING);
   markItemAsSaving(dirtyItems);
 
   const normalizedItems = normalizeLineItems(dirtyItems); // here strip of the sync status
@@ -58,15 +68,13 @@ const syncLogic = async () => {
     updateLineItemId(updateIdsMap);
     markItemAsSynced(syncIds);
     purgeDeletedItems(purgeIds);
+    markMetaDataSynced();
   } catch (error) {
-    console.error("Sync error:", error); // here error
-    // Note: You should ideally have a revertItemToDirty action here
-    // to ensure failed items are retried in the next cycle.
+    console.error("Sync error:", error);
+    setStatus(BILLSTATUS.ERROR);
   } finally {
-    // this finally might trigger in continously loops -> if error occured
-    // also keeps running if the page has exited
-    // this all keeps triggering in a loop if isDeleted=true || isDirty
     isSyncing = false;
+    setStatus(BILLSTATUS.SAVED);
 
     const freshState = useLineItemsStore.getState();
     const freshValid = filterValidLineItems(freshState.lineItems);

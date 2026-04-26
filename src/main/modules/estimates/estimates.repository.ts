@@ -218,6 +218,15 @@ const syncEstimateWithItems = async (estimateId: string, payload: TxnPayloadData
 
     updateEstimateTotals(tx, estimateId);
 
+    tx.update(estimates)
+      .set({
+        customerId: payload.customerId,
+        createdAt: payload.createdAt,
+        updatedAt: sql`(STRFTIME('%Y-%m-%dT%H:%M:%fZ', 'now'))`
+      })
+      .where(eq(estimates.id, estimateId))
+      .run();
+
     return {
       syncedItems,
       deletedRowIds

@@ -184,7 +184,7 @@ export const useLineItemsStore = create<LineItemsStore>()(
             if (index === -1) return;
 
             // item to be updated
-            let item = state.lineItems[index];
+            const item = state.lineItems[index];
 
             let finalValue: any = value;
             let isInventoryItem = item.isInventoryItem;

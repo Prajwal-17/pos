@@ -16,7 +16,6 @@ const useLoadTransactionDetails = (type: TransactionType, id?: string) => {
     setBillingType,
     setTransactionNo,
     setBillingDate,
-    setOriginalBillingDate,
     setCustomerId,
     setCustomerName
   } = useBillingStore.getState();
@@ -42,7 +41,6 @@ const useLoadTransactionDetails = (type: TransactionType, id?: string) => {
       setBillingType(data.type);
       setTransactionNo(data.transactionNo);
       setBillingDate(new Date(data.createdAt as string));
-      setOriginalBillingDate(new Date(data.createdAt as string));
       setCustomerId(data.customerId);
       setCustomerName(data.customer.name);
       setLineItems(data.items);

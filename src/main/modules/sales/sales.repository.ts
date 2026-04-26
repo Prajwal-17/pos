@@ -207,6 +207,15 @@ const syncSaleWithItems = async (saleId: string, payload: TxnPayloadData) => {
 
     updateSaleTotals(tx, saleId);
 
+    tx.update(sales)
+      .set({
+        customerId: payload.customerId,
+        createdAt: payload.createdAt,
+        updatedAt: sql`(STRFTIME('%Y-%m-%dT%H:%M:%fZ', 'now'))`
+      })
+      .where(eq(sales.id, saleId))
+      .run();
+
     return {
       syncedItems,
       deletedRowIds
