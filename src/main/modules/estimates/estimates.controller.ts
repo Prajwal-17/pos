@@ -34,7 +34,6 @@ estimatesController.post("/create", validateRequest("json", txnPayloadSchema), a
   return c.json(result, 200);
 });
 
-// update an existing estimate
 estimatesController.post(
   "/:id/sync",
   validateRequest("param", idSchema),

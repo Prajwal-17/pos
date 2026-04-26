@@ -128,10 +128,7 @@ const createEstimate = async (payload: TxnPayloadData): Promise<SyncResponse> =>
   });
 };
 
-const syncEstimateWithItems = async (
-  estimateId: string,
-  payload: TxnPayloadData
-): Promise<SyncResponse> => {
+const syncEstimateWithItems = async (estimateId: string, payload: TxnPayloadData) => {
   return db.transaction((tx) => {
     const syncedItems: SyncedItems[] = [];
     const deletedRowIds: string[] = [];

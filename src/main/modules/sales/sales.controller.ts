@@ -34,7 +34,6 @@ salesController.post("/create", validateRequest("json", txnPayloadSchema), async
   return c.json(result, 200);
 });
 
-// update an existing sale
 salesController.post(
   "/:id/sync",
   validateRequest("param", idSchema),
