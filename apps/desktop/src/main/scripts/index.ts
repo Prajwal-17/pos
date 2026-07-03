@@ -5,6 +5,7 @@ import { updatePurchasePrice } from "./release-v4/updatePurchasePrice";
 // import { updateQuantityToMilliUnits } from "./release-v4/updateQuantityToMilliUnits";
 // import { updateTotalQuantityToMilliUnits } from "./release-v4/updateTotalQuantityToMilliUnits";
 
+// scripts to update the db
 export async function dbScripts() {
   // db scripts for above v4.0.0
   await updateProductSnapshot(); // update product snapshot using product object
