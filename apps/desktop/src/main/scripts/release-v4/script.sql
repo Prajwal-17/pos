@@ -93,3 +93,80 @@ FROM products
 WHERE product_snapshot != RTRIM(product_snapshot)
 
 ORDER BY issue, name;
+
+-- Verify if total(saleItems.quantity) = sales.totalQuantity
+SELECT
+    s.id,
+    s.invoice_no,
+    s.total_quantity AS stored_total_quantity,
+    COALESCE(SUM(si.quantity), 0) AS calculated_total_quantity
+FROM sales s
+LEFT JOIN sale_items si
+    ON s.id = si.sale_id
+GROUP BY
+    s.id,
+    s.invoice_no,
+    s.total_quantity
+HAVING
+    COALESCE(SUM(si.quantity), 0) != COALESCE(s.total_quantity, 0);
+
+
+-- Verify if total(estimatesitems.quantity) = estimates.totalQuantity
+SELECT
+    e.id,
+    e.estimate_no,
+    e.total_quantity AS stored_total_quantity,
+    COALESCE(SUM(ei.quantity), 0) AS calculated_total_quantity
+FROM estimates e
+LEFT JOIN estimate_items ei
+    ON e.id = ei.estimate_id
+GROUP BY
+    e.id,
+    e.estimate_no,
+    e.total_quantity
+HAVING
+    COALESCE(SUM(ei.quantity), 0) != COALESCE(e.total_quantity, 0);
+
+-- Verify total(saleItems.quantity) = sales.grandTotal
+SELECT
+    s.id,
+    s.invoice_no,
+    s.grand_total AS stored_grand_total,
+    COALESCE(SUM(si.total_price), 0) AS calculated_grand_total
+FROM sales s
+LEFT JOIN sale_items si
+    ON s.id = si.sale_id
+GROUP BY
+    s.id,
+    s.invoice_no,
+    s.grand_total
+HAVING
+    COALESCE(SUM(si.total_price), 0) != COALESCE(s.grand_total, 0);
+
+-- Verify total(estimateItems.quantity) = estimates.grandTotal
+SELECT
+    e.id,
+    e.estimate_no,
+    e.grand_total AS stored_grand_total,
+    COALESCE(SUM(ei.total_price), 0) AS calculated_grand_total
+FROM estimates e
+LEFT JOIN estimate_items ei
+    ON e.id = ei.estimate_id
+GROUP BY
+    e.id,
+    e.estimate_no,
+    e.grand_total
+HAVING
+    COALESCE(SUM(ei.total_price), 0) != COALESCE(e.grand_total, 0);
+
+
+-- Verify product history - where all price fields are null
+SELECT *
+FROM product_history
+WHERE
+    old_price IS NULL
+    AND new_price IS NULL
+    AND old_mrp IS NULL
+    AND new_mrp IS NULL
+    AND old_purchase_price IS NULL
+    AND new_purchase_price IS NULL;

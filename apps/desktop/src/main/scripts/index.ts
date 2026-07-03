@@ -1,5 +1,5 @@
 import { recalculateTotalQuantitySold } from "./release-v4/recalculateTotalQuantitySold";
-import { updateCheckedQtyToMilliUnits } from "./release-v4/updateCheckedQtyToMilliUnits";
+// import { updateCheckedQtyToMilliUnits } from "./release-v4/updateCheckedQtyToMilliUnits";
 import { updateProductSnapshot } from "./release-v4/updateProductSnpashot";
 import { updatePurchasePrice } from "./release-v4/updatePurchasePrice";
 // import { updateQuantityToMilliUnits } from "./release-v4/updateQuantityToMilliUnits";
@@ -11,6 +11,6 @@ export async function dbScripts() {
   await updatePurchasePrice(); // recalculate purchase price of saleItems & estimateItems and update
   // await updateQuantityToMilliUnits();
   // await updateTotalQuantityToMilliUnits();
-  await updateCheckedQtyToMilliUnits();
+  // await updateCheckedQtyToMilliUnits();
   await recalculateTotalQuantitySold();
 }
