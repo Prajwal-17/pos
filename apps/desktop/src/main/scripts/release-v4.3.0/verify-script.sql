@@ -170,3 +170,38 @@ WHERE
     AND new_mrp IS NULL
     AND old_purchase_price IS NULL
     AND new_purchase_price IS NULL;
+
+
+-- Verify app_instance has exactly 1 row
+SELECT 'app_instance' AS table_name, COUNT(*) AS row_count
+FROM app_instance
+HAVING COUNT(*) != 1;
+
+-- Verify store_profile has exactly 1 row
+SELECT 'store_profile' AS table_name, COUNT(*) AS row_count
+FROM store_profile
+HAVING COUNT(*) != 1;
+
+-- Verify storeId is populated in customers
+SELECT 'customers' AS table_name, COUNT(*) AS null_storeid_count
+FROM customers
+WHERE store_id IS NULL
+HAVING COUNT(*) > 0;
+
+-- Verify storeId is populated in products
+SELECT 'products' AS table_name, COUNT(*) AS null_storeid_count
+FROM products
+WHERE store_id IS NULL
+HAVING COUNT(*) > 0;
+
+-- Verify storeId is populated in sales
+SELECT 'sales' AS table_name, COUNT(*) AS null_storeid_count
+FROM sales
+WHERE store_id IS NULL
+HAVING COUNT(*) > 0;
+
+-- Verify storeId is populated in estimates
+SELECT 'estimates' AS table_name, COUNT(*) AS null_storeid_count
+FROM estimates
+WHERE store_id IS NULL
+HAVING COUNT(*) > 0;
