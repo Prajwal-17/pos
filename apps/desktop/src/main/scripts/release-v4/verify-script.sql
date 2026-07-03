@@ -127,7 +127,7 @@ GROUP BY
 HAVING
     COALESCE(SUM(ei.quantity), 0) != COALESCE(e.total_quantity, 0);
 
--- Verify total(saleItems.quantity) = sales.grandTotal
+-- Verify total(saleItems.totalPrice) = sales.grandTotal
 SELECT
     s.id,
     s.invoice_no,
@@ -143,7 +143,7 @@ GROUP BY
 HAVING
     COALESCE(SUM(si.total_price), 0) != COALESCE(s.grand_total, 0);
 
--- Verify total(estimateItems.quantity) = estimates.grandTotal
+-- Verify total(estimateItems.totalPrice) = estimates.grandTotal
 SELECT
     e.id,
     e.estimate_no,
