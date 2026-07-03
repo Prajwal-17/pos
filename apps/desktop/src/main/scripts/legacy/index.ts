@@ -15,21 +15,8 @@
 // } from "./updateProductFields";
 // import { updateTotalPriceEstimates, updateTotalPriceSales } from "./updateTotalPrice";
 // import { updateProductHistory } from "./productHistory";
-import { updateProductSnapshot } from "./v4/updateProductSnpashot";
-import { recalculateTotalQuantitySold } from "./v4/recalculateTotalQuantitySold";
-import { updateCheckedQtyToMilliUnits } from "./v4/updateCheckedQtyToMilliUnits";
-import { updatePurchasePrice } from "./v4/updatePurchasePrice";
-import { updateQuantityToMilliUnits } from "./v4/updateQuantityToMilliUnits";
-import { updateTotalQuantityToMilliUnits } from "./v4/updateTotalQuantityToMilliUnits";
 
-export async function dbScripts() {
-  // db scripts for above v4.0.0
-  await updateProductSnapshot(); // update product snapshot using product object
-  await updatePurchasePrice(); // recalculate purchase price of saleItems & estimateItems and update
-  await updateQuantityToMilliUnits();
-  await updateTotalQuantityToMilliUnits();
-  await updateCheckedQtyToMilliUnits();
-  await recalculateTotalQuantitySold();
+export async function dbScriptsLegacy() {
   //
   // -- Used Scripts --
   // await trimProductSpaces();

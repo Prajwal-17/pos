@@ -1,57 +1,8 @@
 import { eq } from "drizzle-orm";
-import { convertToRupees } from "../../../shared/utils/utils";
+import { generateProductSnapshot } from "../../../shared/utils/productSnapshot";
+import { paisaToRupees } from "../../../shared/utils/utils";
 import { db } from "../../db/db";
 import { estimateItems, products, saleItems } from "../../db/schema";
-
-const ignoredWeight = ["", "1ml", "1g", "none", "1pc", "1kg"];
-
-type SnapshotPayload = {
-  name: string;
-  weight: string | null;
-  unit: string | null;
-  mrp: number | null;
-};
-
-// update name & conver to rs
-
-export const generateProductSnapshot = (item: SnapshotPayload) => {
-  let name = item.name;
-
-  // weight && mrp && weight+unit does not equal to ignoredWeights
-  if (
-    item.weight !== null &&
-    item.mrp &&
-    !ignoredWeight.some((w) => `${item.weight}${item.unit}` === w)
-  ) {
-    name += ` ${item.weight}${item.unit}`;
-    if (item.mrp) {
-      name += ` ${convertToRupees(item.mrp)}Rs`;
-    }
-  }
-
-  // weight && mrp && weight+unit equal to ignoredWeights
-  if (
-    item.weight !== null &&
-    item.mrp &&
-    ignoredWeight.some((w) => `${item.weight}${item.unit}` === w)
-  ) {
-    if (item.mrp) {
-      name += ` ${convertToRupees(item.mrp)} Rs`;
-    }
-  }
-
-  // weight = null && mrp
-  if (item.weight === null && item.mrp) {
-    name += ` ${convertToRupees(item.mrp)}Rs`;
-  }
-
-  // weight && mrp = null
-  if (item.weight !== null && !item.mrp) {
-    name += ` ${item.weight}${item.unit}`;
-  }
-
-  return name;
-};
 
 export async function updateProductSnapshot() {
   try {
@@ -60,7 +11,12 @@ export async function updateProductSnapshot() {
     const updatedProducts = existingProducts.map((item) => {
       return {
         ...item,
-        productSnapshot: generateProductSnapshot(item)
+        productSnapshot: generateProductSnapshot({
+          name: item.name,
+          weight: item.weight,
+          unit: item.unit,
+          mrp: item.mrp ? paisaToRupees(item.mrp) : null
+        })
       };
     });
 
@@ -89,21 +45,21 @@ export async function updateProductSnapshot() {
         if (!saleItem.productId) {
           return {
             ...saleItem,
-            productSnapshot: saleItem.name
+            productSnapshot: saleItem.productSnapshot
           };
         }
 
         const product = db.select().from(products).where(eq(products.id, saleItem.productId)).get();
+        const productName = product?.name || saleItem.name || "";
 
         return {
           ...saleItem,
-          name: product?.name,
+          name: productName,
           productSnapshot: generateProductSnapshot({
-            // @ts-ignore - name exists
-            name: product.name,
+            name: productName,
             weight: saleItem.weight,
             unit: saleItem.unit,
-            mrp: saleItem.mrp
+            mrp: saleItem.mrp ? paisaToRupees(saleItem.mrp) : null
           })
         };
       })
@@ -131,7 +87,7 @@ export async function updateProductSnapshot() {
         if (!estimateItem.productId) {
           return {
             ...estimateItem,
-            productSnapshot: estimateItem.name
+            productSnapshot: estimateItem.productSnapshot
           };
         }
         const product = db
@@ -139,15 +95,16 @@ export async function updateProductSnapshot() {
           .from(products)
           .where(eq(products.id, estimateItem.productId))
           .get();
+        const productName = product?.name || estimateItem.name || "";
+
         return {
           ...estimateItem,
-          name: product?.name,
+          name: productName,
           productSnapshot: generateProductSnapshot({
-            // @ts-ignore - name exists
-            name: product.name,
+            name: productName,
             weight: estimateItem.weight,
             unit: estimateItem.unit,
-            mrp: estimateItem.mrp
+            mrp: estimateItem.mrp ? paisaToRupees(estimateItem.mrp) : null
           })
         };
       })
