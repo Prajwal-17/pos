@@ -1,803 +1,896 @@
-I have everything needed. Here is the complete inventory.
+# Linear Light Migration — Midnight Navy Theme
+
+Complete migration guide for QuickCart from the current amber/saffron design system to a **Linear-inspired light mode** with **Midnight Navy** accent and **Warm Brown Ledger** sidebar, tuned for a 1366×768 grocery billing workstation.
 
 ---
 
-# Renderer Frontend Inventory — `apps/desktop/src/renderer/src/`
+## Table of Contents
 
-## 1. `components/` — All Files
-
-### Non-UI files (custom app components)
-
-| File                                    | Purpose                                                                                                                                                                      |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `components/Sidebar.tsx`                | App navigation sidebar — draggable/resizable, docked or overlay (billing) variant, renders logo, "New Sale/Estimate" shortcuts, `navLinks`, and a static store profile card. |
-| `components/highlighted-text.tsx`       | Tiny util component that highlights a search query substring inside text via `<mark>`.                                                                                       |
-| `components/layouts/RootLayout.tsx`     | Top-level layout gate: shows a loading spinner during bootstrap, lazy-loads `OnboardingFlow` if not onboarded, otherwise renders `AppShell`.                                 |
-| `components/layouts/AppShell.tsx`       | The actual app shell — animated sidebar (hidden on billing pages), header with collapsible toggle + dynamic page title + search input, and `<Outlet />`.                     |
-| `components/layouts/SidebarLayout.tsx`  | Thin wrapper that just renders `<AppShell />`. (Appears unused by `routes.tsx`.)                                                                                             |
-| `components/layouts/FullPageLayout.tsx` | Bare full-screen wrapper with just an `<Outlet />` (centered/max-w). (Appears unused by `routes.tsx`.)                                                                       |
-
-### `components/ui/` — Shadcn-generated primitives
-
-**Count: 22 files** — all Shadcn/ui new-york style generated primitives, not hand-written app logic.
-
-`alert-dialog.tsx`, `badge.tsx`, `button.tsx`, `calendar.tsx`, `card.tsx`, `chart.tsx`, `checkbox.tsx`, `command.tsx`, `dialog.tsx`, `dropdown-menu.tsx`, `input.tsx`, `label.tsx`, `menubar.tsx`, `popover.tsx`, `select.tsx`, `separator.tsx`, `switch.tsx`, `table.tsx`, `tabs.tsx`, `tooltip.tsx`.
+1. [Overview & Rationale](#1-overview--rationale)
+2. [Token Architecture — Complete `:root` Spec](#2-token-architecture--complete-root-spec)
+3. [Color Segregation by Use Case](#3-color-segregation-by-use-case)
+4. [Products Page — Weight+Unit vs MRP Visual Differentiation](#4-products-page--weightunit-vs-mrp-visual-differentiation)
+5. [Minimal Motion with React Motion](#5-minimal-motion-with-react-motion)
+6. [Component Inventory (Reference)](#6-component-inventory-reference)
+7. [Phase-Wise Migration Plan](#7-phase-wise-migration-plan)
+8. [Component-Specific Manual Edits](#8-component-specific-manual-edits)
+9. [Verification Checklist](#9-verification-checklist)
+10. [Rollback Plan](#10-rollback-plan)
 
 ---
 
-## 2. `pages/` — Recursive
+## 1. Overview & Rationale
 
-```
-pages/
-├── NotFoundPage.tsx                  # 404 catch-all route
-├── billing/
-│   └── BillingPage.tsx               # Top-level billing route (sale/estimate create + edit)
-├── customers/
-│   └── CustomersPage.tsx             # Customers directory route
-├── dashboard/
-│   ├── DashboardPage.tsx             # Route wrapper: reads :type param, validates, renders <Dashboard>
-│   └── Dashboard.tsx                 # Inner component — transaction list + revenue header + ViewModal
-├── export/
-│   └── pdf/
-│       └── PdfInvoicePage.tsx        # Standalone PDF invoice renderer (separate route, no shell)
-├── home/
-│   └── HomePage.tsx                  # Index route ("/") landing/home page
-├── products/
-│   └── ProductsPage.tsx             # Product catalog route
-├── reports/
-│   └── ReportsPage.tsx              # Reports route
-└── settings/
-    └── SettingsPage.tsx             # Settings route (parent with nested Outlet for sub-sections)
-```
+### Why Midnight Navy + Warm Brown Ledger
 
-**Notes:**
+| Property                                           | Rationale                                                                                            |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Midnight Navy primary (`oklch(28% 0.04 264)`)      | Authoritative, bank-grade, professional — conveys trust for a billing app without being loud         |
+| Warm Brown Ledger sidebar (`oklch(0.28 0.022 60)`) | Dark but warm — intentional like physical account books, separates chrome from content distinctively |
+| Warm canvas (`oklch(0.98 0.002 260)`)              | Reduces eye fatigue under fluorescent shop lighting                                                  |
+| White cards (`oklch(1 0 0)`)                       | Crisp content surfaces that pop against the warm canvas                                              |
+| Single accent, muted palette                       | The operator's attention goes to prices and status, not chrome color                                 |
+| Dense, information-rich layout                     | Billing needs to show many line items at once on 768px vertical                                      |
 
-- Only `pages/export/` has a subdirectory (`pdf/`).
-- `dashboard/` is the only page dir with two files: `DashboardPage` (route param validation) vs `Dashboard` (actual UI). `routes.tsx` imports `DashboardPage`.
-- All pages are flat single-file routes otherwise — sub-components live in `features/`.
+### What Changes
+
+| Layer          | Before                                         | After                                                          |
+| -------------- | ---------------------------------------------- | -------------------------------------------------------------- |
+| Primary accent | Amber (`oklch(87.67% 0.165 90.15)`)            | Midnight Navy (`oklch(28% 0.04 264)`)                          |
+| Canvas         | Cool off-white (`oklch(0.9942 0.0034 247.86)`) | Warm off-white (`oklch(0.98 0.002 260)`)                       |
+| Cards          | Pure white (same as canvas-ish)                | Pure white on warm canvas (visible hierarchy)                  |
+| Sidebar        | Light gray (`oklch(95.46% 0.004 264.37)`)      | **Warm Brown Ledger** (`oklch(0.28 0.022 60)`) with light text |
+| Borders        | `oklch(82% 0.006 286.286)`                     | Hairline ladder (`oklch(0.86 0.006 260)` etc.)                 |
+| Text           | `oklch(0.2795 0.0368 260.031)`                 | `oklch(0.18 0.035 260)` (deeper ink)                           |
+| Font weight    | 425                                            | 500 (better readability on 100 PPI TN panel)                   |
+| Charts         | Hardcoded hexes, old amber mappings            | Muted tertiary palette, midnight-navy-anchored                 |
+| Products page  | Weight & MRP badges visually identical         | Clear typographic+shape distinction                            |
+| Dark mode      | Removed                                        | Stays removed                                                  |
 
 ---
 
-## 3. `features/` — Recursive
-
-**Two features have their OWN component subdirectories:**
-
-- `billing/tabs/` (2 files)
-- `onboarding/steps/` (4 files)
-
-```
-features/
-├── billing/
-│   ├── BillingHeader.tsx              # Billing screen top header
-│   ├── LineItemsTable.tsx             # Line items table container
-│   ├── LineItemRow.tsx                # Single line item row
-│   ├── CustomerInputBox.tsx           # Customer picker input
-│   ├── ProductDailogWrapper.tsx       # Wraps product picker dialog
-│   ├── QuantityPresets.tsx            # Quick quantity preset buttons
-│   ├── SummaryFooter.tsx              # Totals / summary footer
-│   ├── BillingSaveStatus.tsx          # Sync/save status indicator
-│   ├── BillPreview.tsx                # Live bill preview pane
-│   ├── BillingSkeleton.tsx            # Loading skeleton
-│   └── tabs/
-│       ├── BillingTabBar.tsx          # Sale/estimate tab switcher bar
-│       └── BillingTab.tsx             # Individual tab trigger
-│
-├── customers/
-│   ├── CustomerLayout.tsx             # Layout shell for customer view
-│   ├── CustomerSidebar.tsx            # Customer details sidebar
-│   ├── CustomerTable.tsx              # Customers table container
-│   ├── CustomerTableRow.tsx           # Single customer row
-│   ├── CustomerDetails.tsx            # Customer detail panel
-│   ├── CustomerSummaryCard.tsx        # Customer summary metric card
-│   ├── CustomerTypeColor.tsx          # Color-codes customer role/type
-│   └── CustomerDialog.tsx             # Create/edit customer dialog
-│
-├── dashboard/
-│   ├── MetricsComponent.tsx           # Metrics section wrapper
-│   ├── MetricCard.tsx                 # Single metric card
-│   ├── StatCard.tsx                   # Stat display card
-│   ├── ItemRow.tsx                    # Generic item row
-│   ├── TopProductsChart.tsx           # Top products chart (recharts)
-│   ├── SalesEstimatesChart.tsx        # Sales vs estimates chart
-│   ├── RecentTransactionsTable.tsx    # Recent transactions table
-│   ├── RecentTransactionsTableRow.tsx # Recent transaction row
-│   └── ViewModal.tsx                  # Transaction detail modal
-│
-├── onboarding/
-│   ├── OnboardingFlow.tsx             # Root onboarding orchestrator
-│   ├── OnboardingStepper.tsx          # Step progress indicator
-│   ├── OnboardingComplete.tsx         # Completion screen
-│   └── steps/
-│       ├── WelcomeStep.tsx            # Welcome intro step
-│       ├── StoreIdentityStep.tsx      # Store name/identity step
-│       ├── LocationStep.tsx           # Store location step
-│       └── OwnerContactStep.tsx       # Owner contact info step
-│
-├── productDialog/
-│   ├── ProductDialog.tsx              # Root product create/edit dialog
-│   ├── ProductEditForm.tsx            # Product form fields
-│   ├── ProductViewMode.tsx            # Read-only product view
-│   ├── ProductImageCropSelector.tsx   # Image crop UI component
-│   ├── ProductHistoryTimeline.tsx     # Price-change history timeline
-│   ├── ProductTransactionsTable.tsx   # Product's transactions table
-│   ├── StatusIndicator.tsx            # Sync/status badge
-│   └── productImageCrop.ts            # Pure image-crop helper logic (non-component)
-│
-├── products/
-│   ├── ProductHeader.tsx              # Products list header
-│   ├── ProductListItem.tsx            # Single product list item
-│   └── ProductResults.tsx             # Products results container
-│
-├── search/
-│   ├── SearchDropdown.tsx             # Global search dropdown
-│   └── MemoizedSearchDropDown.tsx     # Memoized wrapper of SearchDropdown
-│
-├── settings/
-│   ├── SettingsSections.tsx           # Defines section pages (BillingSettingsPage, ExportsSettingsPage, StoreProfileSettingsPage) — used by routes
-│   ├── SettingsField.tsx              # Reusable settings field row
-│   └── settingsNavigation.ts          # Settings nav config (non-component)
-│
-└── transactionDashboard/
-    ├── DashboardTable.tsx             # Transactions table for dashboard
-    ├── DashboardTableRow.tsx          # Single transaction row
-    ├── DashboardCard.tsx              # Transaction summary card
-    └── DateRangePicker.tsx            # Date range filter picker
-```
-
----
-
-## 4. Layout Scaffolding — What Renders
-
-### `components/layouts/RootLayout.tsx` (the gate)
-
-Uses `useAppBootstrap()` (bootstrap state) and `useAppStore` (`isOnboardingComplete`). Renders one of three states inside `<AnimatePresence mode="wait">`:
-
-1. **Bootstrapping** → full-screen spinner ("Loading...").
-2. **Not onboarded** → `<Suspense>` around lazy-imported `<OnboardingFlow />`.
-3. **Ready** → `<AppShell />` + `<ReactQueryDevtools />`.
-
-So `RootLayout` is the onboarding/bootstrap gate, NOT the visual shell.
-
-### `components/layouts/AppShell.tsx` (the actual shell)
-
-This is the real chrome. It renders:
-
-- A `flex h-screen w-full` container.
-- **Sidebar slot:** Hidden entirely on billing pages. On non-billing pages, renders `<Sidebar />` inside an animated (motion) collapsible `<motion.div>`, toggled by a `PanelLeftClose`/`PanelLeftOpen` button in the header. On billing pages, instead renders `<Sidebar variant="overlay" />` (hover-to-reveal overlay).
-- **Header** (`h-14`, hidden on billing): sidebar-toggle button + dynamic **page title** (derived from `pathname` via `getPageTitle()` — e.g. "Dashboard", "Products", "Sales Overview", "Settings", default "Workspace") + a **search `<Input />`** with a search icon (max-w-md). Note: the search input appears to be presentational only — no handler wired here.
-- **`<main>`** with `<section className="flex-1 overflow-y-auto">` containing the **`<Outlet />`** (where page routes render).
-
-### Sidebar.tsx (rendered inside AppShell)
-
-- Resizable (`MIN 220 / MAX 400 / DEFAULT 288` px), width persisted to `localStorage`.
-- Docked vs overlay (`variant` prop) — overlay mode uses `useSidebarStore` (open/pinned) + hover-open strip + click-outside-to-close.
-- Content: QuickCart logo header, "New Sale" + "New Estimate" buttons, `navLinks`-driven nav (`@/constants/Navlinks`), and a hardcoded store-profile card at the bottom.
-
-### Other layouts (exist but unused by current routes)
-
-- `SidebarLayout.tsx` — just re-exports `<AppShell />`.
-- `FullPageLayout.tsx` — bare `<Outlet />` full-screen wrapper.
-- `routes.tsx` only references `RootLayout`; the routing tree uses `AppShell` indirectly via `RootLayout → AppShell → <Outlet/>`. No `SidebarLayout`/`FullPageLayout` imports.
-
----
-
-## 5. Top-Level Providers — `App.tsx` + `main.tsx`
-
-### `main.tsx` (entry point)
-
-Minimal. Imports `./index.css`, then `createRoot(...).render(<StrictMode><App /></StrictMode>)`. No providers here.
-
-### `App.tsx` (provider root)
-
-Wraps everything in:
-
-1. A `<div className="bg-background-secondary">` wrapper.
-2. **`<QueryClientProvider client={queryClient}>`** — single `new QueryClient()` (default config, no custom options). This is the **TanStack Query** provider.
-3. **`<RouterProvider router={router} />`** — React Router v7 `createHashRouter` (hash router, per Electron `file://` requirement) imported from `./routes`.
-4. **`<Toaster />`** from `react-hot-toast` (position `bottom-center`), inside the QueryClientProvider.
-
-### Notable observations on provider stack
-
-- **No explicit Zustand `<Provider>`** at the root — Zustand stores are consumed via hooks (`useAppStore`, `useSidebarStore`, `useViewModalStore`) directly, which is the standard Zustand pattern (no context provider needed).
-- **No ThemeProvider / no TooltipProvider** at the root (Shadcn providers, if needed, are likely per-component or absent).
-- **The onboarding gate is NOT in `App.tsx`** — it lives inside `RootLayout` (the topmost route element), driven by `useAppStore.isOnboardingComplete`. So the router always mounts `RootLayout` first, which conditionally swaps between `OnboardingFlow` / `AppShell`.
-- `ReactQueryDevtools` is mounted **inside `AppShell`** (i.e. only when the user is past onboarding), not at the `App.tsx` root.
-
-### Router shape (`routes.tsx`)
-
-Hash router with this tree:
-
-- `/` → `RootLayout` (the bootstrap/onboarding gate + `AppShell`)
-  - index → `HomePage`
-  - `products` → `ProductsPage`
-  - `customers` → `CustomersPage`
-  - `dashboard/:type` → `DashboardPage` (`sales` / `estimates`)
-  - `reports` → `ReportsPage`
-  - `settings` → `SettingsPage` with nested children: index redirects to `store-profile`; plus `billing`, `exports` (these sub-pages are the named exports from `features/settings/SettingsSections.tsx`).
-  - `billing/*` → `:type/create` and `:type/:id/edit` → `BillingPage` (note: the create/edit routes are duplicated in the source — likely a latent bug worth flagging during migration).
-- `export/pdf/:type` → `PdfInvoicePage` (standalone, **outside** the shell — no `RootLayout`).
-- `*` → `NotFoundPage`.
-
----
-
-## Migration Roadmap Cheatsheet
-
-- **Foundational / shell layer:** `main.tsx` → `App.tsx` (QueryClient + Router + Toaster) → `RootLayout` (bootstrap + onboarding gate) → `AppShell` (sidebar + header + search + Outlet) + `Sidebar.tsx`. Migrate these first since every page depends on them.
-- **Independent leaf routes (good early candidates):** `HomePage`, `ProductsPage` (+ `features/products/*`), `ReportsPage`, `CustomersPage` (+ `features/customers/*`).
-- **Medium complexity:** `SettingsPage` + `features/settings/*` (nested routes), `DashboardPage` + `features/dashboard/*` + `features/transactionDashboard/*`.
-- **Highest complexity (do last):** `billing/*` + `features/billing/*` (debounced sync, tabs, save-status, dynamic sidebar overlay) and `features/productDialog/*` (image crop, history, transactions) + `features/onboarding/*` (multi-step lazy-loaded gate).
-- **Reusable primitives:** 22 Shadcn `components/ui/*` + 2 generic utils (`Sidebar`, `highlighted-text`) — keep stable across phases.
-  </task_result>
-  </task>
-
-````
-
-**Tool: task**
-
-**Input:**
-```json
-{
-  "description": "Find migration hotspots & hardcoded colors",
-  "subagent_type": "explore",
-  "prompt": "Thoroughness: very thorough.\n\nI am planning a color-palette + minor-UI (padding/spacing/opacity) migration for a React + Tailwind v4 app. The migration is primarily a CSS variable swap in `apps/desktop/src/renderer/src/index.css`, but some components have hardcoded Tailwind classes that need manual tuning (e.g. opacity values like `bg-muted/30`, `bg-background/95`, raw hex colors, or inline style objects).\n\nSearch the entire `apps/desktop/src/renderer/src/` tree (EXCLUDING `components/ui/` which is Shadcn-generated and EXCLUDING `pages/export/pdf/` and anything obviously print/demo related like `DemoReceipts`).\n\nI need you to find and report:\n\n1. **Hardcoded color values** — any raw hex codes (`#...`), `rgb()`, `rgba()`, `oklch()`, or `hsl()` literals inside `.tsx` files (inline styles, motion animate props, constants). List file path + line + the value.\n\n2. **Opacity-tinted surface classes** that may need tuning after the palette swap — patterns like `bg-background/NN`, `bg-muted/NN`, `bg-card/NN`, `bg-surface-N/NN`, `bg-sidebar/NN`. List file path + line + the class.\n\n3. **Inline `style={{ ... }}` objects** in components that set colors, backgrounds, or gradients. List file + line.\n\n4. **Files using the old domain-specific tokens** — search for usages of: `--onboarding-*`, `--product-*`, `--search-*`, `--invoice-*`, `bg-product-`, `bg-search-`, `bg-onboarding-`, `text-product-`, `text-search-`, `border-product-`, etc. (these are the custom semantic groups defined in index.css).\n\n5. Specifically inspect these files (which the design doc flagged) and report whether they STILL match the doc's described line numbers/content (the doc may be out of date):\n   - `components/Sidebar.tsx`\n   - `components/layouts/AppShell.tsx`\n   - any file named `LineItemsTable.tsx`, `LineItemRow.tsx`, `BillingHeader.tsx`, `BillingPage.tsx`, `BillingTab.tsx`, `OnboardingStepper.tsx`\n   \n   For each: report actual path, and the current `bg-*`/`border-*`/opacity classes on the lines mentioned in the doc.\n\nReport findings grouped by category. Give me file paths and line numbers. Do NOT edit anything."
-}
-````
-
-**Output:**
-
-```
-<task id="ses_0d2bc0cd4ffeBNZabq51rNDyds" state="completed">
-<task_result>
-I now have all the data needed. Let me compile the comprehensive findings report.
-
----
-
-# Color Palette / UI Migration Search Report
-
-**Scope searched:** `apps/desktop/src/renderer/src/` — excluding `components/ui/` (Shadcn), `pages/export/pdf/`, and `DemoReceipts`.
-
-**Baseline note:** `index.css` currently defines domain-specific token groups in addition to the base Shadcn-style tokens: `--onboarding-*` (8 vars, lines 93–100), `--product-*` (7 vars, lines 105–111), `--search-*` (9 vars, lines 114–123), `--invoice-*` (6 vars, lines 126–131), plus `--chart-1..5` (lines 86–90). All are re-exported in `@theme inline` (lines 200–235). The migration doc swaps the `:root` block but keeps the same variable names.
-
----
-
-## 1. Hardcoded color values in `.tsx` files
-
-These are raw color literals (hex / rgb / rgba / oklch / hsl) sitting in component JS — they **cannot** pick up the palette swap automatically.
-
-### A. True inline color literals (will render wrong after swap)
-
-| File | Line | Value |
-|---|---|---|
-| `features/onboarding/OnboardingStepper.tsx` | 30 | `"oklch(69.72% 0.209 145.47)"` (motion `animate` backgroundColor, completed) |
-| `features/onboarding/OnboardingStepper.tsx` | 32 | `"oklch(87.67% 0.165 90.15)"` (active — **this is the old amber primary**) |
-| `features/onboarding/OnboardingStepper.tsx` | 33 | `"oklch(0.967 0.0029 264.5419)"` (inactive — **old `--muted`**) |
-| `features/onboarding/OnboardingStepper.tsx` | 36 | `"oklch(69.72% 0.209 145.47)"` (animate borderColor, completed) |
-| `features/onboarding/OnboardingStepper.tsx` | 38 | `"oklch(77.55% 0.174 90.04)"` (active border — **old `--ring`**) |
-| `features/onboarding/OnboardingStepper.tsx` | 39 | `"oklch(82% 0.006 286.286)"` (inactive border — **old `--border`**) |
-| `features/onboarding/OnboardingStepper.tsx` | 56 | `color: isActive ? "oklch(0.2795 0.0368 260.031)" : "oklch(0.551 0.0234 264.3637)"` (**old `--foreground` / `--muted-foreground`**) |
-| `features/dashboard/TopProductsChart.tsx` | 15 | `"hsl(140, 25%, 55%)"` (COLORS array, "Soft Sage") |
-| `features/dashboard/TopProductsChart.tsx` | 16 | `"hsl(350, 30%, 65%)"` (COLORS array, "Dusty Rose") |
-
-> `TopProductsChart.tsx` COLORS array (lines 11–17) also references `var(--chart-3/4/5)` for the first 3 slices, then falls back to the two hardcoded hsl()s for slices 4–5. So pie slices beyond index 2 use literal colors.
-
-### B. `rgba()` literals embedded inside arbitrary shadow values (borderline — these are shadow tints, not pure colors)
-
-| File | Line | Value |
-|---|---|---|
-| `features/productDialog/ProductDialog.tsx` | 147 | `shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)]` (TabsList) |
-| `features/productDialog/ProductDialog.tsx` | 150 | `shadow-[0_2px_12px_rgba(0,0,0,0.06)]` (active tab trigger) |
-| `features/productDialog/ProductDialog.tsx` | 157 | `shadow-[0_2px_12px_rgba(0,0,0,0.06)]` (active tab trigger) |
-| `features/productDialog/ProductDialog.tsx` | 164 | `shadow-[0_2px_12px_rgba(0,0,0,0.06)]` (active tab trigger) |
-
-> These are alpha-tinted black shadows in arbitrary-value syntax. They are cosmetically tied to the `--shadow-*` token system and may want to be swapped to `shadow-sm`/`shadow-md`, but they will not "break" the palette.
-
-### C. Hardcoded hex in a non-tsx helper (flagged by the doc as "do not change")
-
-| File | Line | Value |
-|---|---|---|
-| `features/productDialog/productImageCrop.ts` | 4 | `const CANVAS_BACKGROUND = "#ffffff";` |
-
-> This is a `<canvas>` 2D API fill, not a CSS reference. The doc explicitly lists it under "should not change."
-
-### D. Chart config using CSS variables (good — these WILL swap automatically; listed for completeness)
-
-| File | Line | Value |
-|---|---|---|
-| `features/dashboard/SalesEstimatesChart.tsx` | 22 | `color: "var(--chart-1)"` |
-| `features/dashboard/SalesEstimatesChart.tsx` | 26 | `color: "var(--chart-2)"` |
-
----
-
-## 2. Opacity-tinted surface classes (need post-swap review)
-
-All of these reference a token whose value changes after the swap, so a fixed alpha like `/30` may render with different visual weight against the new warm canvas. Grouped by token.
-
-### `bg-background/NN`
-| File | Line | Class |
-|---|---|---|
-| `components/Sidebar.tsx` | 303 | `bg-background/80 hover:bg-background/90` (store card) |
-| `components/layouts/AppShell.tsx` | 68 | `bg-background/95` (header) |
-| `features/billing/LineItemsTable.tsx` | 74 | `bg-background/95` (table container) |
-| `features/billing/LineItemsTable.tsx` | 75 | `bg-background/95` (toolbar strip) |
-| `features/billing/LineItemsTable.tsx` | 122 | `bg-background/80` (toolbar button) |
-| `features/billing/LineItemRow.tsx` | 202 | `bg-background/90` (discount button) |
-| `features/billing/LineItemRow.tsx` | 231 | `bg-background/80` (action button) |
-| `features/billing/LineItemRow.tsx` | 251 | `bg-background/80` (action button) |
-| `features/billing/SummaryFooter.tsx` | 118 | `bg-background/60` (footer bar) |
-| `features/productDialog/ProductDialog.tsx` | 112 | `bg-background/50` (dialog header) |
-| `features/productDialog/ProductHistoryTimeline.tsx` | 118 | `bg-card/50` (note: card, not background) |
-
-### `bg-muted/NN`
-| File | Line | Class |
-|---|---|---|
-| `features/products/ProductHeader.tsx` | 72 | `bg-muted/40` |
-| `features/products/ProductHeader.tsx` | 92 | `bg-muted/30` |
-| `features/products/ProductHeader.tsx` | 222 | `bg-muted/30` |
-| `features/products/ProductHeader.tsx` | 390 | `bg-muted/40` |
-| `features/products/ProductListItem.tsx` | 64 | `bg-muted/30` (image thumb) |
-| `features/search/SearchDropdown.tsx` | 351 | `bg-muted/50` |
-| `features/search/SearchDropdown.tsx` | 453 | `bg-muted/30` (icon container) |
-| `features/billing/LineItemRow.tsx` | 96 | `bg-muted/30` (qty control) |
-| `features/billing/LineItemRow.tsx` | 184 | `bg-muted/25` (amount display) |
-| `features/billing/BillingHeader.tsx` | 201 | `bg-muted/30` (date/time box) |
-
-### `bg-card/NN`
-| File | Line | Class |
-|---|---|---|
-| `features/productDialog/ProductHistoryTimeline.tsx` | 118 | `bg-card/50` |
-
-### `bg-secondary/NN`
-| File | Line | Class |
-|---|---|---|
-| `features/dashboard/MetricCard.tsx` | 50 | `bg-secondary/60` (and `hover:bg-secondary/80`) |
-| `features/dashboard/ViewModal.tsx` | 47 | `bg-secondary/30` |
-| `features/dashboard/ViewModal.tsx` | 120 | `bg-secondary/10` |
-| `features/dashboard/Dashboard.tsx` | 32 | `bg-secondary/90` |
-| `features/productDialog/ProductViewMode.tsx` | 36 | `bg-secondary/40` |
-| `features/productDialog/ProductViewMode.tsx` | 95 | `bg-secondary/10` |
-| `features/productDialog/ProductEditForm.tsx` | 59 | `bg-secondary/40` |
-| `features/productDialog/ProductImageCropSelector.tsx` | 192 | `bg-secondary/20` |
-| `features/productDialog/ProductTransactionsTable.tsx` | 181 | `bg-secondary/40` |
-| `features/productDialog/ProductDialog.tsx` | 147 | `bg-secondary/40` (TabsList) |
-
-### `bg-sidebar/NN`
-None found. (`bg-sidebar` itself appears at `components/Sidebar.tsx:198`, full-opacity, no alpha.)
-
-### Other opacity-tinted background tokens (state/brand — also swap-affected)
-
-`bg-primary/`: `Sidebar.tsx:216` (`/10`), `:240` (full); onboarding steps `LocationStep.tsx:90`, `OwnerContactStep.tsx:71`, `StoreIdentityStep.tsx:48` (all `bg-primary/15`); `WelcomeStep.tsx:56` (`bg-primary/10 border-primary/30`); `OnboardingComplete.tsx:86, 97` (`bg-primary/10`); `CustomerSummaryCard.tsx:79` (`bg-primary/15` string prop).
-
-`bg-destructive/`: `ProductHeader.tsx:206` (`border-destructive/40`+`bg-destructive/10`), `:396` (`/10`); `RecentTransactionsTableRow.tsx:90`, `DashboardTableRow.tsx:144`, `CustomerTableRow.tsx:131` (all `border-destructive/20 bg-destructive/10`); `ProductDialog.tsx:199, 223` (`border-destructive/30`+`/10`), `:279` (`bg-destructive/10`); `ProductListItem.tsx:162, 220` (`/10`); `MetricCard.tsx:73` (`bg-destructive/15`); `BillingSaveStatus.tsx:20` (`bg-destructive/15 ring-destructive/25`); `BillingTabBar.tsx:134` (`/10`); `ProductImageCropSelector.tsx:177` (`/10`).
-
-`bg-success/`: `Sidebar.tsx:305` (`bg-success/20`); `RecentTransactionsTableRow.tsx:88`, `DashboardTableRow.tsx:142`, `CustomerTableRow.tsx:129` (`bg-success/10 border-success/20`); `BillingSkeleton.tsx:58` (`border-success/20`); `OnboardingComplete.tsx:58` (`border-success/40`).
-
-`bg-warning/`: `ProductListItem.tsx:95` (`border-warning/30 bg-warning/10`).
-
-`bg-info/`, `bg-accent/`, `bg-foreground/`: scattered — `BillingSaveStatus.tsx:17` (`bg-info/15 ring-info/25`), `:18` (`bg-success/15`), `:19` (`bg-warning/15`); `SearchDropdown.tsx:438` (`bg-foreground/6 ring-foreground/15`); `LineItemsTable.tsx:80` (`hover:bg-muted/60`), etc.
-
-**Dynamic opacity-class generator worth flagging:**
-- `utils/index.ts:54` `getCheckStatusColor()` returns `bg-success/25`, `bg-warning/20`, or `bg-background` — consumed in `LineItemRow.tsx:46/53`. Both `/25` and `/20` may need retuning.
-
----
-
-## 3. Inline `style={{ ... }}` objects that set colors / backgrounds / gradients
-
-**None.** All 12 `style={{}}` occurrences in non-excluded `.tsx` files are layout/transform only:
-
-| File | Lines | Sets only |
-|---|---|---|
-| `features/products/ProductResults.tsx` | 49, 57 | virtualizer `height`/`position`/`transform` |
-| `features/search/SearchDropdown.tsx` | 416, 420 | virtualizer `height`/`transform` |
-| `features/transactionDashboard/DashboardTable.tsx` | 51, 59 | virtualizer `height`/`position`/`transform` |
-| `features/customers/CustomerTable.tsx` | 72, 81 | virtualizer `height`/`position`/`marginBottom`/`transform` |
-| `features/productDialog/ProductViewMode.tsx` | 145 | `overflowWrap` |
-| `features/productDialog/ProductEditForm.tsx` | 299 | `overflowWrap` |
-| `components/Sidebar.tsx` | 201 | sidebar `width`/`minWidth`/`maxWidth`/`flexBasis` |
-| `components/Sidebar.tsx` | 354 | `transformOrigin` |
-
-> The closest thing to "inline color" lives in motion `animate={{}}` props, not `style={{}}` — those are reported in §1.A (`OnboardingStepper.tsx`).
-
----
-
-## 4. Old domain-specific token usage in components
-
-These all reference the `--onboarding-* / --product-* / --search-* / --invoice-*` variable groups defined in `index.css`. They are NOT hardcoded — they will follow whatever you set those vars to in the new `:root`. Listed so you know every consumer.
-
-### `--onboarding-*` (dark onboarding rail — intentionally dark per doc)
-| File | Line | Class |
-|---|---|---|
-| `features/onboarding/OnboardingFlow.tsx` | 35 | `from-onboarding-gradient-start via-onboarding-gradient-mid to-onboarding-gradient-end bg-linear-to-br` |
-| `features/onboarding/OnboardingFlow.tsx` | 53 | `text-onboarding-text-muted` |
-| `features/onboarding/OnboardingFlow.tsx` | 68 | `bg-onboarding-icon-bg` |
-| `features/onboarding/OnboardingFlow.tsx` | 71 | `text-onboarding-feature-text` |
-| `features/onboarding/OnboardingFlow.tsx` | 77 | `text-onboarding-text-footer` |
-| `features/onboarding/OnboardingComplete.tsx` | 87 | `text-onboarding-icon-dark` |
-| `features/onboarding/OnboardingComplete.tsx` | 98 | `text-onboarding-icon-dark` |
-| `features/onboarding/steps/LocationStep.tsx` | 91 | `text-onboarding-icon-dark` |
-| `features/onboarding/steps/OwnerContactStep.tsx` | 72 | `text-onboarding-icon-dark` |
-| `features/onboarding/steps/StoreIdentityStep.tsx` | 49 | `text-onboarding-icon-dark` |
-
-### `--product-*`
-| File | Line | Class |
-|---|---|---|
-| `features/productDialog/ProductTransactionsTable.tsx` | 139 | `bg-product-badge-bg text-product-badge-text` |
-| `features/productDialog/ProductTransactionsTable.tsx` | 167 | `text-product-label` |
-| `features/productDialog/ProductTransactionsTable.tsx` | 171 | `text-product-label` |
-
-### `--search-*`
-| File | Line | Class |
-|---|---|---|
-| `components/highlighted-text.tsx` | 12 | `bg-search-highlight` |
-| `features/search/SearchDropdown.tsx` | 481 | `border-search-badge-weight-border bg-search-badge-weight-bg text-search-badge-weight-text` |
-| `features/search/SearchDropdown.tsx` | 490 | `border-search-badge-mrp-border bg-search-badge-mrp-bg text-search-badge-mrp-text` |
-
-### `--invoice-*`
-No usages found in the searched `.tsx` tree (the `--invoice-*` tokens are consumed only inside the excluded `pages/export/pdf/` print templates).
-
-### `--sidebar-*`
-| File | Line | Class |
-|---|---|---|
-| `components/Sidebar.tsx` | 198 | `bg-sidebar text-sidebar-foreground` |
-| `components/Sidebar.tsx` | 225 | `text-sidebar-foreground/55` |
-| `components/Sidebar.tsx` | 284 | `bg-secondary text-sidebar-foreground` |
-| `components/Sidebar.tsx` | 285 | `text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground` |
-| `pages/NotFoundPage.tsx` | 15 | `from-primary to-sidebar-primary bg-linear-to-r bg-clip-text text-transparent` (gradient text) |
-
----
-
-## 5. Doc verification — flagged files
-
-The migration doc is `docs/design-system/08-linear-light-billing-migration.md` (Phase 2, sections 2.1–2.8). Verification of each cited location against the **current** source:
-
-### 2.1 `components/Sidebar.tsx`
-Path: `/mnt/data/code/projects/pos_tree/dev/apps/desktop/src/renderer/src/components/Sidebar.tsx`
-
-| Doc line | Doc claim | ACTUAL current | Status |
-|---|---|---|---|
-| 198 | `bg-sidebar` (stays) | Line 198: `"bg-sidebar text-sidebar-foreground relative h-full shrink-0 ... border-r border-r-black/8"` | ✅ matches. **Bonus:** note `border-r-black/8` — a built-in black/opacity border, not a token. |
-| 306 | `bg-background/80` → `bg-surface-2/80` | `bg-background/80` is on **line 303** (not 306). Line 306 is `<div className="bg-success/20 text-success ...">MS</div>`. | ⚠️ **Doc is off by 3 lines.** The class exists at line 303: `"border-border bg-background/80 hover:bg-background/90 flex cursor-pointer items-center gap-3 rounded-xl border p-3 backdrop-blur-md ..."`. |
-
-### 2.2 `components/layouts/AppShell.tsx`
-Path: `/mnt/data/code/projects/pos_tree/dev/apps/desktop/src/renderer/src/components/layouts/AppShell.tsx`
-
-| Doc line | Doc claim | ACTUAL current | Status |
-|---|---|---|---|
-| 68 | `bg-background/95` (stays) | Line 68: `<header className="bg-background/95 flex h-14 items-center border-b px-6">` | ✅ matches exactly |
-| 96 | `bg-muted/40` → `bg-muted/60` | Line 96: `className="bg-muted/40 h-10 pl-12 text-base"` | ✅ matches exactly |
-
-### 2.3 `LineItemsTable.tsx`
-Path: `/mnt/data/code/projects/pos_tree/dev/apps/desktop/src/renderer/src/features/billing/LineItemsTable.tsx`
-
-| Doc line | Doc claim | ACTUAL current | Status |
-|---|---|---|---|
-| 74 | `bg-background/95` → `bg-background` | Line 74: `<div className="border-border/70 bg-background/95 relative w-full flex-1 rounded-xl border px-4 pb-4 shadow-lg">` | ✅ matches exactly |
-| 75 | `bg-background/95` → `bg-muted/60` | Line 75: `<div className="bg-background/95 mb-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3">` | ✅ matches exactly |
-
-### 2.4 `LineItemRow.tsx`
-Path: `/mnt/data/code/projects/pos_tree/dev/apps/desktop/src/renderer/src/features/billing/LineItemRow.tsx`
-
-| Doc line | Doc claim | ACTUAL current | Status |
-|---|---|---|---|
-| 53 | `hover:border-border` (stays) | Line 53: `className={`group ${checkedColor} border-border/70 hover:border-border grid w-full items-center rounded-xl border ...`}` | ✅ matches. **Note:** `${checkedColor}` injects `bg-background` / `bg-success/25` / `bg-warning/20` from `utils/index.ts:54`. |
-| 96 | `bg-muted/30` → `bg-muted/60` | Line 96: `<div className="bg-muted/30 border-border/70 relative mx-auto flex h-10 w-full items-center rounded-lg border font-bold">` | ✅ matches exactly |
-| 186 | `bg-muted/25` → `bg-muted/40` | `bg-muted/25` is on **line 184** (not 186). Line 186 is `</div>`. | ⚠️ **Doc is off by 2 lines.** Class at line 184: `<div className="bg-muted/25 border-border/70 text-foreground flex h-full w-full items-center justify-end rounded-lg border px-3 pl-8 ...">` |
-
-### 2.5 `BillingHeader.tsx`
-Path: `/mnt/data/code/projects/pos_tree/dev/apps/desktop/src/renderer/src/features/billing/BillingHeader.tsx`
-
-| Doc line | Doc claim | ACTUAL current | Status |
-|---|---|---|---|
-| 170 | `bg-card border-border/60` (stays) | Line 170: `<div className="bg-card border-border/60 mx-4 my-2 flex flex-col gap-4 rounded-2xl border p-4 shadow-sm">` | ✅ matches exactly |
-
-### 2.6 `BillingPage.tsx`
-Path: `/mnt/data/code/projects/pos_tree/dev/apps/desktop/src/renderer/src/pages/billing/BillingPage.tsx`
-
-| Doc line | Doc claim | ACTUAL current | Status |
-|---|---|---|---|
-| 125 | `bg-background-secondary` (stays) | Line 125: `<div className="bg-background-secondary relative flex h-full flex-1 flex-col">` | ✅ matches exactly |
-
-### 2.7 `BillingTab.tsx`
-Path: `/mnt/data/code/projects/pos_tree/dev/apps/desktop/src/renderer/src/features/billing/tabs/BillingTab.tsx`
-
-| Doc line | Doc claim | ACTUAL current | Status |
-|---|---|---|---|
-| 47 | `bg-background-secondary` → `bg-surface-1` | Line 47: `? "bg-background-secondary text-foreground z-10 -mb-px"` | ✅ matches exactly |
-
-### 2.8 `OnboardingStepper.tsx`
-Path: `/mnt/data/code/projects/pos_tree/dev/apps/desktop/src/renderer/src/features/onboarding/OnboardingStepper.tsx`
-
-| Doc ref | Doc claim | ACTUAL current | Status |
-|---|---|---|---|
-| lines 30–39, 56 | Inline `animate` prop oklch values | Lines 28–40: `animate={{ backgroundColor: ..., borderColor: ... }}` with oklch on 30, 32, 33, 36, 38, 39. Line 56: `animate={{ color: isActive ? "oklch(0.2795 0.0368 260.031)" : "oklch(0.551 0.0234 264.3637)" }}` | ✅ matches exactly |
-
----
-
-## Summary of doc accuracy
-
-- **6 of 8 sections** (2.2, 2.3, 2.5, 2.6, 2.7, 2.8) match the cited line numbers exactly.
-- **2 sections have stale line numbers** but the cited classes still exist verbatim, just shifted:
-  - **§2.1 Sidebar.tsx**: `bg-background/80` is at **line 303**, not 306.
-  - **§2.4 LineItemRow.tsx**: `bg-muted/25` is at **line 184**, not 186.
-- No class strings cited by the doc have been renamed or removed.
-
-## Items the doc did NOT flag but you should consider
-
-1. **`utils/index.ts:54` `getCheckStatusColor()`** — dynamically returns `bg-success/25` / `bg-warning/20` / `bg-background`. Both opacity-tinted; same retuning concern as `LineItemRow`.
-2. **`features/dashboard/TopProductsChart.tsx:15-16`** — two hardcoded `hsl()` pie-slice colors not mentioned anywhere in the doc.
-3. **`features/search/SearchDropdown.tsx:318`** — `ring-1 ring-black/6` (built-in `black` at 6%, not a token).
-4. **`components/Sidebar.tsx:198`** — `border-r-black/8` (built-in `black` at 8%, not a token).
-5. **`features/onboarding/OnboardingFlow.tsx:44, 49`** — `text-white` on the dark onboarding rail (intentional, but it's a raw built-in color).
-6. **`pages/NotFoundPage.tsx:15`** — gradient text `from-primary to-sidebar-primary ... text-transparent` (uses tokens, so it will swap, but worth visually verifying).
-7. **`features/productDialog/ProductDialog.tsx:147, 150, 157, 164`** — four `rgba(0,0,0,...)` literals inside arbitrary `shadow-[...]` values; tied to shadow system but not tokenized.
-8. **`features/productDialog/productImageCrop.ts:4`** — `#ffffff` canvas fill (doc explicitly says leave it).
-</task_result>
-</task>
-```
-
----
-
-## Assistant (Plan · GLM-5.2 · 24.7s)
-
-_Thinking:_
-
-I now have a comprehensive understanding. Let me also check if there's an existing migration doc structure to follow, and look at the docs/design-system directory.
-
-Actually, I have enough information now. The user wants me to CREATE a concise doc. But I'm in Plan Mode (READ-ONLY), so I MUST NOT create files. I should present a plan instead.
-
-Wait, let me re-read the instructions. The system reminder says:
-"CRITICAL: Plan mode ACTIVE - you are in READ-ONLY phase. STRICTLY FORBIDDEN: ANY file edits, modifications, or system changes."
-
-And: "The user indicated that they do not want you to execute yet"
-
-So I cannot create the doc file. I need to present a plan to the user. But the user explicitly asked me to "create a concise doc".
-
-Given the conflict, the right approach is to present the plan/roadmap as my response output (text), and offer to write it to a file once they exit plan mode. The user can review the roadmap in my response.
-
-Actually, let me reconsider. The user wants a roadmap doc. I should present the roadmap content in my response so they can review it, and ask if they want me to write it to a file (e.g., a new doc in docs/design-system/).
-
-Let me also quickly check what's in docs/design-system to place the new doc appropriately and match conventions.
-
-Let me check the design-system docs folder.
-
-Let me check the existing design-system docs to match conventions for where this new roadmap should live.
-
-**Tool: read**
-
-**Input:**
-
-```json
-{
-  "filePath": "/mnt/data/code/projects/pos_tree/dev/docs/design-system"
+## 2. Token Architecture — Complete `:root` Spec
+
+Replace the entire `:root { ... }` block in `apps/desktop/src/renderer/src/index.css` with the following. The `@theme inline` block requires **no changes** — variable names remain identical.
+
+```css
+:root {
+  --font-sans: "InterVariable", system-ui, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-roboto: "InterVariable", system-ui, sans-serif;
+
+  /* ── Surface Ladder ── */
+  --canvas: oklch(0.98 0.002 260); /* warm off-white page background */
+  --surface-1: oklch(1 0 0); /* cards, content panels — pure white */
+  --surface-2: oklch(0.945 0.005 260); /* elevated cards, hover rows, selected nav */
+  --surface-3: oklch(0.89 0.006 260); /* sub-nav, dropdowns */
+  --surface-4: oklch(0.83 0.006 260); /* deepest elevated surface */
+
+  /* ── Hairline Borders ── */
+  --hairline: oklch(0.86 0.006 260); /* default card/divider borders */
+  --hairline-strong: oklch(0.75 0.008 260); /* input outlines, selected card borders */
+  --hairline-tertiary: oklch(0.93 0.003 260); /* nested surface borders */
+
+  /* ── Text ── */
+  --ink: oklch(0.18 0.035 260); /* headlines, body text — deep charcoal */
+  --ink-muted: oklch(0.38 0.025 260); /* secondary text, meta, timestamps */
+  --ink-subtle: oklch(0.5 0.02 260); /* placeholder, disabled, deselected */
+  --ink-tertiary: oklch(0.63 0.02 260); /* disabled controls, decorative */
+
+  /* ── Brand & Accent (Midnight Navy) ── */
+  --primary: oklch(28% 0.04 264); /* midnight navy — CTAs, focus, links, brand */
+  --primary-hover: oklch(20% 0.04 264); /* darker navy — hovered CTAs */
+  --primary-focus: oklch(28% 0.04 264 / 0.5); /* focus ring tint */
+  --on-primary: #ffffff; /* text on primary background */
+
+  /* ── Warm Brown Ledger Sidebar ── */
+  --sidebar: oklch(0.28 0.022 60); /* warm dark brown — physical ledger feel */
+  --sidebar-foreground: oklch(0.9 0.01 85); /* light warm text on sidebar */
+  --sidebar-primary: var(--primary); /* sidebar active indicator */
+  --sidebar-primary-foreground: var(--on-primary);
+  --sidebar-accent: oklch(0.32 0.02 60); /* sidebar hover/selected bg */
+  --sidebar-accent-foreground: oklch(0.95 0.01 85); /* sidebar hover text */
+
+  /* ── Semantic States ── */
+  --success: #27a644;
+  --success-foreground: #ffffff;
+  --warning: oklch(70% 0.14 75);
+  --warning-foreground: oklch(0.18 0.035 260);
+  --destructive: #d32f2f;
+  --destructive-foreground: #ffffff;
+  --info: #1565c0;
+  --info-foreground: #ffffff;
+
+  /* ── Charts & Data Visualization ──
+     Linear-inspired muted palette: one accent + subdued tertiaries.
+     No neon, no high saturation — the data speaks, not the colors. */
+  --chart-1: oklch(46% 0.15 264); /* midnight navy (primary range) */
+  --chart-2: oklch(48% 0.06 180); /* muted teal */
+  --chart-3: oklch(45% 0.04 220); /* slate blue-gray */
+  --chart-4: oklch(48% 0.05 155); /* muted sage green */
+  --chart-5: oklch(50% 0.05 45); /* muted warm amber */
+  /* Extra chart colors for multi-series: */
+  --chart-6: oklch(42% 0.03 255); /* deep steel */
+  --chart-7: oklch(50% 0.04 105); /* muted olive */
+  --chart-8: oklch(47% 0.03 10); /* muted rose */
+
+  /* ── Semantic Token Mapping (backward compat — all existing classes use these names) ── */
+  --background: var(--canvas);
+  --background-secondary: var(--surface-1);
+  --foreground: var(--ink);
+
+  --card: var(--surface-1);
+  --card-foreground: var(--ink);
+
+  --popover: var(--surface-1);
+  --popover-foreground: var(--ink);
+
+  --primary-foreground: var(--on-primary);
+
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--ink);
+
+  --accent: var(--surface-2);
+  --accent-foreground: var(--ink-muted);
+
+  --muted: var(--surface-1);
+  --muted-foreground: var(--ink-muted);
+
+  --border: var(--hairline);
+  --borderprimary: var(--primary);
+  --input: var(--hairline-strong);
+
+  --ring: var(--primary-focus);
+
+  /* ── Onboarding (dark rail — intentionally dark) ── */
+  --onboarding-gradient-start: oklch(25% 0.04 264);
+  --onboarding-gradient-mid: oklch(18% 0.03 264);
+  --onboarding-gradient-end: oklch(12% 0.02 255);
+  --onboarding-text-muted: oklch(70% 0.01 264);
+  --onboarding-text-footer: oklch(45% 0.01 264);
+  --onboarding-icon-bg: oklch(28% 0.04 264 / 0.15);
+  --onboarding-feature-text: oklch(80% 0.01 264);
+  --onboarding-icon-dark: oklch(46% 0.15 264);
+
+  /* ── Product Dialog ── */
+  --product-label: var(--ink-muted);
+  --product-value: var(--ink);
+  --product-surface: var(--surface-1);
+  --product-surface-hover: var(--surface-2);
+  --product-divider: var(--hairline);
+  --product-badge-bg: oklch(28% 0.04 264 / 0.08);
+  --product-badge-text: oklch(28% 0.04 264);
+
+  /* ── Search Dropdown ── */
+  --search-highlight: oklch(28% 0.04 264 / 0.15);
+  --search-icon-bg-from: var(--surface-1);
+  --search-icon-bg-to: var(--surface-2);
+  --search-icon-fg: var(--primary);
+  --search-badge-weight-border: var(--hairline);
+  --search-badge-weight-bg: var(--surface-2);
+  --search-badge-weight-text: var(--ink-muted);
+  --search-badge-mrp-border: oklch(28% 0.04 264 / 0.3);
+  --search-badge-mrp-bg: oklch(28% 0.04 264 / 0.08);
+  --search-badge-mrp-text: var(--primary);
+
+  /* ── Invoice Template (PDF/print) ── */
+  --invoice-bg: var(--surface-1);
+  --invoice-text: var(--ink);
+  --invoice-text-muted: var(--ink-muted);
+  --invoice-accent: var(--primary);
+  --invoice-border: var(--hairline);
+  --invoice-table-header-bg: var(--surface-2);
+
+  /* ── Shadows ── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.1), 0 6px 12px rgba(0, 0, 0, 0.05);
+  --shadow-2xl: 0 24px 48px rgba(0, 0, 0, 0.12);
+
+  --radius: 0.5rem;
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
 }
 ```
 
-**Output:**
+### `@layer base` Body Addition
 
-```
-<path>/mnt/data/code/projects/pos_tree/dev/docs/design-system</path>
-<type>directory</type>
-<entries>
-01-trust-clarity.md
-02-warm-retail.md
-03-modern-monochrome.md
-04-thermal-print.md
-08-linear-light-billing-migration.md
-5-linear-design.md
-6-linear-light.md
-7-linear-light-product.md
-README.md
+Add `font-weight: 500` and `font-size: 14px` to the body rule for 100 PPI readability:
 
-(9 entries)
-</entries>
+```css
+body {
+  @apply bg-background text-foreground;
+  font-weight: 500;
+  font-size: 14px;
+}
 ```
 
----
+### Files That Require NO Changes
 
-## Assistant (Plan · GLM-5.2 · 68.9s)
+- `@theme inline` block — variable names unchanged, only values swapped
+- `@font-face` block — InterVariable already loaded
+- `@layer base` scrollbar rules — reference `var(--muted)` / `var(--border)` which auto-swap
+- All Shadcn-generated `components/ui/*` — auto-adapt via token references
 
-_Thinking:_
+### Files That MUST NOT Be Changed
 
-There's a numbered series. The migration guide is `08-linear-light-billing-migration.md`. A roadmap doc for the migration agent would naturally be `09-...` or similar. Let me check the README quickly to understand the convention.
-
-Actually I have enough. I'm in plan mode so I cannot write the file. I'll present the roadmap as my response and offer to write it to a file. Let me present a concise, phase-wise roadmap.
-
-Let me structure the roadmap well. The user wants:
-
-1. A concise doc of the frontend structure
-2. A roadmap for the migration agent to travel around in phases
-3. Phase-wise separation between react components
-4. Reference the design doc (08-linear-light-billing-migration.md)
-
-I have all the data. Let me build the roadmap. The design doc has Phase 1 (CSS swap) and Phase 2 (component adjustments). But the user wants a more granular phase-wise separation of the React components for the migration agent to travel through.
-
-I should propose phases that:
-
-- Phase 0/1: Foundation — CSS variable swap (the design doc's Phase 1)
-- Phase 2: Shell/layout layer (Sidebar, AppShell, RootLayout, App.tsx wrapper)
-- Phase 3: Simple leaf pages (Home, Reports, NotFound)
-- Phase 4: Products feature + ProductDialog
-- Phase 5: Customers feature
-- Phase 6: Dashboard + TransactionDashboard + charts
-- Phase 7: Settings
-- Phase 8: Search (global search dropdown)
-- Phase 9: Billing (most complex — LineItemsTable, LineItemRow, BillingHeader, tabs, SummaryFooter, etc.)
-- Phase 10: Onboarding (dark rail — separate palette, last)
-- Phase 11: Final verification / polish
-
-Each phase should list the components, the migration work (palette swap auto-applies + manual adjustments flagged), and dependencies.
-
-Let me write this up concisely. Since I'm in plan mode, I'll present it as text and ask if they want it written to a file.
-
-Let me draft the roadmap content. I want it concise but complete.
-
-I'll present this as my "plan" / proposed document content, and ask the user where they'd like it saved (or whether they want me to write it at all, since plan mode forbids edits).
-
-Let me think about the dependency ordering more carefully:
-
-Foundation:
-
-- `main.tsx` (imports index.css)
-- `App.tsx` (`<div className="bg-background-secondary">` wrapper — token auto-swaps)
-- `index.css` (the swap itself)
-
-Shell (everything depends on this):
-
-- `RootLayout.tsx` (gate, minimal styling)
-- `AppShell.tsx` (header bg-background/95 stays, search bg-muted/40 → /60)
-- `Sidebar.tsx` (bg-sidebar stays, store card bg-background/80 → bg-surface-2/80, border-r-black/8)
-
-Then leaf pages in increasing complexity:
-
-1. Home (HomePage) — simple
-2. Reports (ReportsPage)
-3. NotFound (gradient text, uses tokens)
-4. Products (ProductHeader, ProductListItem, ProductResults) + ProductDialog (ProductDialog, ProductEditForm, ProductViewMode, ProductImageCropSelector, ProductHistoryTimeline, ProductTransactionsTable, StatusIndicator)
-5. Customers (CustomerLayout, CustomerSidebar, CustomerTable, CustomerTableRow, CustomerDetails, CustomerSummaryCard, CustomerTypeColor, CustomerDialog)
-6. Dashboard (DashboardPage, Dashboard, MetricsComponent, MetricCard, StatCard, ItemRow, TopProductsChart, SalesEstimatesChart, RecentTransactionsTable, RecentTransactionsTableRow, ViewModal) + TransactionDashboard (DashboardTable, DashboardTableRow, DashboardCard, DateRangePicker)
-7. Settings (SettingsPage, SettingsSections, SettingsField, settingsNavigation)
-8. Search (SearchDropdown, MemoizedSearchDropDown, highlighted-text)
-9. Billing (BillingPage, BillingHeader, LineItemsTable, LineItemRow, CustomerInputBox, ProductDailogWrapper, QuantityPresets, SummaryFooter, BillingSaveStatus, BillPreview, BillingSkeleton, tabs/BillingTabBar, tabs/BillingTab) — most complex, debounced sync
-10. Onboarding (OnboardingFlow, OnboardingStepper, OnboardingComplete, steps/\*) — dark rail, separate palette
-
-Plus shared util `utils/index.ts getCheckStatusColor()` flagged.
-
-I'll present this as a clean phased roadmap. Let me write the response. Since I must present a plan in plan mode, I'll output the proposed doc content and ask the user to confirm before I write it.
-
-Given the output should be concise but this is a doc the user explicitly requested to be created, I'll present the full roadmap content in my response. I'll keep it tight.
-
-Let me write it.
-
-I have everything I need. I'm in plan mode so I can't write the file yet — below is the proposed roadmap doc content for your review. Tell me if it looks right and where to save it (I'd suggest `docs/design-system/09-linear-light-migration-roadmap.md`), then I'll write it on your go-ahead.
+| File                                         | Reason                                         |
+| -------------------------------------------- | ---------------------------------------------- |
+| `pages/export/pdf/PdfInvoicePage.tsx`        | Thermal print formatting, own dimensions       |
+| `features/productDialog/productImageCrop.ts` | `#ffffff` is a JS Canvas API constant, not CSS |
+| `DemoReceipts.tsx`                           | Print demo, thermal formatting                 |
 
 ---
 
-# Linear-Light Migration — Component Roadmap
+## 3. Color Segregation by Use Case
 
-A phase-wise travel map for the migration agent. The palette swap is one CSS edit (`index.css`); this doc orders the **React components** so the agent moves from foundation → shell → leaves → complex features, retuning opacity tints and hardcoded values as it goes.
+### 3.1 Charts & Data Visualization
 
-> **Golden rule:** ~95% of components need **zero className changes**. After the `:root` swap, walk each phase and visually verify, then patch only the flagged items.
+Linear-style charts use a muted, restrained palette. The primary data series is midnight navy; secondary series are subdued tertiary tones. No neon, no high saturation.
 
-## How to read each phase
+| Token       | Value                 | Chart Use                                         |
+| ----------- | --------------------- | ------------------------------------------------- |
+| `--chart-1` | `oklch(46% 0.15 264)` | Primary data series (sales, revenue, main metric) |
+| `--chart-2` | `oklch(48% 0.06 180)` | Secondary series (estimates, comparison data)     |
+| `--chart-3` | `oklch(45% 0.04 220)` | Tertiary series (expenses, costs)                 |
+| `--chart-4` | `oklch(48% 0.05 155)` | Quaternary series (profit, growth)                |
+| `--chart-5` | `oklch(50% 0.05 45)`  | Quinary series (projections, forecasts)           |
+| `--chart-6` | `oklch(42% 0.03 255)` | Extra series (deep steel)                         |
+| `--chart-7` | `oklch(50% 0.04 105)` | Extra series (muted olive)                        |
+| `--chart-8` | `oklch(47% 0.03 10)`  | Extra series (muted rose)                         |
 
-- **Token auto-swap** = works automatically, just verify.
-- **Manual** = flagged edit (opacity retune, hardcoded color, doc drift).
-- **Depends on** = must be done after the listed phases.
+#### Bar Graph Specifics
+
+- **Sales bars**: `--chart-1` (midnight navy)
+- **Estimate bars**: `--chart-2` (muted teal)
+- **Profit bars**: `--chart-4` (muted sage)
+- **Grid lines**: `var(--hairline)` at 50% opacity
+- **Axis text**: `var(--ink-muted)`
+- **Hover state**: lighter tint of the bar's color
+
+#### Pie/Donut Specifics (Top Products)
+
+- Slice 0: `--chart-1`
+- Slice 1: `--chart-2`
+- Slice 2: `--chart-3`
+- Slice 3+: cycle through `--chart-4`, `--chart-5`, `--chart-6`, `--chart-7`, `--chart-8`
+- All slices use 92% fill opacity — none at full saturation
+
+#### Hardcoded Chart Color Fixes Required
+
+- `features/dashboard/TopProductsChart.tsx:15-16` — two hardcoded `hsl()` values → replace with `var(--chart-4)` and `var(--chart-5)` references
+
+### 3.2 Semantic States (Billing Save Status, Status Pills)
+
+These colors appear on save-status indicators, row-check status, and status pills across all pages.
+
+| State               | Background          | Text/Border                              | Use                       |
+| ------------------- | ------------------- | ---------------------------------------- | ------------------------- |
+| Synced (success)    | `bg-success/15`     | `text-success border-success/25`         | Saved, completed, paid    |
+| Saving (info)       | `bg-info/15`        | `text-info border-info/25`               | Processing, uploading     |
+| Unsaved (warning)   | `bg-warning/15`     | `text-warning border-warning/30`         | Pending, attention needed |
+| Error (destructive) | `bg-destructive/10` | `text-destructive border-destructive/25` | Failed, deleted, void     |
+
+### 3.3 Search Dropdown
+
+Product search results in the billing screen dropdown:
+
+| Element                | Token                                            | Visual Role                            |
+| ---------------------- | ------------------------------------------------ | -------------------------------------- |
+| Product name highlight | `--search-highlight`                             | Highlight matching query text          |
+| Icon container bg      | `--search-icon-bg-from` to `--search-icon-bg-to` | Product thumbnail placeholder gradient |
+| Icon fg                | `--search-icon-fg` (primary)                     | Product icon color                     |
+| Weight badge border    | `--search-badge-weight-border` (hairline)        | Neutral, recedes                       |
+| Weight badge bg        | `--search-badge-weight-bg` (surface-2)           | Muted background                       |
+| Weight badge text      | `--search-badge-weight-text` (ink-muted)         | Secondary information                  |
+| MRP badge border       | `--search-badge-mrp-border` (primary/30)         | Accent-weighted                        |
+| MRP badge bg           | `--search-badge-mrp-bg` (primary/08)             | Light accent tint                      |
+| MRP badge text         | `--search-badge-mrp-text` (primary)              | Stands out — price is key              |
+
+### 3.4 Product Dialog
+
+| Token                     | Visual Role                            |
+| ------------------------- | -------------------------------------- |
+| `--product-label`         | Field labels ("Price", "MRP", "Stock") |
+| `--product-value`         | Field values (actual numbers)          |
+| `--product-surface`       | Section background                     |
+| `--product-surface-hover` | Section hover state                    |
+| `--product-divider`       | Section separator                      |
+| `--product-badge-bg`      | Transaction type badge (sale/estimate) |
+| `--product-badge-text`    | Badge label text                       |
+
+### 3.5 Invoice / PDF
+
+Self-contained for PDF generation. Mapped to surface/text tokens so they auto-swap.
+
+### 3.6 Onboarding
+
+The onboarding flow uses a dark rail (intentionally dark regardless of main theme). Midnight navy's cooler hue (`264`) aligns well — the gradient uses navy-leaning blues that complement the primary accent.
 
 ---
 
-## Phase 0 — Foundation (the swap)
+## 4. Products Page — Weight+Unit vs MRP Visual Differentiation
 
-**Files:** `src/index.css`, `src/main.tsx`, `src/App.tsx`
+### Problem
 
-- Replace entire `:root` block per design doc §"Token Migration".
-- Add `font-size: 14px; font-weight: 500;` to `body` in `@layer base`.
-- `@theme inline` and `@font-face` blocks: **no changes**.
-- `App.tsx` wrapper `<div className="bg-background-secondary">`: token auto-swaps.
-- **Verify:** warm canvas, lavender primary, charcoal text, dim sidebar.
+Currently in `ProductListItem.tsx` (lines 83–99) and `SearchDropdown.tsx` (lines 477–492), both weight+unit and MRP badges use identical visual treatment:
 
-## Phase 1 — App Shell (every page depends on this)
+- Both are `Badge variant="outline"` with `rounded-full px-2.5 py-0.5 text-base font-semibold shadow-sm`
+- Weight uses `border-border bg-muted text-muted-foreground`
+- MRP uses `border-warning/30 bg-warning/10 text-warning`
+- At a glance on a 100 PPI TN panel, they blur into each other
+
+### Design Goal
+
+A shop operator scanning the product list must instantly distinguish:
+
+- **"What size is this?"** (weight+unit — quantity information, secondary)
+- **"What's the printed retail price?"** (MRP — price information, important)
+
+### Solution: Shape + Color + Position Differentiation
+
+**Weight+Unit badge** — compact, rectangular, neutral, recedes visually:
+
+```tsx
+<Badge
+  variant="outline"
+  className="border-hairline/60 bg-surface-2/50 text-ink-muted rounded-md px-2 py-0 text-xs font-medium tracking-normal"
+>
+  {product.weight}
+  {product.unit}
+</Badge>
+```
+
+- **Shape**: `rounded-md` (4px) — compact rectangle, distinct from pills
+- **Color**: `bg-surface-2/50 border-hairline/60 text-ink-muted` — almost invisible, doesn't compete
+- **Size**: `px-2 py-0 text-xs` — smallest badge, acknowledges secondary importance
+- **Font**: `font-medium` — not bold, doesn't demand attention
+
+**MRP badge** — pill, accent-tinted, stands out:
+
+```tsx
+<Badge
+  variant="outline"
+  className="border-primary/30 bg-primary/8 text-primary rounded-full px-2.5 py-0.5 text-sm font-semibold tracking-normal"
+>
+  MRP ₹{paisaToRupeeString(product.mrp)}
+</Badge>
+```
+
+- **Shape**: `rounded-full` — pill, clearly different from weight rectangle
+- **Color**: `bg-primary/8 border-primary/30 text-primary` — midnight navy accent, visible but tasteful
+- **Size**: `px-2.5 py-0.5 text-sm` — slightly larger than weight badge
+- **Font**: `font-semibold` — commands attention for price scanning
+
+### Visual Scan Pattern (Left to Right)
+
+```
+[Thumbnail]  Amul Gold Milk 1L  ▣ 500ml  ● MRP ₹32   ₹28.00  [Actions]
+              ↑ product name    ↑ weight    ↑ MRP        ↑ selling price
+              bold, large       rect, gray  pill,navy    bold, largest
+```
+
+The weight is a compact gray rectangle that the eye skips; the MRP is a navy pill that catches the eye. The selling price (rightmost, largest) remains the dominant number.
+
+### Affected Files
+
+| File                                    | Lines   | Change                                                           |
+| --------------------------------------- | ------- | ---------------------------------------------------------------- |
+| `features/products/ProductListItem.tsx` | 84–91   | Apply weight-badge classes above                                 |
+| `features/products/ProductListItem.tsx` | 93–99   | Apply MRP-badge classes above (replace `warning` with `primary`) |
+| `features/search/SearchDropdown.tsx`    | 477–492 | Apply weight-badge classes above                                 |
+| `features/search/SearchDropdown.tsx`    | 487–492 | Apply MRP-badge classes above (replace `warning` with `primary`) |
+
+### Search Dropdown Token Updates
+
+Update the `--search-badge-mrp-*` tokens in `:root` to use primary (midnight navy) instead of warning amber:
+
+- `--search-badge-mrp-border`: `oklch(28% 0.04 264 / 0.3)` → midnight navy at 30%
+- `--search-badge-mrp-bg`: `oklch(28% 0.04 264 / 0.08)` → midnight navy at 8%
+- `--search-badge-mrp-text`: `var(--primary)` → midnight navy
+
+---
+
+## 5. Minimal Motion with React Motion
+
+Motion is already imported in several components (`motion/react`). These additions are subtle — a billing workstation should never feel distracting.
+
+### 5.1 LineItemRow — Entry & Exit
+
+When a new line item is added or removed in billing:
+
+```tsx
+import { motion, AnimatePresence } from "motion/react";
+
+// Inside LineItemsTable, wrap each row:
+<AnimatePresence mode="popLayout">
+  {lineItems.map((item) => (
+    <motion.div
+      key={item.rowId}
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: "auto" }}
+      exit={{ opacity: 0, height: 0 }}
+      transition={{ duration: 0.15, ease: "easeOut" }}
+    >
+      <LineItemRow ... />
+    </motion.div>
+  ))}
+</AnimatePresence>
+```
+
+- **Duration**: 150ms — fast enough to feel instant, slow enough to register
+- **Animates**: opacity + height (layout-aware)
+- **No scale/rotation**: these would be distracting in a data table
+
+### 5.2 Sidebar Nav Items — Hover Lift
+
+Subtle hover feedback on navigation items:
+
+```tsx
+<motion.div whileHover={{ x: 2 }} transition={{ duration: 0.12, ease: "easeOut" }}>
+  {/* nav item content */}
+</motion.div>
+```
+
+- **Translates**: 2px right — micro lift, barely perceptible
+- **Duration**: 120ms — snappy
+
+### 5.3 Billing Save Status — Pulse When Saving
+
+When the sync status is "SAVING", a gentle opacity pulse:
+
+```tsx
+<motion.div
+  animate={status === "SAVING" ? { opacity: [1, 0.65, 1] } : { opacity: 1 }}
+  transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
+>
+  {/* save status indicator */}
+</motion.div>
+```
+
+- **Pulse**: soft 1.2s cycle — visible but not urgent
+- **Stops**: when status becomes SYNCED or IS_DIRTY
+
+### 5.4 Tab Content — Fade Transition
+
+When switching between billing tabs (Sale / Estimate) or settings sub-pages:
+
+```tsx
+<motion.div
+  key={activeTabId}
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ duration: 0.12, ease: "easeOut" }}
+>
+  {/* tab content */}
+</motion.div>
+```
+
+- **Duration**: 120ms — near-instant
+- **No translation**: tab content stays in place, just fades in
+
+### 5.5 Dashboard Metric Cards — Hover Scale
+
+Cards in the dashboard metrics section gain a subtle pressable feel:
+
+```tsx
+<motion.div
+  whileHover={{ scale: 1.01 }}
+  whileTap={{ scale: 0.99 }}
+  transition={{ duration: 0.12, ease: "easeOut" }}
+>
+  <MetricCard ... />
+</motion.div>
+```
+
+- **Scale**: 1% hover, 1% press — almost imperceptible but adds tactility
+
+### 5.6 Product List Items — Staggered Fade-In
+
+When the product list loads, items fade in with a stagger:
+
+```tsx
+<motion.div
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ duration: 0.2, delay: index * 0.02 }}
+>
+  <ProductListItem ... />
+</motion.div>
+```
+
+- **Stagger**: 20ms per item — creates a subtle cascade
+- **Only on initial load**: not on filter/sort changes (would be distracting)
+
+### Motion Rules
+
+| Do                                       | Don't                            |
+| ---------------------------------------- | -------------------------------- |
+| 150ms max duration for layout animations | Anything over 300ms              |
+| Opacity + height/width only              | Rotation, bounce, spring effects |
+| `easeOut` easing                         | `easeInOut` or elastic curves    |
+| Stagger only on initial page load        | Stagger on every filter change   |
+| Respect `prefers-reduced-motion: reduce` | Ignore accessibility preferences |
+
+---
+
+## 6. Component Inventory (Reference)
+
+### Page Routes (`pages/`)
+
+| File                            | Complexity   | Key Concern                              |
+| ------------------------------- | ------------ | ---------------------------------------- |
+| `home/HomePage.tsx`             | Low          | Token-driven, verify only                |
+| `products/ProductsPage.tsx`     | Medium       | Product list + search/filter             |
+| `customers/CustomersPage.tsx`   | Medium       | Customer table + sidebar                 |
+| `billing/BillingPage.tsx`       | High         | Debounced sync, tabs, overlay sidebar    |
+| `dashboard/DashboardPage.tsx`   | Medium       | Route param validation → `Dashboard.tsx` |
+| `reports/ReportsPage.tsx`       | Low          | Token-driven                             |
+| `settings/SettingsPage.tsx`     | Medium       | Nested sub-routes                        |
+| `export/pdf/PdfInvoicePage.tsx` | Do Not Touch | Thermal print formatting                 |
+| `NotFoundPage.tsx`              | Low          | Gradient text uses tokens                |
+
+### Feature Components (`features/`)
+
+| Feature                 | Files                  | Concerns                                                |
+| ----------------------- | ---------------------- | ------------------------------------------------------- |
+| `billing/`              | 11 files + `tabs/` (2) | Line items table, sync status, tabs, save-status        |
+| `products/`             | 3 files                | Product list header, list items, results                |
+| `productDialog/`        | 8 files                | Edit form, view mode, image crop, history, transactions |
+| `customers/`            | 8 files                | Table, rows, sidebar, details, dialog                   |
+| `dashboard/`            | 9 files                | Metrics, charts, transactions, modals                   |
+| `transactionDashboard/` | 4 files                | Dashboard table, rows, cards, date picker               |
+| `onboarding/`           | 3 + `steps/` (4)       | Dark rail flow, stepper, completion screen              |
+| `search/`               | 2 files                | Global search dropdown                                  |
+| `settings/`             | 3 files                | Settings sections, field row, nav config                |
+
+### Layout Components (`components/`)
+
+| File                     | Role                                                          |
+| ------------------------ | ------------------------------------------------------------- |
+| `Sidebar.tsx`            | Resizable nav sidebar — docked (default) or overlay (billing) |
+| `layouts/AppShell.tsx`   | Main shell — sidebar + header + `<Outlet />`                  |
+| `layouts/RootLayout.tsx` | Bootstrap/onboarding gate                                     |
+| `highlighted-text.tsx`   | Search query substring highlighter                            |
+
+---
+
+## 7. Phase-Wise Migration Plan
+
+> **Golden rule:** ~95% of components need **zero className changes**. After the CSS variable swap, walk each phase and visually verify, then patch only the flagged items.
+
+### Phase 0 — CSS Foundation Swap
+
+**Files:** `apps/desktop/src/renderer/src/index.css`
+
+1. Replace the entire `:root { ... }` block with the spec in §2 (lines 12–118 → new block).
+2. Add `font-weight: 500; font-size: 14px;` to the `body` rule in `@layer base`.
+3. Remove the `.linear-light` scope block entirely (lines 120–284) — its values are now in `:root`.
+4. `@theme inline` and `@font-face` blocks: **zero changes**.
+
+**Verify:** Reload app. Warm canvas, midnight navy primary, warm brown sidebar, weight-500 body text.
+
+### Phase 1 — App Shell
 
 **Files:** `components/layouts/RootLayout.tsx`, `components/layouts/AppShell.tsx`, `components/Sidebar.tsx`
 
-- `AppShell.tsx:68` `bg-background/95` — stays. `:96` `bg-muted/40` → `bg-muted/60`.
-- `Sidebar.tsx:198` `bg-sidebar` stays; `:303` `bg-background/80` → `bg-surface-2/80` (doc said line 306 — **off by 3**).
-- Flag: `Sidebar.tsx:198` `border-r-black/8` uses raw black, consider `border-border`.
-- `RootLayout.tsx`: spinner + onboarding gate, minimal styling — verify only.
+| File           | Line | Current                                   | Change                                                                        |
+| -------------- | ---- | ----------------------------------------- | ----------------------------------------------------------------------------- |
+| `AppShell.tsx` | 68   | `bg-background/95`                        | (stays) — auto-swaps to warm canvas at 95%                                    |
+| `AppShell.tsx` | 96   | `bg-muted/40`                             | → `bg-muted/60` (search bar needs more contrast against warm canvas)          |
+| `Sidebar.tsx`  | 198  | `bg-sidebar text-sidebar-foreground`      | (stays) — auto-swaps to warm brown ledger                                     |
+| `Sidebar.tsx`  | 198  | `border-r-black/8`                        | → `border-r-border/15` (use token, not raw black)                             |
+| `Sidebar.tsx`  | 303  | `bg-background/80 hover:bg-background/90` | → `bg-sidebar-accent/80 hover:bg-sidebar-accent` (store card on dark sidebar) |
 
-## Phase 2 — Leaf Pages (low risk, quick wins)
+### Phase 2 — Leaf Pages
 
 **Files:** `pages/home/HomePage.tsx`, `pages/reports/ReportsPage.tsx`, `pages/NotFoundPage.tsx`
 
-- Mostly token-driven. Verify only.
-- `NotFoundPage.tsx:15` gradient text `from-primary to-sidebar-primary` — swaps, verify contrast.
+- Token-driven. Verify colors render correctly.
+- `NotFoundPage.tsx:15` gradient `from-primary to-sidebar-primary` — verify midnight → warm brown gradient.
 
-## Phase 3 — Products + Product Dialog
+### Phase 3 — Products + Product Dialog
 
 **Pages:** `pages/products/ProductsPage.tsx`
-**Features:** `features/products/*` (ProductHeader, ProductListItem, ProductResults), `features/productDialog/*` (ProductDialog, ProductEditForm, ProductViewMode, ProductImageCropSelector, ProductHistoryTimeline, ProductTransactionsTable, StatusIndicator)
+**Features:** `features/products/*`, `features/productDialog/*`
 
-- Opacity retunes: `ProductHeader.tsx` (4× `bg-muted/30` & `/40`), `ProductListItem.tsx:64` `bg-muted/30`.
-- `bg-secondary/NN` tints across ProductDialog subtree (7 spots) — verify, retune if low-contrast.
-- `ProductDialog.tsx:147,150,157,164` — arbitrary `shadow-[..._rgba(0,0,0,...)]`; consider `shadow-sm/md`.
-- `--product-*` domain tokens auto-swap via index.css.
-- `productImageCrop.ts:4` `#ffffff` canvas fill — **leave** (not CSS).
+#### Product List Items
 
-## Phase 4 — Customers
+| File                  | Line  | Change                                                                                   |
+| --------------------- | ----- | ---------------------------------------------------------------------------------------- |
+| `ProductListItem.tsx` | 84–91 | Weight badge: apply new compact rectangular classes (§4)                                 |
+| `ProductListItem.tsx` | 93–99 | MRP badge: apply new primary-accent pill classes (§4) — replace `warning` with `primary` |
+
+#### Opacity Retunes
+
+| File                           | Line    | Current           | Change                                    |
+| ------------------------------ | ------- | ----------------- | ----------------------------------------- |
+| `ProductHeader.tsx`            | 72, 390 | `bg-muted/40`     | → `bg-muted/60`                           |
+| `ProductHeader.tsx`            | 92, 222 | `bg-muted/30`     | → `bg-muted/50`                           |
+| `ProductListItem.tsx`          | 64      | `bg-muted/30`     | → `bg-muted/50` (image thumb placeholder) |
+| `ProductViewMode.tsx`          | 36      | `bg-secondary/40` | → `bg-secondary/60`                       |
+| `ProductViewMode.tsx`          | 95      | `bg-secondary/10` | (stays)                                   |
+| `ProductEditForm.tsx`          | 59      | `bg-secondary/40` | → `bg-secondary/60`                       |
+| `ProductImageCropSelector.tsx` | 192     | `bg-secondary/20` | → `bg-secondary/40`                       |
+| `ProductTransactionsTable.tsx` | 181     | `bg-secondary/40` | → `bg-secondary/60`                       |
+| `ProductHistoryTimeline.tsx`   | 118     | `bg-card/50`      | → `bg-card/70`                            |
+| `ProductDialog.tsx`            | 147     | `bg-secondary/40` | → `bg-secondary/60` (TabsList)            |
+
+#### Shadow Cleanup
+
+| File                | Line          | Current                                     | Change        |
+| ------------------- | ------------- | ------------------------------------------- | ------------- |
+| `ProductDialog.tsx` | 147           | `shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)]` | → `shadow-xs` |
+| `ProductDialog.tsx` | 150, 157, 164 | `shadow-[0_2px_12px_rgba(0,0,0,0.06)]`      | → `shadow-md` |
+
+#### Do Not Touch
+
+- `productImageCrop.ts:4` — `#ffffff` canvas fill
+- `--product-*` domain tokens — auto-swap via `:root`
+
+### Phase 4 — Customers
 
 **Page:** `pages/customers/CustomersPage.tsx`
-**Features:** `features/customers/*` (CustomerLayout, CustomerSidebar, CustomerTable, CustomerTableRow, CustomerDetails, CustomerSummaryCard, CustomerTypeColor, CustomerDialog)
+**Features:** `features/customers/*`
 
-- `CustomerTableRow.tsx:131` status pill `border-destructive/20 bg-destructive/10` — verify.
-- `CustomerSummaryCard.tsx:79` `bg-primary/15` — verify against lavender.
-- No hardcoded colors; token-driven.
+| File                      | Line | Current                                                  | Change                       |
+| ------------------------- | ---- | -------------------------------------------------------- | ---------------------------- |
+| `CustomerTableRow.tsx`    | 131  | Status pills (`border-destructive/20 bg-destructive/10`) | Verify against new palette   |
+| `CustomerSummaryCard.tsx` | 79   | `bg-primary/15`                                          | Verify against midnight navy |
 
-## Phase 5 — Dashboard + Transaction Dashboard
+Token-driven, no hardcoded colors. Verify status pill contrast.
+
+### Phase 5 — Dashboard + Charts
 
 **Pages:** `pages/dashboard/DashboardPage.tsx`, `Dashboard.tsx`
 **Features:** `features/dashboard/*`, `features/transactionDashboard/*`
 
-- `MetricCard.tsx:50` `bg-secondary/60 hover:bg-secondary/80` — retune.
-- `Dashboard.tsx:32` `bg-secondary/90`, `ViewModal.tsx` (`/30`, `/10`) — verify.
-- Charts: `SalesEstimatesChart.tsx` uses `var(--chart-1/2)` (auto-swap ✓). `TopProductsChart.tsx:15-16` has **two hardcoded `hsl()`** pie colors — manual fix to palette.
-- `RecentTransactionsTableRow` / `DashboardTableRow` status pills — verify.
+#### Opacity Retunes
 
-## Phase 6 — Settings
+| File             | Line | Current                                 | Change                                    |
+| ---------------- | ---- | --------------------------------------- | ----------------------------------------- |
+| `MetricCard.tsx` | 50   | `bg-secondary/60 hover:bg-secondary/80` | → `bg-secondary/70 hover:bg-secondary/90` |
+| `Dashboard.tsx`  | 32   | `bg-secondary/90`                       | (stays)                                   |
+| `ViewModal.tsx`  | 47   | `bg-secondary/30`                       | → `bg-secondary/50`                       |
+| `ViewModal.tsx`  | 120  | `bg-secondary/10`                       | (stays)                                   |
+
+#### Chart Color Fixes
+
+| File                      | Line | Current                   | Change               |
+| ------------------------- | ---- | ------------------------- | -------------------- |
+| `TopProductsChart.tsx`    | 15   | `"hsl(140, 25%, 55%)"`    | → `"var(--chart-4)"` |
+| `TopProductsChart.tsx`    | 16   | `"hsl(350, 30%, 65%)"`    | → `"var(--chart-5)"` |
+| `SalesEstimatesChart.tsx` | 22   | `color: "var(--chart-1)"` | (stays — auto-swaps) |
+| `SalesEstimatesChart.tsx` | 26   | `color: "var(--chart-2)"` | (stays — auto-swaps) |
+
+### Phase 6 — Settings
 
 **Page:** `pages/settings/SettingsPage.tsx`
-**Features:** `features/settings/*` (SettingsSections, SettingsField, settingsNavigation)
+**Features:** `features/settings/*`
 
-- Token-driven, verify nested-route nav active states.
+Token-driven. Verify nested-route nav active states against midnight navy primary.
 
-## Phase 7 — Global Search
+### Phase 7 — Global Search
 
-**Features:** `features/search/*` (SearchDropdown, MemoizedSearchDropDown), `components/highlighted-text.tsx`
+**Features:** `features/search/*`, `components/highlighted-text.tsx`
 
-- `SearchDropdown.tsx:351` `bg-muted/50`, `:453` `bg-muted/30` — retune.
-- `SearchDropdown.tsx:318` `ring-black/6` — raw black, consider `ring-border`.
-- `--search-*` domain tokens auto-swap; verify weight/MRP badges.
+| File                   | Line    | Current               | Change                                     |
+| ---------------------- | ------- | --------------------- | ------------------------------------------ |
+| `SearchDropdown.tsx`   | 351     | `bg-muted/50`         | → `bg-muted/70`                            |
+| `SearchDropdown.tsx`   | 453     | `bg-muted/30`         | → `bg-muted/50`                            |
+| `SearchDropdown.tsx`   | 318     | `ring-1 ring-black/6` | → `ring-1 ring-border` (use token)         |
+| `SearchDropdown.tsx`   | 477–492 | Weight/MRP badges     | Apply same classes as ProductListItem (§4) |
+| `highlighted-text.tsx` | 12      | `bg-search-highlight` | (stays — auto-swaps via token)             |
 
-## Phase 8 — Billing (most complex — do late)
+### Phase 8 — Billing (Most Complex)
 
 **Page:** `pages/billing/BillingPage.tsx`
 **Features:** `features/billing/*` incl. `tabs/`
 
-- `BillingPage.tsx:125` `bg-background-secondary` stays.
-- `LineItemsTable.tsx:74` `bg-background/95` → `bg-background`; `:75` → `bg-muted/60`; `:122` `bg-background/80` verify.
-- `LineItemRow.tsx:96` `bg-muted/30` → `/60`; `:184` `bg-muted/25` → `/40` (doc said line 186 — **off by 2**); `:202,:231,:251` `bg-background/90,/80,/80` verify.
-- `SummaryFooter.tsx:118` `bg-background/60` verify.
-- `BillingHeader.tsx:170` `bg-card border-border/60` stays.
-- `tabs/BillingTab.tsx:47` `bg-background-secondary` → `bg-surface-1`.
-- `BillingSaveStatus.tsx` info/success/warning/destructive rings — verify semantic colors.
-- **Shared util:** `utils/index.ts:54` `getCheckStatusColor()` returns `bg-success/25` / `bg-warning/20` / `bg-background` — retune opacities (consumed by LineItemRow).
-- Note: billing sync is debounced; visual-only changes, no logic edits.
+#### Table & Rows
 
-## Phase 9 — Onboarding (dark rail, separate palette — last)
+| File                 | Line     | Current               | Change                            |
+| -------------------- | -------- | --------------------- | --------------------------------- |
+| `LineItemsTable.tsx` | 74       | `bg-background/95`    | → `bg-background`                 |
+| `LineItemsTable.tsx` | 75       | `bg-background/95`    | → `bg-muted/60`                   |
+| `LineItemsTable.tsx` | 122      | `bg-background/80`    | → `bg-muted/60`                   |
+| `LineItemRow.tsx`    | 53       | `hover:border-border` | (stays)                           |
+| `LineItemRow.tsx`    | 96       | `bg-muted/30`         | → `bg-muted/60` (qty control)     |
+| `LineItemRow.tsx`    | 184      | `bg-muted/25`         | → `bg-muted/40` (amount display)  |
+| `LineItemRow.tsx`    | 202      | `bg-background/90`    | → `bg-muted/70` (discount button) |
+| `LineItemRow.tsx`    | 231, 251 | `bg-background/80`    | → `bg-muted/60` (action buttons)  |
 
-**Features:** `features/onboarding/*` (OnboardingFlow, OnboardingStepper, OnboardingComplete, `steps/*`)
+#### Header, Footer, Tabs
 
-- `--onboarding-*` tokens are **intentionally dark** — auto-swap, verify.
-- `OnboardingStepper.tsx:30-39,56` — **7 inline oklch literals** in motion `animate` props (old amber primary, foreground, muted, border, ring). **Manual fix:** extract to `STEP_COLORS` constant (design doc §2.8 Option A) synced to lavender.
-- Steps use `bg-primary/15`, `text-onboarding-icon-dark` — verify.
+| File                | Line | Current                    | Change                             |
+| ------------------- | ---- | -------------------------- | ---------------------------------- |
+| `BillingHeader.tsx` | 170  | `bg-card border-border/60` | (stays)                            |
+| `BillingHeader.tsx` | 201  | `bg-muted/30`              | → `bg-muted/60` (date/time box)    |
+| `SummaryFooter.tsx` | 118  | `bg-background/60`         | → `bg-background/80`               |
+| `BillingPage.tsx`   | 125  | `bg-background-secondary`  | (stays — auto-swaps)               |
+| `BillingTab.tsx`    | 47   | `bg-background-secondary`  | → `bg-surface-1` (active tab lift) |
 
-## Phase 10 — Verification & Polish
+#### Shared Utility
 
-- Run full checklist from design doc §"Verification Checklist".
-- Cross-check: `pnpm typecheck && pnpm lint`.
-- Manual smoke: every route in `routes.tsx`, billing create+edit, onboarding fresh-launch, search, dashboard charts, print/PDF untouched.
-- **Do not touch:** `pages/export/pdf/PdfInvoicePage.tsx`, `components/ui/*`, `DemoReceipts`, `productImageCrop.ts`.
+| File             | Line | Current                                                                           | Change                                                                       |
+| ---------------- | ---- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `utils/index.ts` | 54   | `getCheckStatusColor()` returns `bg-success/25`, `bg-warning/20`, `bg-background` | → `bg-success/15`, `bg-warning/15`, `bg-background` (retune for new palette) |
+
+### Phase 9 — Onboarding
+
+**Features:** `features/onboarding/*`
+
+The onboarding flow uses a dark rail, intentionally dark regardless of main theme. The `--onboarding-*` tokens have been synced to midnight navy's hue (264) in the `:root` spec.
+
+#### Hardcoded Colors in Motion Props
+
+`OnboardingStepper.tsx` has inline `oklch()` values in `motion.animate` props (JavaScript objects — cannot reference CSS variables directly). Replace with a shared constant:
+
+```tsx
+// Add at top of OnboardingStepper.tsx
+const STEP_COLORS = {
+  completed: "#27a644", // --success
+  active: "oklch(28% 0.04 264)", // --primary (midnight navy)
+  inactive: "oklch(0.945 0.005 260)", // --surface-2
+  activeBorder: "oklch(28% 0.04 264 / 0.5)", // --ring
+  inactiveBorder: "oklch(0.86 0.006 260)", // --hairline
+  activeText: "oklch(0.18 0.035 260)", // --ink
+  inactiveText: "oklch(0.50 0.02 260)" // --ink-subtle
+};
+```
+
+Then reference `STEP_COLORS.active`, `STEP_COLORS.inactive`, etc. in the motion `animate` props (lines 30–39, 56).
+
+### Phase 10 — Verification & Polish
+
+1. Run `pnpm typecheck && pnpm lint` — must pass clean.
+2. Manual smoke test every route:
+   - Home (`/`), Products, Customers, Dashboard (sales + estimates), Reports, Settings (all sub-pages)
+   - Billing: create new sale, create new estimate, edit existing sale
+   - Search dropdown (open in billing line item row)
+   - Product dialog: view, edit, delete (soft), restore, permanent delete
+   - Onboarding: fresh launch flow (store identity → location → owner → complete)
+3. Verify all semantic states: success, warning, info, destructive — visible against warm canvas.
+4. Verify charts render with correct muted palette.
+5. Verify weight vs MRP badges are visually distinct.
+6. Verify sidebar contrast — warm brown with light text, active item clearly visible.
+7. Run `pnpm build` to verify production build succeeds.
 
 ---
 
-### Doc-accuracy notes for the agent
+## 8. Component-Specific Manual Edits
 
-The design doc `08-...md` is mostly accurate but **2 line refs drifted**:
+### Complete File-Change Checklist
 
-- §2.1 Sidebar `bg-background/80` → actual **line 303** (doc: 306).
-- §2.4 LineItemRow `bg-muted/25` → actual **line 184** (doc: 186).
+| #   | File                                         | Lines              | Change                                               | Phase |
+| --- | -------------------------------------------- | ------------------ | ---------------------------------------------------- | ----- |
+| 1   | `src/index.css`                              | 12–284             | Replace `:root` and remove `.linear-light`           | 0     |
+| 2   | `src/index.css`                              | `body` rule        | Add `font-weight: 500; font-size: 14px;`             | 0     |
+| 3   | `components/Sidebar.tsx`                     | 198                | `border-r-black/8` → `border-r-border/15`            | 1     |
+| 4   | `components/Sidebar.tsx`                     | 303                | Store card bg → `bg-sidebar-accent/80`               | 1     |
+| 5   | `layouts/AppShell.tsx`                       | 96                 | `bg-muted/40` → `bg-muted/60`                        | 1     |
+| 6   | `products/ProductListItem.tsx`               | 84–91              | Weight badge: compact rectangle classes              | 3     |
+| 7   | `products/ProductListItem.tsx`               | 93–99              | MRP badge: primary-accent pill classes               | 3     |
+| 8   | `products/ProductListItem.tsx`               | 64                 | `bg-muted/30` → `bg-muted/50`                        | 3     |
+| 9   | `products/ProductHeader.tsx`                 | 72,390             | `bg-muted/40` → `bg-muted/60`                        | 3     |
+| 10  | `products/ProductHeader.tsx`                 | 92,222             | `bg-muted/30` → `bg-muted/50`                        | 3     |
+| 11  | `productDialog/ProductViewMode.tsx`          | 36                 | `bg-secondary/40` → `bg-secondary/60`                | 3     |
+| 12  | `productDialog/ProductViewMode.tsx`          | 95                 | (stays)                                              | 3     |
+| 13  | `productDialog/ProductEditForm.tsx`          | 59                 | `bg-secondary/40` → `bg-secondary/60`                | 3     |
+| 14  | `productDialog/ProductImageCropSelector.tsx` | 192                | `bg-secondary/20` → `bg-secondary/40`                | 3     |
+| 15  | `productDialog/ProductTransactionsTable.tsx` | 181                | `bg-secondary/40` → `bg-secondary/60`                | 3     |
+| 16  | `productDialog/ProductHistoryTimeline.tsx`   | 118                | `bg-card/50` → `bg-card/70`                          | 3     |
+| 17  | `productDialog/ProductDialog.tsx`            | 147                | `bg-secondary/40` → `bg-secondary/60` + shadow fix   | 3     |
+| 18  | `productDialog/ProductDialog.tsx`            | 150,157,164        | `shadow-[...]` → `shadow-md`                         | 3     |
+| 19  | `dashboard/MetricCard.tsx`                   | 50                 | `bg-secondary/60` → `bg-secondary/70`                | 5     |
+| 20  | `dashboard/ViewModal.tsx`                    | 47                 | `bg-secondary/30` → `bg-secondary/50`                | 5     |
+| 21  | `dashboard/TopProductsChart.tsx`             | 15–16              | Hardcoded hsl() → `var(--chart-4)`, `var(--chart-5)` | 5     |
+| 22  | `search/SearchDropdown.tsx`                  | 351                | `bg-muted/50` → `bg-muted/70`                        | 7     |
+| 23  | `search/SearchDropdown.tsx`                  | 453                | `bg-muted/30` → `bg-muted/50`                        | 7     |
+| 24  | `search/SearchDropdown.tsx`                  | 318                | `ring-black/6` → `ring-border`                       | 7     |
+| 25  | `search/SearchDropdown.tsx`                  | 477–492            | Weight/MRP badges (same as ProductListItem)          | 7     |
+| 26  | `billing/LineItemsTable.tsx`                 | 74,75,122          | `bg-background/95` → `bg-background`/`bg-muted/60`   | 8     |
+| 27  | `billing/LineItemRow.tsx`                    | 96,184,202,231,251 | Opacity retunes (see table)                          | 8     |
+| 28  | `billing/BillingHeader.tsx`                  | 201                | `bg-muted/30` → `bg-muted/60`                        | 8     |
+| 29  | `billing/SummaryFooter.tsx`                  | 118                | `bg-background/60` → `bg-background/80`              | 8     |
+| 30  | `billing/BillingTab.tsx`                     | 47                 | `bg-background-secondary` → `bg-surface-1`           | 8     |
+| 31  | `utils/index.ts`                             | 54                 | `getCheckStatusColor()` — retune opacities           | 8     |
+| 32  | `onboarding/OnboardingStepper.tsx`           | 30–39,56           | Extract STEP_COLORS constant, sync to midnight navy  | 9     |
 
-### Doc-undocumented hotspots the agent must also handle
+---
 
-- `utils/index.ts:54` `getCheckStatusColor()` — opacity-tinted status helper.
-- `TopProductsChart.tsx:15-16` — two hardcoded `hsl()` pie colors.
-- Raw `black/NN` borders/rings in `Sidebar.tsx:198`, `SearchDropdown.tsx:318`.
-- `ProductDialog.tsx` — 4× arbitrary `rgba()` shadow values.
+## 9. Verification Checklist
+
+### After Phase 0 (CSS Swap)
+
+- [ ] Page background is warm off-white (`oklch(0.98 0.002 260)`), not the previous cool off-white
+- [ ] Sidebar is warm brown ledger, clearly dimmer than content
+- [ ] Sidebar text is legible (light warm text on dark warm brown)
+- [ ] Primary buttons are midnight navy, not amber
+- [ ] Text is deep charcoal (`oklch(0.18 0.035 260)`), body appears at weight 500
+- [ ] Cards are pure white with 1px hairline borders — visible against warm canvas
+- [ ] Success (green), warning (amber), destructive (red), info (blue) states all visible
+- [ ] Scrollbars use token colors correctly
+
+### After Phase 1–9 (Component Edits)
+
+- [ ] Search bar in AppShell has sufficient contrast against warm canvas
+- [ ] Sidebar store card blends with sidebar (not canvas-colored)
+- [ ] Weight badges are compact gray rectangles (`rounded-md`), not pills
+- [ ] MRP badges are midnight navy pills (`rounded-full`), distinct from weight badges
+- [ ] Product list image thumbnails have correct background contrast
+- [ ] Product dialog secondary surfaces have sufficient lift
+- [ ] Product dialog tabs have correct shadows
+- [ ] Customer status pills have proper contrast
+- [ ] Dashboard metric cards have correct hover contrast
+- [ ] Chart colors are muted Linear-style (no neon)
+- [ ] `TopProductsChart` has no hardcoded hsl() — all tokens
+- [ ] Search dropdown weight/MRP badges match ProductListItem style
+- [ ] Search dropdown border uses token, not raw black
+- [ ] Billing table container renders as a card
+- [ ] Billing toolbar strip has subtle surface lift
+- [ ] Billing qty controls and amount displays distinguishable from row bg
+- [ ] Billing active tab has surface lift
+- [ ] Billing save status displays correct semantic colors for all states
+- [ ] `getCheckStatusColor()` opacities work with new palette
+- [ ] Onboarding stepper uses midnight navy (not amber) for active step
+- [ ] Onboarding stepper motion colors match palette tokens
+- [ ] Onboarding gradient uses navy-leaning dark blues
+
+### After Phase 10 (Final)
+
+- [ ] `pnpm typecheck` passes clean
+- [ ] `pnpm lint` passes clean
+- [ ] `pnpm build` succeeds
+- [ ] App loads on 1366×768 at zoomFactor 1.0 without horizontal scrollbars
+- [ ] Print/PDF invoice pages untouched and correct
+- [ ] No raw hex, rgb(), or oklch() values remain outside of `index.css` and `OnboardingStepper.tsx` STEP_COLORS constant
+
+---
+
+## 10. Rollback Plan
+
+**Simplest rollback:**
+
+```
+git checkout -- apps/desktop/src/renderer/src/index.css
+```
+
+This restores the old `:root` token block and the `.linear-light` scope. All component className changes in Phases 1–9 are opacity/background tweaks that degrade gracefully — they work with either palette. However, if you want a complete rollback of component changes too:
+
+```
+git checkout -- apps/desktop/src/renderer/src/features/
+git checkout -- apps/desktop/src/renderer/src/components/
+git checkout -- apps/desktop/src/renderer/src/utils/index.ts
+```
+
+**Files safe from any migration impact (verified no changes):**
+
+- `pages/export/pdf/PdfInvoicePage.tsx`
+- `components/ui/*` (all 22 Shadcn files)
+- `features/productDialog/productImageCrop.ts`
+- Any files not listed in §8
+
+---
+
+## Appendix A: Doc Accuracy Notes
+
+The previous migration guide (`08-linear-light-billing-migration.md`) had two stale line references. These are corrected in this document:
+
+| Old doc claim                               | Actual line | Corrected here |
+| ------------------------------------------- | ----------- | -------------- |
+| §2.1 Sidebar `bg-background/80` at line 306 | Line 303    | §8 item #4     |
+| §2.4 LineItemRow `bg-muted/25` at line 186  | Line 184    | §8 item #27    |
+
+## Appendix B: Previously Undocumented Hotspots Now Covered
+
+| Hotspot                                | Location                                                  | §8 item # |
+| -------------------------------------- | --------------------------------------------------------- | --------- |
+| `getCheckStatusColor()` opacity helper | `utils/index.ts:54`                                       | 31        |
+| `TopProductsChart` hardcoded hsl()     | `TopProductsChart.tsx:15-16`                              | 21        |
+| Raw `border-r-black/8` in Sidebar      | `Sidebar.tsx:198`                                         | 3         |
+| Raw `ring-black/6` in SearchDropdown   | `SearchDropdown.tsx:318`                                  | 24        |
+| ProductDialog arbitrary rgba() shadows | `ProductDialog.tsx:147,150,157,164`                       | 17, 18    |
+| Weight/MRP badge visual parity bug     | `ProductListItem.tsx:84-99`, `SearchDropdown.tsx:477-492` | 6, 7, 25  |
