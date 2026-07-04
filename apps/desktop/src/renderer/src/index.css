@@ -14,200 +14,62 @@
   --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-roboto: "InterVariable", system-ui, sans-serif;
 
-  --background: oklch(0.9942 0.0034 247.8575);
-  --background-secondary: oklch(95.46% 0.004 264.37);
-  --foreground: oklch(0.2795 0.0368 260.031);
-
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2795 0.0368 260.031);
-
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2795 0.0368 260.031);
-
-  --primary: oklch(87.67% 0.165 90.15);
-  --primary-foreground: oklch(0% 0 0);
-
-  --secondary: oklch(0.9276 0.0058 264.5313);
-  --secondary-foreground: oklch(33.43% 0 0);
-
-  --accent: oklch(0.9519 0.0013 106.4244);
-  --accent-foreground: oklch(0.3729 0.0306 259.7328);
-
-  --muted: oklch(0.967 0.0029 264.5419);
-  --muted-foreground: oklch(0.551 0.0234 264.3637);
-
-  --destructive: oklch(64.69% 0.238 29.23);
-  --destructive-foreground: oklch(100% 0 0);
-
-  --border: oklch(82% 0.006 286.286);
-  --borderprimary: oklch(0.8475 0.173193 89.8358);
-  --input: oklch(0.8717 0.0093 258.3382);
-
-  --sidebar: oklch(95.46% 0.004 264.37);
-  --sidebar-foreground: oklch(0.2795 0.0368 260.031);
-  --sidebar-primary: oklch(0.5854 0.2041 277.1173);
-  --sidebar-primary-foreground: oklch(0.9519 0.0013 106.4244);
-  --sidebar-accent: oklch(0.9519 0.0013 106.4244);
-  --sidebar-accent-foreground: oklch(0.3729 0.0306 259.7328);
-
-  --success: oklch(69.72% 0.209 145.47);
-  --success-foreground: oklch(100% 0 0);
-
-  --warning: oklch(75% 0.16 85);
-  --warning-foreground: oklch(0.2795 0.0368 260.031);
-
-  --info: oklch(65% 0.14 250);
-  --info-foreground: oklch(100% 0 0);
-
-  --chart-1: #3b82f6;
-  --chart-2: #10b981;
-  --chart-3: hsl(190, 45%, 45%);
-  --chart-4: hsl(220, 30%, 55%);
-  --chart-5: hsl(30, 40%, 65%);
-
-  /* Onboarding Flow Colors */
-  --onboarding-gradient-start: oklch(25% 0.04 264);
-  --onboarding-gradient-mid: oklch(18% 0.03 264);
-  --onboarding-gradient-end: oklch(12% 0.02 255);
-  --onboarding-text-muted: oklch(70% 0.01 264);
-  --onboarding-text-footer: oklch(45% 0.01 264);
-  --onboarding-icon-bg: oklch(87.67% 0.165 90.15 / 0.15);
-  --onboarding-feature-text: oklch(80% 0.01 264);
-  --onboarding-icon-dark: oklch(60% 0.165 90.15);
-
-  --ring: oklch(77.55% 0.174 90.04);
-
-  /* Product Dialog - hierarchy colors */
-  --product-label: oklch(55% 0.02 264);
-  --product-value: oklch(28% 0.04 260);
-  --product-surface: oklch(97% 0.003 264);
-  --product-surface-hover: oklch(95% 0.005 264);
-  --product-divider: oklch(90% 0.005 264);
-  --product-badge-bg: oklch(94% 0.02 90);
-  --product-badge-text: oklch(45% 0.12 80);
-
-  /* Search Dropdown */
-  --search-highlight: oklch(93% 0.14 95);
-  --search-icon-bg-from: oklch(97% 0.01 90);
-  --search-icon-bg-to: oklch(94% 0.03 90);
-  --search-icon-fg: oklch(55% 0.15 85);
-  --search-badge-weight-border: oklch(88% 0.005 264);
-  --search-badge-weight-bg: oklch(96% 0.003 264);
-  --search-badge-weight-text: oklch(50% 0.015 264);
-  --search-badge-mrp-border: oklch(85% 0.06 70);
-  --search-badge-mrp-bg: oklch(95% 0.03 80);
-  --search-badge-mrp-text: oklch(48% 0.12 55);
-
-  /* Invoice Template */
-  --invoice-bg: oklch(100% 0 0);
-  --invoice-text: oklch(20% 0.02 260);
-  --invoice-text-muted: oklch(45% 0.02 260);
-  --invoice-accent: oklch(55% 0.12 160);
-  --invoice-border: oklch(90% 0.01 260);
-  --invoice-table-header-bg: oklch(96% 0.01 260);
-
-  --radius: 0.5rem;
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
-  --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.1), 0 6px 12px rgba(0, 0, 0, 0.05);
-  --shadow-2xl: 0 24px 48px rgba(0, 0, 0, 0.12);
-  --tracking-normal: 0em;
-  --spacing: 0.25rem;
-}
-
-/* ── Linear Light scope (home + sidebar only) ──
-   Overrides the amber :root tokens within any subtree tagged `.linear-light`.
-   When ready for the full migration, move these values into :root and drop the class. */
-.linear-light {
-  --font-sans: "InterVariable", system-ui, sans-serif;
-
   /* ── Surface Ladder ── */
-  --canvas: oklch(0.98 0.002 260);
-  --surface-1: oklch(1 0 0);
-  --surface-2: oklch(0.945 0.005 260);
-  --surface-3: oklch(0.89 0.006 260);
-  --surface-4: oklch(0.83 0.006 260);
+  --canvas: oklch(0.98 0.002 260); /* warm off-white page background */
+  --surface-1: oklch(1 0 0); /* cards, content panels — pure white */
+  --surface-2: oklch(0.945 0.005 260); /* elevated cards, hover rows, selected nav */
+  --surface-3: oklch(0.89 0.006 260); /* sub-nav, dropdowns */
+  --surface-4: oklch(0.83 0.006 260); /* deepest elevated surface */
 
   /* ── Hairline Borders ── */
-  --hairline: oklch(0.86 0.006 260);
-  --hairline-strong: oklch(0.75 0.008 260);
-  --hairline-tertiary: oklch(0.93 0.003 260);
+  --hairline: oklch(0.86 0.006 260); /* default card/divider borders */
+  --hairline-strong: oklch(0.75 0.008 260); /* input outlines, selected card borders */
+  --hairline-tertiary: oklch(0.93 0.003 260); /* nested surface borders */
 
   /* ── Text ── */
-  --ink: oklch(0.18 0.035 260);
-  --ink-muted: oklch(0.38 0.025 260);
-  --ink-subtle: oklch(0.50 0.02 260);
-  --ink-tertiary: oklch(0.63 0.02 260);
+  --ink: oklch(0.18 0.035 260); /* headlines, body text — deep charcoal */
+  --ink-muted: oklch(0.38 0.025 260); /* secondary text, meta, timestamps */
+  --ink-subtle: oklch(0.5 0.02 260); /* placeholder, disabled, deselected */
+  --ink-tertiary: oklch(0.63 0.02 260); /* disabled controls, decorative */
 
-  /* ── Brand & Accent ── */
-  /* A: Slate-charcoal — serious, minimal, thermal-print vibe. Stripe/Lightspeed. */
-  /*--primary: oklch(35% 0.02 260);
-  --primary-hover: oklch(25% 0.02 260);
-  --primary-focus: oklch(35% 0.02 260 / 0.5);
-  --on-primary: #ffffff;*/
+  /* ── Brand & Accent (Midnight Navy) ── */
+  --primary: oklch(28% 0.04 264); /* midnight navy — CTAs, focus, links, brand */
+  --primary-hover: oklch(20% 0.04 264); /* darker navy — hovered CTAs */
+  --primary-focus: oklch(28% 0.04 264 / 0.5); /* focus ring tint */
+  --on-primary: #ffffff; /* text on primary background */
 
-  /*B: Deep teal — calm, money-associated, modern. Shopify/Square energy. */
-  /*--primary: oklch(48% 0.13 195);
-  --primary-hover: oklch(40% 0.13 195);
-  --primary-focus: oklch(48% 0.13 195 / 0.5);
-  --on-primary: #ffffff;*/
-
-  /* C: Warm slate-blue — muted, professional, not in-your-face. Notion/Linear hybrid. */
-  /*--primary: oklch(45% 0.06 260);
-  --primary-hover: oklch(35% 0.06 260);
-  --primary-focus: oklch(45% 0.06 260 / 0.5);
-  --on-primary: #ffffff;*/
-
-  /* D: Rich forest green — earthy, calm, distinct from the blue/everyone-else. */
-  /*--primary: oklch(45% 0.14 160);
-  --primary-hover: oklch(38% 0.14 160);
-  --primary-focus: oklch(45% 0.14 160 / 0.5);
-  --on-primary: #ffffff;*/
-
-  /* E: Deep maroon — warm, premium, Indian retail feel without being bright. */
-  /*--primary: oklch(38% 0.14 15);
-  --primary-hover: oklch(30% 0.14 15);
-  --primary-focus: oklch(38% 0.14 15 / 0.5);
-  --on-primary: #ffffff;*/
-
-  /* F: Midnight navy — darker than option C, more authoritative. Bank-grade. */
-  --primary: oklch(28% 0.04 264);
-  --primary-hover: oklch(20% 0.04 264);
-  --primary-focus: oklch(28% 0.04 264 / 0.5);
-  --on-primary: #ffffff;
-
-  /* G: Muted plum — warm undertone, distinct, soft on eyes. */
-  /*--primary: oklch(42% 0.1 310);
-  --primary-hover: oklch(35% 0.1 310);
-  --primary-focus: oklch(42% 0.1 310 / 0.5);
-  --on-primary: #ffffff;
-*/
-  /* H: Burned copper — warm, earthy, grocery-store natural. */
-  /* --primary: oklch(48% 0.13 50); */
-  /* --primary-hover: oklch(40% 0.13 50); */
-  /* --primary-focus: oklch(48% 0.13 50 / 0.5); */
-  /* --on-primary: #ffffff; */
+  /* ── Warm Brown Ledger Sidebar ── */
+  --sidebar: oklch(0.28 0.022 60); /* warm dark brown — physical ledger feel */
+  --sidebar-foreground: oklch(0.9 0.01 85); /* light warm text on sidebar */
+  --sidebar-primary: var(--primary); /* sidebar active indicator */
+  --sidebar-primary-foreground: var(--on-primary);
+  --sidebar-accent: oklch(0.32 0.02 60); /* sidebar hover/selected bg */
+  --sidebar-accent-foreground: oklch(0.95 0.01 85); /* sidebar hover text */
 
   /* ── Semantic States ── */
   --success: #27a644;
   --success-foreground: #ffffff;
   --warning: oklch(70% 0.14 75);
-  --warning-foreground: #1a1c1e;
+  --warning-foreground: oklch(0.18 0.035 260);
   --destructive: #d32f2f;
   --destructive-foreground: #ffffff;
   --info: #1565c0;
   --info-foreground: #ffffff;
 
-  /* ── Charts ── */
-  --chart-1: oklch(52% 0.18 264);
-  --chart-2: #27a644;
-  --chart-3: hsl(190, 45%, 45%);
-  --chart-4: hsl(220, 30%, 55%);
-  --chart-5: hsl(30, 40%, 65%);
+  /* ── Charts & Data Visualization ──
+     Linear-inspired muted palette: one accent + subdued tertiaries.
+     No neon, no high saturation — the data speaks, not the colors. */
+  --chart-1: oklch(46% 0.15 264); /* midnight navy (primary range) */
+  --chart-2: oklch(48% 0.06 180); /* muted teal */
+  --chart-3: oklch(45% 0.04 220); /* slate blue-gray */
+  --chart-4: oklch(48% 0.05 155); /* muted sage green */
+  --chart-5: oklch(50% 0.05 45); /* muted warm amber */
+  /* Extra chart colors for multi-series: */
+  --chart-6: oklch(42% 0.03 255); /* deep steel */
+  --chart-7: oklch(50% 0.04 105); /* muted olive */
+  --chart-8: oklch(47% 0.03 10); /* muted rose */
 
-  /* ── Semantic Token Mapping ── */
+  /* ── Semantic Token Mapping (backward compat — all existing classes use these names) ── */
   --background: var(--canvas);
   --background-secondary: var(--surface-1);
   --foreground: var(--ink);
@@ -233,16 +95,48 @@
   --borderprimary: var(--primary);
   --input: var(--hairline-strong);
 
-  --sidebar: var(--surface-3);
-  --sidebar-foreground: var(--ink);
-  --sidebar-primary: var(--primary);
-  --sidebar-primary-foreground: var(--on-primary);
-  --sidebar-accent: var(--surface-2);
-  --sidebar-accent-foreground: var(--ink);
-
   --ring: var(--primary-focus);
 
-  --radius: 0.5rem;
+  /* ── Onboarding (dark rail — intentionally dark) ── */
+  --onboarding-gradient-start: oklch(25% 0.04 264);
+  --onboarding-gradient-mid: oklch(18% 0.03 264);
+  --onboarding-gradient-end: oklch(12% 0.02 255);
+  --onboarding-text-muted: oklch(70% 0.01 264);
+  --onboarding-text-footer: oklch(45% 0.01 264);
+  --onboarding-icon-bg: oklch(28% 0.04 264 / 0.15);
+  --onboarding-feature-text: oklch(80% 0.01 264);
+  --onboarding-icon-dark: oklch(46% 0.15 264);
+
+  /* ── Product Dialog ── */
+  --product-label: var(--ink-muted);
+  --product-value: var(--ink);
+  --product-surface: var(--surface-1);
+  --product-surface-hover: var(--surface-2);
+  --product-divider: var(--hairline);
+  --product-badge-bg: oklch(28% 0.04 264 / 0.08);
+  --product-badge-text: oklch(28% 0.04 264);
+
+  /* ── Search Dropdown ── */
+  --search-highlight: oklch(28% 0.04 264 / 0.15);
+  --search-icon-bg-from: var(--surface-1);
+  --search-icon-bg-to: var(--surface-2);
+  --search-icon-fg: var(--primary);
+  --search-badge-weight-border: var(--hairline);
+  --search-badge-weight-bg: var(--surface-2);
+  --search-badge-weight-text: var(--ink-muted);
+  --search-badge-mrp-border: oklch(28% 0.04 264 / 0.3);
+  --search-badge-mrp-bg: oklch(28% 0.04 264 / 0.08);
+  --search-badge-mrp-text: var(--primary);
+
+  /* ── Invoice Template (PDF/print) ── */
+  --invoice-bg: var(--surface-1);
+  --invoice-text: var(--ink);
+  --invoice-text-muted: var(--ink-muted);
+  --invoice-accent: var(--primary);
+  --invoice-border: var(--hairline);
+  --invoice-table-header-bg: var(--surface-2);
+
+  /* ── Shadows ── */
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
@@ -250,37 +144,9 @@
   --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.1), 0 6px 12px rgba(0, 0, 0, 0.05);
   --shadow-2xl: 0 24px 48px rgba(0, 0, 0, 0.12);
 
-  font-weight: 500;
-
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-weight: 600;
-    letter-spacing: -0.02em;
-  }
-
-  .font-semibold {
-    font-weight: 600;
-  }
-
-  .font-bold {
-    font-weight: 700;
-  }
-
-  .font-extrabold {
-    font-weight: 750;
-  }
-
-  .text-muted-foreground {
-    font-weight: 500;
-  }
-
-  .text-xs {
-    font-weight: 500;
-  }
+  --radius: 0.5rem;
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
 }
 
 @theme inline {
@@ -419,6 +285,8 @@
 
   body {
     @apply bg-background text-foreground;
+    font-weight: 500;
+    font-size: 14px;
   }
 
   @media (prefers-reduced-motion: reduce) {
