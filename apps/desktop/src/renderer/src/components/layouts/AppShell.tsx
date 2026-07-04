@@ -34,6 +34,10 @@ const getPageTitle = (pathname: string) => {
     return "Settings";
   }
 
+  if (matchPath("/palette-demo", pathname)) {
+    return "Palette Demo";
+  }
+
   return "Workspace";
 };
 
