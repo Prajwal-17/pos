@@ -4,12 +4,10 @@ import Home from "@/pages/home/HomePage";
 import ProductsPage from "@/pages/products/ProductsPage";
 import Reports from "@/pages/reports/ReportsPage";
 import SettingsPage from "@/pages/settings/SettingsPage";
-import PaletteDemoPage from "@/pages/palette/PaletteDemoPage";
 import {
   ChartColumn,
   House,
   Package,
-  Palette,
   ReceiptText,
   Settings,
   ShoppingCart,
@@ -64,11 +62,5 @@ export const navLinks: NavlinkType[] = [
     title: "Settings",
     element: <SettingsPage />,
     icon: <Settings size={24} />
-  },
-  {
-    href: "/palette-demo",
-    title: "Palette Demo",
-    element: <PaletteDemoPage />,
-    icon: <Palette size={24} />
   }
 ];
