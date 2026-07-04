@@ -21,10 +21,11 @@
   --surface-3: oklch(0.89 0.006 260); /* sub-nav, dropdowns */
   --surface-4: oklch(0.83 0.006 260); /* deepest elevated surface */
 
-  /* ── Hairline Borders ── */
-  --hairline: oklch(0.86 0.006 260); /* default card/divider borders */
-  --hairline-strong: oklch(0.75 0.008 260); /* input outlines, selected card borders */
-  --hairline-tertiary: oklch(0.93 0.003 260); /* nested surface borders */
+  /* ── Hairline Borders ──
+     Dark enough to be visible on 100 PPI TN panels at 1366×768. */
+  --hairline: oklch(0.74 0.008 260); /* default card/divider borders */
+  --hairline-strong: oklch(0.62 0.010 260); /* input outlines, selected card borders */
+  --hairline-tertiary: oklch(0.83 0.005 260); /* nested surface borders */
 
   /* ── Text ── */
   --ink: oklch(0.18 0.035 260); /* headlines, body text — deep charcoal */
@@ -32,19 +33,22 @@
   --ink-subtle: oklch(0.5 0.02 260); /* placeholder, disabled, deselected */
   --ink-tertiary: oklch(0.63 0.02 260); /* disabled controls, decorative */
 
-  /* ── Brand & Accent (Midnight Navy) ── */
-  --primary: oklch(28% 0.04 264); /* midnight navy — CTAs, focus, links, brand */
-  --primary-hover: oklch(20% 0.04 264); /* darker navy — hovered CTAs */
-  --primary-focus: oklch(28% 0.04 264 / 0.5); /* focus ring tint */
-  --on-primary: #ffffff; /* text on primary background */
+  /* ── Brand & Accent ── */
+  --primary: oklch(45% 0.06 260); /* warm slate — muted, professional */
+  --primary-hover: oklch(35% 0.06 260); /* deeper slate — hovered CTAs */
+  --primary-focus: oklch(45% 0.06 260 / 0.4); /* focus ring tint */
+  --on-primary: #ffffff;
 
-  /* ── Warm Brown Ledger Sidebar ── */
-  --sidebar: oklch(0.28 0.022 60); /* warm dark brown — physical ledger feel */
-  --sidebar-foreground: oklch(0.9 0.01 85); /* light warm text on sidebar */
-  --sidebar-primary: var(--primary); /* sidebar active indicator */
+  /* ── Sidebar ──
+     Linear-style: sidebar is a few notches dimmer than canvas.
+     Still light, still readable — it recedes so content takes priority,
+     but is clearly visible for navigation. */
+  --sidebar: oklch(0.90 0.004 260); /* dimmed warm gray — distinct from canvas but light */
+  --sidebar-foreground: oklch(0.30 0.03 260); /* readable text on light sidebar */
+  --sidebar-primary: var(--primary); /* active indicator */
   --sidebar-primary-foreground: var(--on-primary);
-  --sidebar-accent: oklch(0.32 0.02 60); /* sidebar hover/selected bg */
-  --sidebar-accent-foreground: oklch(0.95 0.01 85); /* sidebar hover text */
+  --sidebar-accent: oklch(0.84 0.006 260); /* hover/selected surface */
+  --sidebar-accent-foreground: oklch(0.18 0.035 260); /* active text */
 
   /* ── Semantic States ── */
   --success: #27a644;
@@ -59,7 +63,7 @@
   /* ── Charts & Data Visualization ──
      Linear-inspired muted palette: one accent + subdued tertiaries.
      No neon, no high saturation — the data speaks, not the colors. */
-  --chart-1: oklch(46% 0.15 264); /* midnight navy (primary range) */
+  --chart-1: oklch(48% 0.08 260); /* warm slate (primary range) */
   --chart-2: oklch(48% 0.06 180); /* muted teal */
   --chart-3: oklch(45% 0.04 220); /* slate blue-gray */
   --chart-4: oklch(48% 0.05 155); /* muted sage green */
@@ -103,9 +107,9 @@
   --onboarding-gradient-end: oklch(12% 0.02 255);
   --onboarding-text-muted: oklch(70% 0.01 264);
   --onboarding-text-footer: oklch(45% 0.01 264);
-  --onboarding-icon-bg: oklch(28% 0.04 264 / 0.15);
-  --onboarding-feature-text: oklch(80% 0.01 264);
-  --onboarding-icon-dark: oklch(46% 0.15 264);
+  --onboarding-icon-bg: oklch(45% 0.06 260 / 0.15);
+  --onboarding-feature-text: oklch(80% 0.01 260);
+  --onboarding-icon-dark: oklch(45% 0.06 260);
 
   /* ── Product Dialog ── */
   --product-label: var(--ink-muted);

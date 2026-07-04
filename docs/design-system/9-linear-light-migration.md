@@ -1,6 +1,6 @@
 # Linear Light Migration — Midnight Navy Theme
 
-Complete migration guide for QuickCart from the current amber/saffron design system to a **Linear-inspired light mode** with **Midnight Navy** accent and **Warm Brown Ledger** sidebar, tuned for a 1366×768 grocery billing workstation.
+Complete migration guide for QuickCart from the current amber/saffron design system to a **Linear-inspired light mode** with **Midnight Navy** accent and sidebar, tuned for a 1366×768 grocery billing workstation.
 
 ---
 
@@ -21,12 +21,12 @@ Complete migration guide for QuickCart from the current amber/saffron design sys
 
 ## 1. Overview & Rationale
 
-### Why Midnight Navy + Warm Brown Ledger
+### Why Midnight Navy
 
 | Property                                           | Rationale                                                                                            |
 | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | Midnight Navy primary (`oklch(28% 0.04 264)`)      | Authoritative, bank-grade, professional — conveys trust for a billing app without being loud         |
-| Warm Brown Ledger sidebar (`oklch(0.28 0.022 60)`) | Dark but warm — intentional like physical account books, separates chrome from content distinctively |
+| Dark navy sidebar (`oklch(20% 0.025 264)`)         | Visually anchors the workspace — dark enough to recede, navy enough to feel cohesive with the brand  |
 | Warm canvas (`oklch(0.98 0.002 260)`)              | Reduces eye fatigue under fluorescent shop lighting                                                  |
 | White cards (`oklch(1 0 0)`)                       | Crisp content surfaces that pop against the warm canvas                                              |
 | Single accent, muted palette                       | The operator's attention goes to prices and status, not chrome color                                 |
@@ -39,7 +39,7 @@ Complete migration guide for QuickCart from the current amber/saffron design sys
 | Primary accent | Amber (`oklch(87.67% 0.165 90.15)`)            | Midnight Navy (`oklch(28% 0.04 264)`)                          |
 | Canvas         | Cool off-white (`oklch(0.9942 0.0034 247.86)`) | Warm off-white (`oklch(0.98 0.002 260)`)                       |
 | Cards          | Pure white (same as canvas-ish)                | Pure white on warm canvas (visible hierarchy)                  |
-| Sidebar        | Light gray (`oklch(95.46% 0.004 264.37)`)      | **Warm Brown Ledger** (`oklch(0.28 0.022 60)`) with light text |
+| Sidebar        | Light gray (`oklch(95.46% 0.004 264.37)`)      | **Dark navy** (`oklch(20% 0.025 264)`) with light text |
 | Borders        | `oklch(82% 0.006 286.286)`                     | Hairline ladder (`oklch(0.86 0.006 260)` etc.)                 |
 | Text           | `oklch(0.2795 0.0368 260.031)`                 | `oklch(0.18 0.035 260)` (deeper ink)                           |
 | Font weight    | 425                                            | 500 (better readability on 100 PPI TN panel)                   |
@@ -83,13 +83,13 @@ Replace the entire `:root { ... }` block in `apps/desktop/src/renderer/src/index
   --primary-focus: oklch(28% 0.04 264 / 0.5); /* focus ring tint */
   --on-primary: #ffffff; /* text on primary background */
 
-  /* ── Warm Brown Ledger Sidebar ── */
-  --sidebar: oklch(0.28 0.022 60); /* warm dark brown — physical ledger feel */
-  --sidebar-foreground: oklch(0.9 0.01 85); /* light warm text on sidebar */
-  --sidebar-primary: var(--primary); /* sidebar active indicator */
+  /* ── Midnight Navy Sidebar ── */
+  --sidebar: oklch(20% 0.025 264);       /* dark navy sidebar — distinct from canvas */
+  --sidebar-foreground: oklch(0.88 0.01 264);          /* light text on sidebar */
+  --sidebar-primary: var(--primary);                    /* sidebar active indicator */
   --sidebar-primary-foreground: var(--on-primary);
-  --sidebar-accent: oklch(0.32 0.02 60); /* sidebar hover/selected bg */
-  --sidebar-accent-foreground: oklch(0.95 0.01 85); /* sidebar hover text */
+  --sidebar-accent: oklch(28% 0.04 264 / 0.25);       /* sidebar hover/selected bg */
+  --sidebar-accent-foreground: oklch(0.95 0.005 264);  /* sidebar hover text */
 
   /* ── Semantic States ── */
   --success: #27a644;
@@ -570,7 +570,7 @@ When the product list loads, items fade in with a stagger:
 3. Remove the `.linear-light` scope block entirely (lines 120–284) — its values are now in `:root`.
 4. `@theme inline` and `@font-face` blocks: **zero changes**.
 
-**Verify:** Reload app. Warm canvas, midnight navy primary, warm brown sidebar, weight-500 body text.
+**Verify:** Reload app. Warm canvas, midnight navy primary, dark navy sidebar, weight-500 body text.
 
 ### Phase 1 — App Shell
 
@@ -580,7 +580,7 @@ When the product list loads, items fade in with a stagger:
 | -------------- | ---- | ----------------------------------------- | ----------------------------------------------------------------------------- |
 | `AppShell.tsx` | 68   | `bg-background/95`                        | (stays) — auto-swaps to warm canvas at 95%                                    |
 | `AppShell.tsx` | 96   | `bg-muted/40`                             | → `bg-muted/60` (search bar needs more contrast against warm canvas)          |
-| `Sidebar.tsx`  | 198  | `bg-sidebar text-sidebar-foreground`      | (stays) — auto-swaps to warm brown ledger                                     |
+| `Sidebar.tsx`  | 198  | `bg-sidebar text-sidebar-foreground`      | (stays) — auto-swaps to dark navy sidebar                                     |
 | `Sidebar.tsx`  | 198  | `border-r-black/8`                        | → `border-r-border/15` (use token, not raw black)                             |
 | `Sidebar.tsx`  | 303  | `bg-background/80 hover:bg-background/90` | → `bg-sidebar-accent/80 hover:bg-sidebar-accent` (store card on dark sidebar) |
 
@@ -589,7 +589,7 @@ When the product list loads, items fade in with a stagger:
 **Files:** `pages/home/HomePage.tsx`, `pages/reports/ReportsPage.tsx`, `pages/NotFoundPage.tsx`
 
 - Token-driven. Verify colors render correctly.
-- `NotFoundPage.tsx:15` gradient `from-primary to-sidebar-primary` — verify midnight → warm brown gradient.
+- `NotFoundPage.tsx:15` gradient `from-primary to-sidebar-primary` — verify midnight navy gradient.
 
 ### Phase 3 — Products + Product Dialog
 
@@ -755,7 +755,7 @@ Then reference `STEP_COLORS.active`, `STEP_COLORS.inactive`, etc. in the motion 
 3. Verify all semantic states: success, warning, info, destructive — visible against warm canvas.
 4. Verify charts render with correct muted palette.
 5. Verify weight vs MRP badges are visually distinct.
-6. Verify sidebar contrast — warm brown with light text, active item clearly visible.
+6. Verify sidebar contrast — dark navy with light text, active item clearly visible.
 7. Run `pnpm build` to verify production build succeeds.
 
 ---
@@ -806,8 +806,8 @@ Then reference `STEP_COLORS.active`, `STEP_COLORS.inactive`, etc. in the motion 
 ### After Phase 0 (CSS Swap)
 
 - [ ] Page background is warm off-white (`oklch(0.98 0.002 260)`), not the previous cool off-white
-- [ ] Sidebar is warm brown ledger, clearly dimmer than content
-- [ ] Sidebar text is legible (light warm text on dark warm brown)
+- [ ] Sidebar is dark navy, clearly dimmer than content
+- [ ] Sidebar text is legible (light text on dark navy)
 - [ ] Primary buttons are midnight navy, not amber
 - [ ] Text is deep charcoal (`oklch(0.18 0.035 260)`), body appears at weight 500
 - [ ] Cards are pure white with 1px hairline borders — visible against warm canvas
