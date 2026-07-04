@@ -3,14 +3,16 @@ import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import { motion } from "motion/react";
 
+// Mirrors index.css tokens (motion cannot tween CSS vars directly, so values
+// are duplicated — keep in sync with :root when tokens change).
 const STEP_COLORS = {
-  completed: "#27a644", // --success
-  active: "oklch(28% 0.04 264)", // --primary (midnight navy)
-  inactive: "oklch(0.945 0.005 260)", // --surface-2
-  activeBorder: "oklch(28% 0.04 264 / 0.5)", // --ring
-  inactiveBorder: "oklch(0.86 0.006 260)", // --hairline
-  activeText: "oklch(0.18 0.035 260)", // --ink
-  inactiveText: "oklch(0.50 0.02 260)" // --ink-subtle
+  completed: "oklch(0.550 0.120 150)", // --success
+  active: "oklch(0.430 0.080 258)", // --primary
+  inactive: "oklch(0.940 0.004 255)", // --surface-2
+  activeBorder: "oklch(0.430 0.080 258 / 0.5)", // --ring
+  inactiveBorder: "oklch(0.870 0.004 255)", // --hairline
+  activeText: "oklch(0.210 0.020 255)", // --ink
+  inactiveText: "oklch(0.520 0.014 255)" // --ink-subtle
 };
 
 type OnboardingStepperProps = {
