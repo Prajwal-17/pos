@@ -1,4 +1,5 @@
 import { cleanProductHistory } from "./release-v4.3.0/cleanProductHistory";
+import { dropFtsTables } from "./release-v4.3.0/dropFtsTables";
 import { recalculateGrandTotals } from "./release-v4.3.0/recalculateGrandTotals";
 import { recalculateTotalQuantities } from "./release-v4.3.0/recalculateTotalQuantities";
 import { recalculateTotalQuantitySold } from "./release-v4.3.0/recalculateTotalQuantitySold";
@@ -12,6 +13,7 @@ import { updateStoreId } from "./release-v4.3.0/updateStoreId";
 export async function dbScripts() {
   // db scripts for above v4.3.0
   setupTables(); // create new tables & columns before running data migrations
+  dropFtsTables(); // remove leftover FTS tables from experiments
   await seedAppInstanceAndStoreProfile(); // seed app_instance & store_profile
   await updateStoreId(); // populate storeId FK in customers, products, sales, estimates
   await updateProductSnapshot(); // recalculate product snapshot in products table
