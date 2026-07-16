@@ -1,0 +1,166 @@
+import { ipcMain } from "electron/main";
+import { ReceiptBuilder, CaptureTransport, NetworkTransport } from "@quickcart/thermal-printer";
+import type { ApiResponse } from "../../../shared/types";
+
+/**
+ * Receipt payload received from the renderer process.
+ * This is the data structure the billing page sends for printing.
+ */
+interface PrintReceiptPayload {
+  /** Store details */
+  store: {
+    name: string;
+    address?: string;
+    phone?: string;
+    gstin?: string;
+  };
+  /** Transaction metadata */
+  transaction: {
+    type: "sale" | "estimate";
+    number: number;
+    date: string;
+    customerName: string;
+    isPaid: boolean;
+  };
+  /** Line items */
+  items: Array<{
+    name: string;
+    quantity: number;
+    price: number; // in paisa
+    totalPrice: number; // in paisa
+  }>;
+  /** Totals in paisa */
+  grandTotal: number;
+  /** Printer connection config */
+  printer: {
+    type: "network" | "capture";
+    host?: string;
+    port?: number;
+    outputPath?: string;
+    columns?: number;
+  };
+}
+
+/**
+ * Convert paisa to a formatted rupee string.
+ */
+function formatRupees(paisa: number): string {
+  const rupees = paisa / 100;
+  return `Rs.${rupees.toFixed(2)}`;
+}
+
+/**
+ * Build receipt bytes from a payload using ReceiptBuilder.
+ */
+function buildReceiptBytes(payload: PrintReceiptPayload): Uint8Array {
+  const cols = payload.printer.columns ?? 48;
+  const builder = new ReceiptBuilder({ columns: cols });
+
+  builder.init();
+
+  // Store header
+  builder.center().bold(true).size(2, 2).line(payload.store.name);
+  builder.normalSize().bold(false);
+
+  if (payload.store.address) {
+    builder.line(payload.store.address);
+  }
+  if (payload.store.phone) {
+    builder.line(`Ph: ${payload.store.phone}`);
+  }
+  if (payload.store.gstin) {
+    builder.line(`GSTIN: ${payload.store.gstin}`);
+  }
+
+  builder.hr("=");
+  builder.feed(1);
+
+  // Transaction info
+  builder.left();
+  const typeLabel = payload.transaction.type === "sale" ? "Invoice" : "Estimate";
+  builder.row(`${typeLabel} #${payload.transaction.number}`, payload.transaction.date);
+  builder.line(`Customer: ${payload.transaction.customerName}`);
+  builder.hr("-");
+
+  // Column headers
+  builder.bold(true);
+  builder.columns3("Item", "Qty", "Amount");
+  builder.bold(false);
+  builder.hr("-");
+
+  // Items
+  for (const item of payload.items) {
+    builder.columns3(item.name, `x${item.quantity}`, formatRupees(item.totalPrice));
+  }
+
+  builder.hr("-");
+
+  // Total
+  builder.bold(true);
+  builder.row("TOTAL", formatRupees(payload.grandTotal));
+  builder.bold(false);
+
+  // Payment status
+  builder.feed(1);
+  builder.center();
+  builder.line(payload.transaction.isPaid ? "** PAID **" : "** UNPAID **");
+
+  // Footer
+  builder.feed(1);
+  builder.line("Thank you for your purchase!");
+  builder.feed(3);
+  builder.paperCut();
+
+  return builder.build();
+}
+
+export function printReceipt() {
+  ipcMain.handle(
+    "printer:printReceipt",
+    async (_event, payload: PrintReceiptPayload): Promise<ApiResponse<{ message: string }>> => {
+      try {
+        const bytes = buildReceiptBytes(payload);
+
+        if (payload.printer.type === "network") {
+          const host = payload.printer.host ?? "192.168.1.100";
+          const port = payload.printer.port ?? 9100;
+          const transport = new NetworkTransport(host, port);
+          await transport.open();
+          try {
+            await transport.write(bytes);
+          } finally {
+            await transport.close();
+          }
+          return { status: "success", data: { message: `Receipt printed to ${host}:${port}` } };
+        }
+
+        // Capture mode (dry-run / test)
+        const transport = new CaptureTransport();
+        await transport.open();
+        await transport.write(bytes);
+        await transport.close();
+
+        // Write to file if outputPath specified
+        if (payload.printer.outputPath) {
+          const fs = await import("node:fs/promises");
+          await fs.writeFile(payload.printer.outputPath, transport.getBuffer());
+          return {
+            status: "success",
+            data: { message: `Receipt saved to ${payload.printer.outputPath}` }
+          };
+        }
+
+        return {
+          status: "success",
+          data: { message: `Receipt captured (${transport.getBuffer().length} bytes)` }
+        };
+      } catch (error) {
+        console.error("Error printing receipt:", error);
+        return {
+          status: "error",
+          error: { message: (error as Error).message ?? "Failed to print receipt" }
+        };
+      }
+    }
+  );
+}

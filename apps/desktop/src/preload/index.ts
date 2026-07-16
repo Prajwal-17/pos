@@ -1,5 +1,12 @@
 import { contextBridge, ipcRenderer } from "electron";
-import type { DialogApi, ExportApi, ProductsApi, TransactionType } from "../shared/types";
+import type {
+  DialogApi,
+  ExportApi,
+  PrinterApi,
+  PrintReceiptPayload,
+  ProductsApi,
+  TransactionType
+} from "../shared/types";
 
 const productsApi: ProductsApi = {
   saveProductImage: (dataUrl: string) => ipcRenderer.invoke("products:saveProductImage", dataUrl)
@@ -15,6 +22,11 @@ const exportApi: ExportApi = {
   showItemInFolder: (path: string) => ipcRenderer.send("show-item-in-folder", path)
 };
 
+const printerApi: PrinterApi = {
+  printReceipt: (payload: PrintReceiptPayload) =>
+    ipcRenderer.invoke("printer:printReceipt", payload)
+};
+
 const apiArg = process.argv.find((a) => a.startsWith("--api-port="));
 const apiPort = apiArg ? Number(apiArg.split("=")[1]) : 4722;
 
@@ -26,6 +38,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld("productsApi", productsApi);
     contextBridge.exposeInMainWorld("dialogApi", dialogApi);
     contextBridge.exposeInMainWorld("exportApi", exportApi);
+    contextBridge.exposeInMainWorld("printerApi", printerApi);
     contextBridge.exposeInMainWorld("env", {
       API_URL: `http://localhost:${apiPort}`
     });
@@ -41,6 +54,8 @@ if (process.contextIsolated) {
   window.dialogApi = dialogApi;
   // @ts-ignore (define in ts)
   window.exportApi = exportApi;
+  // @ts-ignore (define in ts)
+  window.printerApi = printerApi;
   // @ts-ignore (define in ts)
   window.env = { API_URL: `http://localhost:${apiPort}` };
 }

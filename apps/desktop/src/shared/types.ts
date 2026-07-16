@@ -628,3 +628,40 @@ export interface ExportApi {
   exportAsPdf: (id: string, type: TransactionType) => Promise<string | null>;
   showItemInFolder: (path: string) => void;
 }
+
+// Thermal printer types
+export interface PrintReceiptPayload {
+  store: {
+    name: string;
+    address?: string;
+    phone?: string;
+    gstin?: string;
+  };
+  transaction: {
+    type: "sale" | "estimate";
+    number: number;
+    date: string;
+    customerName: string;
+    isPaid: boolean;
+  };
+  items: PrintReceiptItem[];
+  grandTotal: number;
+  printer: {
+    type: "network" | "capture";
+    host?: string;
+    port?: number;
+    outputPath?: string;
+    columns?: number;
+  };
+}
+
+export interface PrintReceiptItem {
+  name: string;
+  quantity: number;
+  price: number;
+  totalPrice: number;
+}
+
+export interface PrinterApi {
+  printReceipt: (payload: PrintReceiptPayload) => Promise<ApiResponse<{ message: string }>>;
+}
