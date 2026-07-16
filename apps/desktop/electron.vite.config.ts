@@ -8,7 +8,7 @@ export default defineConfig({
     envPrefix: "M_VITE_",
     build: {
       externalizeDeps: {
-        exclude: ["electron-updater"]
+        exclude: ["electron-updater", "@quickcart/thermal-printer"]
       },
       rollupOptions: {
         input: {
