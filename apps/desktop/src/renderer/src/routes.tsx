@@ -11,6 +11,7 @@ import DashboardPage from "./pages/dashboard/DashboardPage";
 import PdfInvoicePage from "./pages/export/pdf/PdfInvoicePage";
 import HomePage from "./pages/home/HomePage";
 import NotFoundPage from "./pages/NotFoundPage";
+import PrinterTestPage from "./pages/printer-test/PrinterTestPage";
 import ProductsPage from "./pages/products/ProductsPage";
 import ReportsPage from "./pages/reports/ReportsPage";
 import SettingsPage from "./pages/settings/SettingsPage";
@@ -43,6 +44,10 @@ export const router = createHashRouter([
       {
         path: "reports",
         element: <ReportsPage />
+      },
+      {
+        path: "printer-test",
+        element: <PrinterTestPage />
       },
       {
         path: "settings",

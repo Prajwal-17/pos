@@ -10,6 +10,7 @@ import { dashboardController } from "./modules/dashboard/dashboard.controller";
 import { estimatesController } from "./modules/estimates/estimates.controller";
 import { onboardingController } from "./modules/onboarding/onboarding.controller";
 import { preferencesController } from "./modules/preferences/preferences.controller";
+import { printerTestController } from "./modules/printerTest/printerTest.controller";
 import { productsController } from "./modules/products/products.controller";
 import { salesController } from "./modules/sales/sales.controller";
 import { storeProfileController } from "./modules/storeProfile/storeProfile.controller";
@@ -88,6 +89,7 @@ app.route("/api/sales", salesController);
 app.route("/api/estimates", estimatesController);
 app.route("/api/app-preferences", preferencesController);
 app.route("/api/store-profile", storeProfileController);
+app.route("/api/printer-test", printerTestController);
 
 export async function startServer() {
   await initDb();
