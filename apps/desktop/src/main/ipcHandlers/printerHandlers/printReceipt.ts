@@ -119,21 +119,30 @@ export function printReceipt() {
     "printer:printReceipt",
     async (_event, payload: PrintReceiptPayload): Promise<ApiResponse<{ message: string }>> => {
       try {
+        console.log(`\n\n=== [printReceipt Handler] NEW PRINT REQUEST ===`);
+        console.log(`[printReceipt Handler] Payload details:`, JSON.stringify(payload, null, 2));
+        
+        const startTime = Date.now();
         const bytes = buildReceiptBytes(payload);
+        console.log(`[printReceipt Handler] ReceiptBuilder generated ${bytes.length} bytes in ${Date.now() - startTime}ms`);
 
         if (payload.printer.type === "network") {
           const host = payload.printer.host ?? "192.168.1.100";
           const port = payload.printer.port ?? 9100;
-          console.log(`[printReceipt Handler] Received print command for network printer at ${host}:${port}`);
+          console.log(`[printReceipt Handler] Mode: NETWORK -> ${host}:${port}`);
           
           const transport = new NetworkTransport(host, port);
           await transport.open();
           try {
             await transport.write(bytes);
+          } catch (err) {
+            console.error(`[printReceipt Handler] Error during transport write:`, err);
+            throw err;
           } finally {
             await transport.close();
             console.log(`[printReceipt Handler] Network socket closed for ${host}:${port}`);
           }
+          console.log(`[printReceipt Handler] Print completed successfully in ${Date.now() - startTime}ms`);
           return { status: "success", data: { message: `Receipt printed to ${host}:${port}` } };
         }
 
@@ -158,7 +167,11 @@ export function printReceipt() {
           data: { message: `Receipt captured (${transport.getBuffer().length} bytes)` }
         };
       } catch (error) {
+        console.error("=== [printReceipt Handler] ERROR FATAL ===");
         console.error("Error printing receipt:", error);
+        if (error instanceof Error) {
+          console.error("Stack trace:", error.stack);
+        }
         return {
           status: "error",
           error: { message: (error as Error).message ?? "Failed to print receipt" }
