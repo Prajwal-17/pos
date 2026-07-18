@@ -91,7 +91,7 @@ export const SummaryFooter = () => {
         })),
         grandTotal: validItems.reduce((acc, item) => acc + (item.totalPrice || 0), 0),
         printer: {
-          type: "capture" // default to capture/dry-run for now
+          type: "network"
         }
       };
 
