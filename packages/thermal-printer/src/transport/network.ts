@@ -40,20 +40,24 @@ export class NetworkTransport implements Transport {
     }
 
     return new Promise((resolve, reject) => {
+      console.log(`[NetworkTransport] Attempting to connect to ${this.host}:${this.port}...`);
       const socket = createConnection({ host: this.host, port: this.port }, () => {
         socket.removeAllListeners("error");
         this.socket = socket;
+        console.log(`[NetworkTransport] Successfully connected to ${this.host}:${this.port}`);
         resolve();
       });
 
       socket.setTimeout(this.timeoutMs);
 
       socket.once("timeout", () => {
+        console.error(`[NetworkTransport] Connection timeout to ${this.host}:${this.port}`);
         socket.destroy();
         reject(new Error(`Connection to ${this.host}:${this.port} timed out after ${this.timeoutMs}ms`));
       });
 
       socket.once("error", (err) => {
+        console.error(`[NetworkTransport] Connection error to ${this.host}:${this.port}:`, err);
         socket.destroy();
         reject(new Error(`Failed to connect to ${this.host}:${this.port}: ${err.message}`));
       });
@@ -68,8 +72,10 @@ export class NetworkTransport implements Transport {
     return new Promise((resolve, reject) => {
       this.socket!.write(data, (err) => {
         if (err) {
+          console.error(`[NetworkTransport] Failed to write data:`, err);
           reject(new Error(`Failed to write to ${this.host}:${this.port}: ${err.message}`));
         } else {
+          console.log(`[NetworkTransport] Successfully wrote ${data.length} bytes to printer`);
           resolve();
         }
       });

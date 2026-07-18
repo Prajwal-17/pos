@@ -96,10 +96,13 @@ export const SummaryFooter = () => {
       };
 
       const res = await window.printerApi.printReceipt(payload);
+      console.log("[SummaryFooter] Print IPC response received:", res);
+      
       if (res && res.status === "success") {
         toast.success("Receipt printed successfully");
         navigate(`/dashboard/${type}`);
       } else {
+        console.error("[SummaryFooter] Print failed with error from IPC:", res?.error?.message);
         toast.error(res?.error?.message || "Failed to print receipt");
       }
     } catch (error) {

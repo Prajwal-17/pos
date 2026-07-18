@@ -124,12 +124,15 @@ export function printReceipt() {
         if (payload.printer.type === "network") {
           const host = payload.printer.host ?? "192.168.1.100";
           const port = payload.printer.port ?? 9100;
+          console.log(`[printReceipt Handler] Received print command for network printer at ${host}:${port}`);
+          
           const transport = new NetworkTransport(host, port);
           await transport.open();
           try {
             await transport.write(bytes);
           } finally {
             await transport.close();
+            console.log(`[printReceipt Handler] Network socket closed for ${host}:${port}`);
           }
           return { status: "success", data: { message: `Receipt printed to ${host}:${port}` } };
         }
