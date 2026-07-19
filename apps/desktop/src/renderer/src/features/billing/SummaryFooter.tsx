@@ -1,10 +1,8 @@
 import { Button } from "@/components/ui/button";
 import useTransaction from "@/hooks/billing/useTransaction";
-import { apiClient } from "@/lib/apiClient";
-import { useBillingSessionStore } from "@/store/billing/billingSessionStore";
 import { useBillingTabsStore } from "@/store/billing/billingTabsStore";
+import useReceiptPrint from "@/hooks/billing/useReceiptPrint";
 import { flushSync, forceSync } from "@/utils/syncWorker";
-import type { PrintReceiptPayload, StoreProfile } from "@shared/types";
 import { TRANSACTION_TYPE } from "@shared/types";
 import { ArrowUpRight, FileText, Loader2, Printer, Save } from "lucide-react";
 import { useCallback, useState } from "react";
@@ -18,6 +16,7 @@ export const SummaryFooter = () => {
   const activeTabId = useBillingTabsStore((state) => state.activeTabId);
 
   const { subtotal, grandTotal } = useTransaction();
+  const { printReceipt } = useReceiptPrint();
 
   type LoadingAction = "print" | "exit" | "pdf" | null;
   const [loadingAction, setLoadingAction] = useState<LoadingAction>(null);
@@ -43,67 +42,14 @@ export const SummaryFooter = () => {
 
       if (!activeTabId) return;
 
-      const session = useBillingSessionStore.getState().sessions[activeTabId];
-      if (!session) {
-        toast.error("No active session found");
-        return;
-      }
-
-      let storeProfile: StoreProfile;
-      try {
-        const response = await apiClient.get<StoreProfile>("/api/store-profile");
-        // Check if backend returned nested data object or raw profile
-        storeProfile = (response as any).data || response;
-      } catch (e) {
-        toast.error("Failed to load store profile for receipt");
-        return;
-      }
-
-      const validItems = session.lineItems.filter(
-        (i) => i.productSnapshot.trim() !== "" && !i.isDeleted
-      );
-
-      const payload: PrintReceiptPayload = {
-        store: {
-          name: storeProfile.storeName,
-          address: [storeProfile.addressLine1, storeProfile.addressLine2, storeProfile.city]
-            .filter(Boolean)
-            .join(", "),
-          phone: storeProfile.phone,
-          gstin: storeProfile.gstin || undefined
-        },
-        transaction: {
-          type: session.billingType as "sale" | "estimate",
-          number: session.transactionNo || 0,
-          date: new Date(session.billingDate).toLocaleDateString("en-IN", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric"
-          }),
-          customerName: session.customerName || "Walk-in Customer",
-          isPaid: session.billingType === "sale"
-        },
-        items: validItems.map((item) => ({
-          name: item.name || "Unknown Item",
-          quantity: Number(item.quantity) || 1,
-          price: Number(item.price) * 100,
-          totalPrice: item.totalPrice
-        })),
-        grandTotal: validItems.reduce((acc, item) => acc + (item.totalPrice || 0), 0),
-        printer: {
-          type: "network"
-        }
-      };
-
-      const res = await window.printerApi.printReceipt(payload);
-      console.log("[SummaryFooter] Print IPC response received:", res);
+      const success = await printReceipt();
       
-      if (res && res.status === "success") {
+      if (success) {
         toast.success("Receipt printed successfully");
         navigate(`/dashboard/${type}`);
       } else {
-        console.error("[SummaryFooter] Print failed with error from IPC:", res?.error?.message);
-        toast.error(res?.error?.message || "Failed to print receipt");
+        console.error("[SummaryFooter] Print failed: could not find receipt ref");
+        toast.error("Failed to print receipt");
       }
     } catch (error) {
       console.error("Print failed", error);
