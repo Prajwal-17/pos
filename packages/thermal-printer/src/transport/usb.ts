@@ -17,8 +17,8 @@ import type { Transport } from "../types.js";
  */
 export class UsbTransport implements Transport {
   constructor(
-    private readonly _vendorId: number,
-    private readonly _productId: number
+    public readonly _vendorId: number,
+    public readonly _productId: number
   ) {}
 
   async open(): Promise<void> {

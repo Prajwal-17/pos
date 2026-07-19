@@ -17,8 +17,8 @@ import type { Transport } from "../types.js";
  */
 export class SerialTransport implements Transport {
   constructor(
-    private readonly _path: string,
-    private readonly _baudRate = 9600
+    public readonly _path: string,
+    public readonly _baudRate = 9600
   ) {}
 
   async open(): Promise<void> {
