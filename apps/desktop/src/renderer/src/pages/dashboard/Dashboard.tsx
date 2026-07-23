@@ -17,49 +17,46 @@ const Dashboard = ({ type }: { type: DashboardType }) => {
   const transactionId = useViewModalStore((state) => state.transactionId);
 
   return (
-    <>
-      <div className="bg-background flex h-full flex-1 flex-col overflow-hidden px-6 py-4">
-        <div className="mb-3 flex items-center justify-between gap-4">
-          <div className="bg-card flex w-full items-center gap-6 rounded-lg border px-4 py-2.5">
+    <div className="bg-background flex h-full flex-1 flex-col overflow-hidden p-3">
+      <DashboardCard
+        commandLead={
+          <>
             <div className="flex items-center gap-2">
-              <div className="bg-success/15 text-success flex size-8 items-center justify-center rounded-md">
-                <IndianRupee className="size-4" />
-              </div>
-              <span className="text-muted-foreground text-sm font-medium">Revenue</span>
-              <span className="text-foreground text-lg font-semibold tabular-nums">
+              <span className="bg-success/15 text-success flex size-7 items-center justify-center rounded-[var(--radius-control)]">
+                <IndianRupee className="size-3.5" />
+              </span>
+              <span className="text-muted-foreground text-xs font-medium">Revenue</span>
+              <span className="financial-nums text-foreground text-base font-semibold">
                 {formatRupee(totalRevenue ?? 0)}
               </span>
             </div>
+            <div className="bg-border h-5 w-px" />
             <div className="flex items-center gap-2">
-              <div className="bg-secondary text-secondary-foreground flex size-8 items-center justify-center rounded-md">
-                <ShoppingCart className="size-4" />
-              </div>
-              <span className="text-muted-foreground text-sm font-medium">Transactions</span>
-              <span className="text-foreground text-lg font-semibold tabular-nums">
+              <span className="bg-secondary text-secondary-foreground flex size-7 items-center justify-center rounded-[var(--radius-control)]">
+                <ShoppingCart className="size-3.5" />
+              </span>
+              <span className="text-muted-foreground text-xs font-medium">Transactions</span>
+              <span className="financial-nums text-foreground text-base font-semibold">
                 {totalTransactions}
               </span>
             </div>
-          </div>
-
+          </>
+        }
+        commandAction={
           <Button
-            onClick={() => {
-              if (isSales) {
-                navigate("/billing/sales/create");
-              } else {
-                navigate("/billing/estimates/create");
-              }
-            }}
-            className="hover:bg-primary-hover cursor-pointer gap-1.5"
+            size="compact"
+            onClick={() =>
+              navigate(isSales ? "/billing/sales/create" : "/billing/estimates/create")
+            }
+            className="hover:bg-primary-hover cursor-pointer gap-1.5 px-3"
           >
             <Plus className="size-4" />
             {isSales ? "New Sale" : "New Estimate"}
           </Button>
-        </div>
-
-        <DashboardCard />
-        {isViewModalOpen && <ViewModal type={type} id={transactionId} />}
-      </div>
-    </>
+        }
+      />
+      {isViewModalOpen && <ViewModal type={type} id={transactionId} />}
+    </div>
   );
 };
 

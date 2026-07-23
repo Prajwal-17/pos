@@ -25,7 +25,7 @@ export const MetricsComponent = () => {
     <>
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
         {isLoading ? (
-          <Card className="bg-background flex h-full items-center justify-center border shadow-sm hover:shadow-xl">
+          <Card className="bg-card flex h-full items-center justify-center border">
             <CardContent className="py-0">
               <LoaderCircle className="text-primary animate-spin" size={20} />
             </CardContent>
@@ -43,7 +43,7 @@ export const MetricsComponent = () => {
         )}
 
         {isLoading ? (
-          <Card className="bg-background flex h-full items-center justify-center border shadow-sm hover:shadow-xl">
+          <Card className="bg-card flex h-full items-center justify-center border">
             <CardContent className="py-0">
               <LoaderCircle className="text-primary animate-spin" size={20} />
             </CardContent>
@@ -61,7 +61,7 @@ export const MetricsComponent = () => {
         )}
 
         {isLoading ? (
-          <Card className="bg-background col-span-2 grid grid-cols-2 grid-rows-2 items-center justify-center border shadow-sm hover:shadow-xl">
+          <Card className="bg-card col-span-2 grid grid-cols-2 grid-rows-2 items-center justify-center border">
             <CardContent className="col-span-2 row-span-2 flex h-full w-full items-center justify-center py-0">
               <LoaderCircle className="text-primary animate-spin" size={20} />
             </CardContent>
