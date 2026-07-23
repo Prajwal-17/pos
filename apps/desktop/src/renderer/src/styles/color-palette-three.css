@@ -1,0 +1,130 @@
+html[data-palette="palette-3"] {
+  color-scheme: light;
+
+  --font-sans: "InterVariable", system-ui, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Menlo", "Consolas", monospace;
+  --font-roboto: var(--font-sans);
+
+  /* Surfaces */
+  --canvas: oklch(0.965 0.003 255);
+  --surface-1: oklch(0.992 0.002 255);
+  --surface-2: oklch(0.94 0.004 255);
+  --surface-3: oklch(0.94 0.004 255);
+  --surface-4: oklch(0.992 0.002 255);
+
+  /* Borders */
+  --hairline: oklch(0.87 0.004 255);
+  --frame: oklch(0.82 0.005 255);
+  --hairline-strong: oklch(0.78 0.005 255);
+
+  /* Text */
+  --ink: oklch(0.21 0.02 255);
+  --ink-muted: oklch(0.42 0.018 255);
+  --ink-subtle: oklch(0.52 0.014 255);
+  --ink-tertiary: oklch(0.62 0.012 255);
+
+  /* Brand */
+  --primary: oklch(0.48 0.08 185);
+  --primary-hover: oklch(0.42 0.08 185);
+  --primary-focus: oklch(0.48 0.08 185 / 0.4);
+  --on-primary: #ffffff;
+
+  /* Sidebar */
+  --sidebar: oklch(0.955 0.003 255);
+  --sidebar-foreground: oklch(0.25 0.02 255);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--on-primary);
+  --sidebar-accent: oklch(0.945 0.005 185);
+  --sidebar-accent-foreground: var(--ink);
+
+  /* Semantic states */
+  --success: oklch(0.55 0.12 150);
+  --success-foreground: #ffffff;
+  --warning: oklch(0.72 0.13 70);
+  --warning-foreground: var(--ink);
+  --destructive: oklch(0.52 0.18 25);
+  --destructive-foreground: #ffffff;
+  --info: oklch(0.5 0.13 250);
+  --info-foreground: #ffffff;
+
+  /* Charts */
+  --chart-1: oklch(0.50 0.08 185);
+  --chart-2: oklch(0.55 0.07 175);
+  --chart-3: oklch(0.58 0.06 195);
+  --chart-4: oklch(0.52 0.06 165);
+  --chart-5: oklch(0.48 0.07 200);
+
+  /* Semantic token map */
+  --background: var(--canvas);
+  --background-secondary: var(--canvas);
+  --foreground: var(--ink);
+  --card: var(--surface-1);
+  --card-foreground: var(--ink);
+  --popover: var(--surface-1);
+  --popover-foreground: var(--ink);
+  --primary-foreground: var(--on-primary);
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--ink);
+  --accent: oklch(0.918 0.012 185);
+  --accent-foreground: var(--ink-muted);
+  --muted: var(--surface-3);
+  --muted-foreground: var(--ink-muted);
+  --border: var(--hairline);
+  --borderprimary: var(--primary);
+  --input: var(--hairline-strong);
+  --ring: var(--primary);
+
+  /* Onboarding */
+  --onboarding-gradient-start: oklch(0.25 0.04 255);
+  --onboarding-gradient-mid: oklch(0.18 0.03 255);
+  --onboarding-gradient-end: oklch(0.12 0.02 255);
+  --onboarding-text-muted: oklch(0.7 0.012 255);
+  --onboarding-text-footer: oklch(0.45 0.012 255);
+  --onboarding-icon-bg: oklch(0.48 0.08 185 / 0.15);
+  --onboarding-feature-text: oklch(0.8 0.01 255);
+  --onboarding-icon-dark: oklch(0.48 0.08 185);
+
+  /* Product Dialog */
+  --product-label: var(--ink-muted);
+  --product-value: var(--ink);
+  --product-surface: var(--surface-1);
+  --product-surface-hover: var(--surface-3);
+  --product-divider: var(--hairline);
+  --product-badge-bg: oklch(0.38 0.07 185 / 0.08);
+  --product-badge-text: oklch(0.38 0.07 185);
+
+  /* Search Dropdown */
+  --search-highlight: oklch(0.85 0.16 80);
+  --search-icon-bg-from: var(--surface-1);
+  --search-icon-bg-to: var(--surface-3);
+  --search-icon-fg: var(--primary);
+
+  /* Product Badges */
+  --badge-mrp-border: oklch(0.68 0.12 75 / 0.35);
+  --badge-mrp-bg: oklch(0.68 0.12 75 / 0.1);
+  --badge-mrp-text: oklch(0.54 0.12 75);
+
+  /* Invoice Template */
+  --invoice-bg: var(--surface-1);
+  --invoice-text: var(--ink);
+  --invoice-text-muted: var(--ink-muted);
+  --invoice-accent: var(--primary);
+  --invoice-border: var(--hairline);
+  --invoice-table-header-bg: var(--surface-3);
+
+  /* Selection */
+  --selection-bg: oklch(0.48 0.08 185 / 0.16);
+
+  /* Shadows */
+  --shadow-xs: 0 1px 0 0 rgb(15 23 42 / 0.08);
+  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.09), 0 1px 1px 0 rgb(15 23 42 / 0.06);
+  --shadow-md: 0 4px 8px -2px rgb(15 23 42 / 0.12), 0 2px 4px -2px rgb(15 23 42 / 0.08);
+  --shadow-lg: 0 12px 24px -6px rgb(15 23 42 / 0.1), 0 4px 8px -4px rgb(15 23 42 / 0.06);
+  --shadow-xl: 0 20px 40px -8px rgb(15 23 42 / 0.14), 0 8px 16px -6px rgb(15 23 42 / 0.08);
+  --shadow-2xl: 0 32px 64px -12px rgb(15 23 42 / 0.18), 0 12px 24px -8px rgb(15 23 42 / 0.1);
+
+  /* Radius */
+  --radius: 0.5rem;
+  --spacing: 0.25rem;
+}

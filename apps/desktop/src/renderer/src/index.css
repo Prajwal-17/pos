@@ -1,5 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./styles/color-palette-one.css";
+@import "./styles/color-palette-two.css";
+@import "./styles/color-palette-three.css";
 
 @font-face {
   font-family: "InterVariable";
@@ -131,6 +134,9 @@
   --invoice-accent: var(--primary);
   --invoice-border: var(--hairline);
   --invoice-table-header-bg: var(--surface-3);
+
+  /* Selection */
+  --selection-bg: oklch(0.43 0.08 258 / 0.16);
 
   /* Shadows */
   --shadow-xs: 0 1px 0 0 rgb(15 23 42 / 0.08);
@@ -313,7 +319,7 @@
   }
 
   ::selection {
-    background-color: oklch(0.43 0.08 258 / 0.16);
+    background-color: var(--selection-bg);
     color: var(--ink);
   }
 
