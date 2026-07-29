@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import useRawReceiptPrint from "@/hooks/billing/useRawReceiptPrint";
 import useReceiptPrint from "@/hooks/billing/useReceiptPrint";
 import useTransaction from "@/hooks/billing/useTransaction";
 import { useBillingTabsStore } from "@/store/billing/billingTabsStore";
@@ -18,8 +19,9 @@ export const SummaryFooter = () => {
 
   const { subtotal, grandTotal } = useTransaction();
   const { printReceipt } = useReceiptPrint();
+  const { printRawReceipt } = useRawReceiptPrint();
 
-  type LoadingAction = "print" | "exit" | "pdf" | null;
+  type LoadingAction = "print" | "raw-print" | "exit" | "pdf" | null;
   const [loadingAction, setLoadingAction] = useState<LoadingAction>(null);
 
   const waitForSync = useCallback(async (): Promise<boolean> => {
@@ -54,6 +56,27 @@ export const SummaryFooter = () => {
       setLoadingAction(null);
     }
   }, [waitForSync, printReceipt, navigate, type]);
+
+  const handleSaveAndRawPrint = useCallback(async () => {
+    setLoadingAction("raw-print");
+    try {
+      const synced = await waitForSync();
+      if (!synced) return;
+
+      const result = await printRawReceipt();
+      if (result.status === "error") {
+        toast.error(result.error.message);
+        return;
+      }
+      toast.success("Receipt sent to the thermal printer");
+      navigate(`/dashboard/${type}`);
+    } catch (error) {
+      console.error("Raw print failed", error);
+      toast.error("Raw print failed");
+    } finally {
+      setLoadingAction(null);
+    }
+  }, [waitForSync, printRawReceipt, navigate, type]);
 
   const handleSaveAndExit = useCallback(async () => {
     setLoadingAction("exit");
@@ -145,7 +168,12 @@ export const SummaryFooter = () => {
         )}
       >
         {loadingAction === "print" ? <Loader2 className="animate-spin" /> : <Printer />}
-        {loadingAction === "print" ? "Saving..." : "Save & Print"}
+        {loadingAction === "print" ? "Saving..." : "Library print"}
+      </Button>
+
+      <Button variant="outline" disabled={loadingAction !== null} onClick={handleSaveAndRawPrint}>
+        {loadingAction === "raw-print" ? <Loader2 className="animate-spin" /> : <Printer />}
+        {loadingAction === "raw-print" ? "Sending..." : "Raw print"}
       </Button>
 
       <Button variant="outline" disabled={loadingAction !== null} onClick={handleSaveAndExit}>

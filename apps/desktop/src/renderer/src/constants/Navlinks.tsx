@@ -1,6 +1,7 @@
 import Customers from "@/pages/customers/CustomersPage";
 import Dashboard from "@/pages/dashboard/DashboardPage";
 import Home from "@/pages/home/HomePage";
+import PrinterTestPage from "@/pages/printer/PrinterTestPage";
 import ProductsPage from "@/pages/products/ProductsPage";
 import Reports from "@/pages/reports/ReportsPage";
 import SettingsPage from "@/pages/settings/SettingsPage";
@@ -8,6 +9,7 @@ import {
   ChartColumn,
   House,
   Package,
+  Printer,
   ReceiptText,
   Settings,
   ShoppingCart,
@@ -56,6 +58,12 @@ export const navLinks: NavlinkType[] = [
     title: "Reports",
     element: <Reports />,
     icon: <ChartColumn size={24} />
+  },
+  {
+    href: "/printer-test",
+    title: "Printer test",
+    element: <PrinterTestPage />,
+    icon: <Printer size={24} />
   },
   {
     href: "/settings",

@@ -15,8 +15,9 @@ const MAX_SIDEBAR_WIDTH = 280;
 const DEFAULT_SIDEBAR_WIDTH = 232;
 const SIDEBAR_WIDTH_STORAGE_KEY = "quickcart-sidebar-width";
 
-const mainLinks = navLinks.filter((item) => item.href !== "/settings");
-const systemLinks = navLinks.filter((item) => item.href === "/settings");
+const systemHrefs = new Set(["/printer-test", "/settings"]);
+const mainLinks = navLinks.filter((item) => !systemHrefs.has(item.href));
+const systemLinks = navLinks.filter((item) => systemHrefs.has(item.href));
 
 type SidebarProps = {
   variant?: "docked" | "overlay";

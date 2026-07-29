@@ -5,6 +5,7 @@ import type {
   DialogApi,
   ExportApi,
   ProductsApi,
+  RawPrintApi,
   TransactionType,
   ZoomApi
 } from "../shared/types";
@@ -21,6 +22,12 @@ const exportApi: ExportApi = {
   exportAsPdf: (id: string, type: TransactionType) =>
     ipcRenderer.invoke("txn:exportAsPdf", id, type),
   showItemInFolder: (path: string) => ipcRenderer.send("show-item-in-folder", path)
+};
+
+const rawPrintApi: RawPrintApi = {
+  printTest: (printerName: string) => ipcRenderer.invoke("printer:raw-test", printerName),
+  printReceipt: (printerName, receipt) =>
+    ipcRenderer.invoke("printer:raw-receipt", printerName, receipt)
 };
 
 const zoomApi: ZoomApi = {
@@ -54,6 +61,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld("productsApi", productsApi);
     contextBridge.exposeInMainWorld("dialogApi", dialogApi);
     contextBridge.exposeInMainWorld("exportApi", exportApi);
+    contextBridge.exposeInMainWorld("rawPrintApi", rawPrintApi);
     contextBridge.exposeInMainWorld("zoomApi", zoomApi);
     contextBridge.exposeInMainWorld("databaseUpgradeApi", databaseUpgradeApi);
     contextBridge.exposeInMainWorld("env", {
@@ -71,6 +79,8 @@ if (process.contextIsolated) {
   window.dialogApi = dialogApi;
   // @ts-ignore (define in ts)
   window.exportApi = exportApi;
+  // @ts-ignore (define in ts)
+  window.rawPrintApi = rawPrintApi;
   // @ts-ignore (define in ts)
   window.zoomApi = zoomApi;
   // @ts-ignore (define in ts)

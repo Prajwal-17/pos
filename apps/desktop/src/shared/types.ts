@@ -661,6 +661,40 @@ export interface ExportApi {
   showItemInFolder: (path: string) => void;
 }
 
+export type RawReceiptItem = {
+  name: string;
+  quantity: string;
+  unitPricePaisa: number;
+  totalPaisa: number;
+};
+
+export type RawReceiptData = {
+  storeName: string;
+  addressLines: string[];
+  phone?: string;
+  gstin?: string;
+  transactionLabel: string;
+  transactionNo: string;
+  customerName: string;
+  dateTime: string;
+  items: RawReceiptItem[];
+  subtotalPaisa: number;
+  totalPaisa: number;
+  qrData?: string;
+};
+
+export type RawPrintResult = {
+  bytesWritten: number;
+};
+
+export interface RawPrintApi {
+  printTest: (printerName: string) => Promise<ApiResponse<RawPrintResult>>;
+  printReceipt: (
+    printerName: string,
+    receipt: RawReceiptData
+  ) => Promise<ApiResponse<RawPrintResult>>;
+}
+
 export interface ZoomApi {
   getZoom: () => Promise<{ zoomFactor: number }>;
   setZoom: (factor: number) => Promise<{ zoomFactor: number }>;
