@@ -494,5 +494,5 @@ export function buildEscPosPlaygroundJob(job: EscPosPlaygroundJob): Buffer {
 }
 
 export function buildEscPosTestReceipt(): Buffer {
-  return buildEscPosPreset("full-diagnostic");
+  return buildEscPosPreset("full-diagnostic"); // full diagnostic button in print test page
 }

@@ -65,8 +65,9 @@ async function printImage(
 export function printHandlers() {
   ipcMain.handle("printer:list", (event) => listPrinters(event.sender));
 
-  ipcMain.handle("printer:raw-test", (_event, printerName: string) =>
-    printPayload(printerName, buildEscPosTestReceipt())
+  ipcMain.handle(
+    "printer:raw-test",
+    (_event, printerName: string) => printPayload(printerName, buildEscPosTestReceipt()) // this is bascially sending esc pos cmds
   );
 
   ipcMain.handle("printer:raw-receipt", (_event, printerName: string, receipt: RawReceiptData) =>

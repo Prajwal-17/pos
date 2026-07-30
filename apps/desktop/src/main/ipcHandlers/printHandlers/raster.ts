@@ -44,6 +44,7 @@ function rasterSlice(raster: ValidatedRaster, row: number, height: number): Buff
   return raster.data.subarray(start, start + height * raster.stride);
 }
 
+// 2nd print - perfect one
 export function buildGsV0Raster(image: MonochromeRasterData): Buffer {
   const raster = validateMonochromeRaster(image);
   const chunks: Buffer[] = [];
@@ -74,6 +75,7 @@ function isBlack(raster: ValidatedRaster, x: number, y: number): boolean {
   return (value & (0x80 >> (x & 7))) !== 0;
 }
 
+// 3rd print - good one
 export function buildEscStarRaster(image: MonochromeRasterData): Buffer {
   const raster = validateMonochromeRaster(image);
   const chunks: Buffer[] = [bytes(ESC, 0x33, 24)];
@@ -102,6 +104,7 @@ export function buildEscStarRaster(image: MonochromeRasterData): Buffer {
   return Buffer.concat(chunks);
 }
 
+// to be ignored
 export function buildGsLRaster(image: MonochromeRasterData): Buffer {
   const raster = validateMonochromeRaster(image);
   const chunks: Buffer[] = [];

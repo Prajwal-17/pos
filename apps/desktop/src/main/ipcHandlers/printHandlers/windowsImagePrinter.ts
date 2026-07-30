@@ -1,5 +1,5 @@
-import { randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -83,6 +83,7 @@ function runPowerShell(script: string): Promise<void> {
   });
 }
 
+// to be ignored
 export async function printReceiptImageOnWindows(
   printerName: string,
   image: ReceiptImageData
