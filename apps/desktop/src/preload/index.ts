@@ -25,11 +25,13 @@ const exportApi: ExportApi = {
 };
 
 const rawPrintApi: RawPrintApi = {
+  listPrinters: () => ipcRenderer.invoke("printer:list"),
   printTest: (printerName: string) => ipcRenderer.invoke("printer:raw-test", printerName),
   printReceipt: (printerName, receipt) =>
     ipcRenderer.invoke("printer:raw-receipt", printerName, receipt),
   printImage: (printerName, image) =>
-    ipcRenderer.invoke("printer:image-receipt", printerName, image)
+    ipcRenderer.invoke("printer:image-receipt", printerName, image),
+  printPlayground: (printerName, job) => ipcRenderer.invoke("printer:playground", printerName, job)
 };
 
 const zoomApi: ZoomApi = {

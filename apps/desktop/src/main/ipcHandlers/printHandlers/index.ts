@@ -1,12 +1,14 @@
-import { ipcMain } from "electron/main";
+import { ipcMain, type WebContents } from "electron/main";
 import type {
   ApiResponse,
+  EscPosPlaygroundJob,
   ImagePrintResult,
   RawPrintResult,
   RawReceiptData,
-  ReceiptImageData
+  ReceiptImageData,
+  SystemPrinterInfo
 } from "../../../shared/types";
-import { buildEscPosReceipt, buildEscPosTestReceipt } from "./escpos";
+import { buildEscPosPlaygroundJob, buildEscPosReceipt, buildEscPosTestReceipt } from "./escpos";
 import { printReceiptImageOnWindows } from "./windowsImagePrinter";
 import { sendRawToWindowsPrinter } from "./windowsRawPrinter";
 
@@ -18,6 +20,22 @@ function errorResponse<T>(error: unknown): ApiResponse<T> {
       message: error instanceof Error ? error.message : "Printer operation failed."
     }
   };
+}
+
+async function listPrinters(sender: WebContents): Promise<ApiResponse<SystemPrinterInfo[]>> {
+  try {
+    const printers = await sender.getPrintersAsync();
+    return {
+      status: "success",
+      data: printers.map((printer) => ({
+        name: printer.name,
+        displayName: printer.displayName,
+        description: printer.description
+      }))
+    };
+  } catch (error) {
+    return errorResponse(error);
+  }
 }
 
 async function printPayload(
@@ -45,6 +63,8 @@ async function printImage(
 }
 
 export function printHandlers() {
+  ipcMain.handle("printer:list", (event) => listPrinters(event.sender));
+
   ipcMain.handle("printer:raw-test", (_event, printerName: string) =>
     printPayload(printerName, buildEscPosTestReceipt())
   );
@@ -55,5 +75,9 @@ export function printHandlers() {
 
   ipcMain.handle("printer:image-receipt", (_event, printerName: string, image: ReceiptImageData) =>
     printImage(printerName, image)
+  );
+
+  ipcMain.handle("printer:playground", (_event, printerName: string, job: EscPosPlaygroundJob) =>
+    printPayload(printerName, buildEscPosPlaygroundJob(job))
   );
 }

@@ -1,5 +1,11 @@
-import type { RawReceiptData } from "../../../shared/types";
+import type {
+  EscPosPlaygroundJob,
+  EscPosPresetId,
+  EscPosTextOptions,
+  RawReceiptData
+} from "../../../shared/types";
 import { paisaToRupeeString } from "../../../shared/utils/utils";
+import { buildRasterCommand } from "./raster";
 
 const ESC = 0x1b;
 const GS = 0x1d;
@@ -19,6 +25,13 @@ function ascii(value: string): Buffer {
 
 function line(value = ""): Buffer {
   return Buffer.concat([ascii(value), bytes(0x0a)]);
+}
+
+function boundedInteger(value: number, minimum: number, maximum: number, label: string): number {
+  if (!Number.isInteger(value) || value < minimum || value > maximum) {
+    throw new Error(`${label} must be between ${minimum} and ${maximum}.`);
+  }
+  return value;
 }
 
 export function wrapText(value: string, width: number): string[] {
@@ -43,9 +56,8 @@ export function wrapText(value: string, width: number): string[] {
     }
 
     const candidate = current ? `${current} ${word}` : word;
-    if (candidate.length <= width) {
-      current = candidate;
-    } else {
+    if (candidate.length <= width) current = candidate;
+    else {
       lines.push(current);
       current = word;
     }
@@ -76,29 +88,63 @@ function itemLines(index: number, item: RawReceiptData["items"][number]): string
   );
 }
 
-function qrCode(payload: string): Buffer {
-  const data = ascii(payload);
+function qrCode(
+  payload: string,
+  moduleSize = 6,
+  errorCorrection: "l" | "m" | "q" | "h" = "m"
+): Buffer {
+  const data = ascii(payload.trim());
+  if (data.length === 0 || data.length > 7_089) {
+    throw new Error("QR data must contain between 1 and 7,089 ASCII bytes.");
+  }
+  const size = boundedInteger(moduleSize, 1, 16, "QR module size");
+  const correction = { l: 0x30, m: 0x31, q: 0x32, h: 0x33 }[errorCorrection];
   const storeLength = data.length + 3;
 
   return Buffer.concat([
     bytes(GS, 0x28, 0x6b, 0x04, 0x00, 0x31, 0x41, 0x32, 0x00),
-    bytes(GS, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x43, 0x06),
-    bytes(GS, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x45, 0x31),
+    bytes(GS, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x43, size),
+    bytes(GS, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x45, correction),
     bytes(GS, 0x28, 0x6b, storeLength & 0xff, (storeLength >> 8) & 0xff, 0x31, 0x50, 0x30),
     data,
     bytes(GS, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x51, 0x30)
   ]);
 }
 
-function code128(payload: string): Buffer {
-  const data = ascii(`{B${payload}`);
+function code128(payload: string, width = 2, height = 60): Buffer {
+  const normalizedPayload = payload.trim();
+  if (!normalizedPayload || normalizedPayload.length > 250) {
+    throw new Error("Code 128 data must contain between 1 and 250 characters.");
+  }
+  const data = ascii(`{B${normalizedPayload}`);
+  const barWidth = boundedInteger(width, 2, 6, "Barcode width");
+  const barHeight = boundedInteger(height, 1, 255, "Barcode height");
+
   return Buffer.concat([
     bytes(GS, 0x48, 0x02),
-    bytes(GS, 0x68, 0x3c),
-    bytes(GS, 0x77, 0x02),
+    bytes(GS, 0x68, barHeight),
+    bytes(GS, 0x77, barWidth),
     bytes(GS, 0x6b, 0x49, data.length),
     data,
     bytes(0x0a)
+  ]);
+}
+
+function paperFinish(feedLines: number, cut: "none" | "full" | "partial"): Buffer {
+  const feed = boundedInteger(feedLines, 0, 20, "Feed lines");
+  const chunks: Buffer[] = [];
+  if (feed > 0) chunks.push(bytes(ESC, 0x64, feed));
+  if (cut === "full") chunks.push(bytes(GS, 0x56, 0x00));
+  if (cut === "partial") chunks.push(bytes(GS, 0x56, 0x01));
+  return Buffer.concat(chunks);
+}
+
+function title(value: string): Buffer {
+  return Buffer.concat([
+    bytes(ESC, 0x61, 0x01, ESC, 0x45, 0x01),
+    line(value),
+    bytes(ESC, 0x45, 0x00, ESC, 0x61, 0x00),
+    line("-".repeat(LINE_WIDTH))
   ]);
 }
 
@@ -116,9 +162,7 @@ export function buildEscPosReceipt(receipt: RawReceiptData): Buffer {
   chunks.push(bytes(GS, 0x21, 0x00), bytes(ESC, 0x45, 0x00));
 
   for (const addressLine of receipt.addressLines) {
-    for (const wrappedLine of wrapText(addressLine, LINE_WIDTH)) {
-      chunks.push(line(wrappedLine));
-    }
+    for (const wrappedLine of wrapText(addressLine, LINE_WIDTH)) chunks.push(line(wrappedLine));
   }
 
   if (receipt.phone) chunks.push(line(`Phone: ${receipt.phone}`));
@@ -179,17 +223,193 @@ export function buildEscPosReceipt(receipt: RawReceiptData): Buffer {
     bytes(ESC, 0x45, 0x01),
     line("Thank you. Visit again."),
     bytes(ESC, 0x45, 0x00),
-    bytes(ESC, 0x64, 0x04),
-    bytes(GS, 0x56, 0x01)
+    paperFinish(4, "partial")
   );
 
   return Buffer.concat(chunks);
 }
 
-export function buildEscPosTestReceipt(): Buffer {
+function buildTextTest(options: EscPosTextOptions): Buffer {
+  const widthScale = boundedInteger(options.widthScale, 1, 8, "Text width scale");
+  const heightScale = boundedInteger(options.heightScale, 1, 8, "Text height scale");
+  const characterSpacing = boundedInteger(options.characterSpacing, 0, 20, "Character spacing");
+  const alignment = { left: 0, center: 1, right: 2 }[options.align];
+  const font = options.font === "a" ? 0 : 1;
+  const baseWidth = options.font === "a" ? 48 : 64;
+  const printableWidth = Math.max(1, Math.floor(baseWidth / widthScale));
+  const chunks: Buffer[] = [
+    bytes(ESC, 0x40),
+    bytes(ESC, 0x61, alignment),
+    bytes(ESC, 0x4d, font),
+    bytes(ESC, 0x45, options.bold ? 1 : 0),
+    bytes(ESC, 0x2d, options.underline),
+    bytes(GS, 0x42, options.reverse ? 1 : 0),
+    bytes(GS, 0x21, ((widthScale - 1) << 4) | (heightScale - 1)),
+    bytes(ESC, 0x20, characterSpacing)
+  ];
+
+  if (options.lineSpacing === null) chunks.push(bytes(ESC, 0x32));
+  else chunks.push(bytes(ESC, 0x33, boundedInteger(options.lineSpacing, 0, 255, "Line spacing")));
+
+  for (const paragraph of options.text.split("\n")) {
+    for (const wrappedLine of wrapText(paragraph, printableWidth)) chunks.push(line(wrappedLine));
+  }
+
+  chunks.push(
+    bytes(GS, 0x21, 0x00, GS, 0x42, 0x00, ESC, 0x2d, 0x00, ESC, 0x45, 0x00),
+    bytes(ESC, 0x20, 0x00, ESC, 0x32, ESC, 0x61, 0x00),
+    paperFinish(options.feedLines, options.cut)
+  );
+  return Buffer.concat(chunks);
+}
+
+function presetFontStyles(): Buffer {
+  return Buffer.concat([
+    bytes(ESC, 0x40),
+    title("FONT + STYLE TEST"),
+    line("Font A: 48-column device font"),
+    bytes(ESC, 0x4d, 0x01),
+    line("Font B: compact 64-column device font"),
+    bytes(ESC, 0x4d, 0x00, ESC, 0x45, 0x01),
+    line("Emphasized / bold"),
+    bytes(ESC, 0x45, 0x00, ESC, 0x47, 0x01),
+    line("Double-strike"),
+    bytes(ESC, 0x47, 0x00, ESC, 0x2d, 0x01),
+    line("Underline one-dot"),
+    bytes(ESC, 0x2d, 0x02),
+    line("Underline two-dot"),
+    bytes(ESC, 0x2d, 0x00, GS, 0x42, 0x01),
+    line(" REVERSE WHITE ON BLACK "),
+    bytes(GS, 0x42, 0x00, ESC, 0x7b, 0x01),
+    line("Upside-down text"),
+    bytes(ESC, 0x7b, 0x00),
+    paperFinish(4, "partial")
+  ]);
+}
+
+function presetAlignment(): Buffer {
+  return Buffer.concat([
+    bytes(ESC, 0x40),
+    title("ALIGNMENT TEST"),
+    bytes(ESC, 0x61, 0x00),
+    line("LEFT | starts at printable edge"),
+    bytes(ESC, 0x61, 0x01),
+    line("CENTER | centered by firmware"),
+    bytes(ESC, 0x61, 0x02),
+    line("RIGHT | ends at printable edge"),
+    bytes(ESC, 0x61, 0x00),
+    line("L" + ".".repeat(46) + "R"),
+    paperFinish(4, "partial")
+  ]);
+}
+
+function presetCharacterSize(): Buffer {
+  const chunks: Buffer[] = [bytes(ESC, 0x40), title("CHARACTER SIZE TEST")];
+  const samples: Array<[number, string]> = [
+    [0x00, "1x1 normal"],
+    [0x01, "1x2 double height"],
+    [0x10, "2x1 double width"],
+    [0x11, "2x2 double size"],
+    [0x22, "3x3 size"]
+  ];
+  for (const [size, label] of samples) chunks.push(bytes(GS, 0x21, size), line(label));
+  chunks.push(bytes(GS, 0x21, 0x00), paperFinish(4, "partial"));
+  return Buffer.concat(chunks);
+}
+
+function presetSpacing(): Buffer {
+  return Buffer.concat([
+    bytes(ESC, 0x40),
+    title("SPACING TEST"),
+    bytes(ESC, 0x33, 18),
+    line("18-dot tight line spacing"),
+    line("Second tight line"),
+    bytes(ESC, 0x32),
+    line("Default line spacing"),
+    line("Second default line"),
+    bytes(ESC, 0x33, 40),
+    line("40-dot loose line spacing"),
+    line("Second loose line"),
+    bytes(ESC, 0x32, ESC, 0x20, 2),
+    line("Two-dot character spacing"),
+    bytes(ESC, 0x20, 0),
+    line("Normal character spacing"),
+    paperFinish(4, "partial")
+  ]);
+}
+
+function presetWrapping(): Buffer {
+  const chunks: Buffer[] = [bytes(ESC, 0x40), title("WRAPPING + COLUMNS")];
+  chunks.push(line("0....5....1....5....2....5....3....5....4....5..48"));
+  for (const wrappedLine of wrapText(
+    "A deliberately long product name wraps on word boundaries without crossing the 48-column receipt grid.",
+    LINE_WIDTH
+  )) {
+    chunks.push(line(wrappedLine));
+  }
+  chunks.push(
+    line("-".repeat(LINE_WIDTH)),
+    line(`${fit("ITEM", 29)}${fit("QTY", 6, "right")}${fit("AMOUNT", 13, "right")}`),
+    line(`${fit("Premium Basmati Rice", 29)}${fit("2", 6, "right")}${fit("290.00", 13, "right")}`),
+    line(`${fit("Coca-Cola 500ml", 29)}${fit("3", 6, "right")}${fit("120.00", 13, "right")}`),
+    line("-".repeat(LINE_WIDTH)),
+    paperFinish(4, "partial")
+  );
+  return Buffer.concat(chunks);
+}
+
+function presetCodepage(): Buffer {
+  const chunks: Buffer[] = [bytes(ESC, 0x40), title("CODEPAGE BYTE CHART")];
+  for (const table of [0, 16, 17, 18]) {
+    chunks.push(bytes(ESC, 0x74, table), line(`ESC t ${table} | bytes 80-FF`));
+    for (let start = 0x80; start <= 0xf0; start += 16) {
+      chunks.push(
+        Buffer.from(Array.from({ length: 16 }, (_, index) => start + index)),
+        bytes(0x0a)
+      );
+    }
+    chunks.push(line());
+  }
+  chunks.push(bytes(ESC, 0x74, 0), paperFinish(4, "partial"));
+  return Buffer.concat(chunks);
+}
+
+function presetQr(): Buffer {
+  return Buffer.concat([
+    bytes(ESC, 0x40),
+    title("NATIVE QR TEST"),
+    bytes(ESC, 0x61, 0x01),
+    qrCode("upi://pay?pa=quickcart@upi&pn=QuickCart&am=123.45&cu=INR&tn=PRINT-TEST", 6, "m"),
+    line(),
+    line("Module 6 | ECC M | UPI sample"),
+    paperFinish(4, "partial")
+  ]);
+}
+
+function presetBarcode(): Buffer {
+  return Buffer.concat([
+    bytes(ESC, 0x40),
+    title("CODE 128 TEST"),
+    bytes(ESC, 0x61, 0x01),
+    code128("QC-00042", 2, 72),
+    line("QC-00042"),
+    paperFinish(4, "partial")
+  ]);
+}
+
+function presetFeedCut(): Buffer {
+  return Buffer.concat([
+    bytes(ESC, 0x40),
+    title("FEED + CUT TEST"),
+    line("Four feed lines should place this above the cutter."),
+    paperFinish(4, "partial")
+  ]);
+}
+
+function presetFullDiagnostic(): Buffer {
   const receipt = buildEscPosReceipt({
-    storeName: "QuickCart Print Test",
-    addressLines: ["80mm raw ESC/POS compatibility receipt", "Windows direct print mode"],
+    storeName: "QuickCart Print Lab",
+    addressLines: ["80mm / 576 dots / 203 DPI", "Windows RAW spooler diagnostic"],
     phone: "9999999999",
     gstin: "29ABCDE1234F1Z5",
     transactionLabel: "Test bill",
@@ -208,28 +428,71 @@ export function buildEscPosTestReceipt(): Buffer {
         quantity: "3",
         unitPricePaisa: 4000,
         totalPaisa: 12000
-      },
-      {
-        name: "Margherita Pizza",
-        quantity: "1",
-        unitPricePaisa: 25000,
-        totalPaisa: 25000
       }
     ],
-    subtotalPaisa: 55000,
-    totalPaisa: 55000,
+    subtotalPaisa: 30000,
+    totalPaisa: 30000,
     qrData: "QUICKCART-RAW-PRINT-TEST"
   });
 
-  const barcode = code128("QC-00042");
   const cutCommand = Buffer.from([GS, 0x56, 0x01]);
   const cutIndex = receipt.lastIndexOf(cutCommand);
   return Buffer.concat([
     receipt.subarray(0, cutIndex),
     bytes(ESC, 0x61, 0x01),
     line("Code 128"),
-    barcode,
-    bytes(ESC, 0x64, 0x04),
-    cutCommand
+    code128("QC-00042"),
+    paperFinish(4, "partial")
   ]);
+}
+
+export function buildEscPosPreset(preset: EscPosPresetId): Buffer {
+  if (preset === "font-styles") return presetFontStyles();
+  if (preset === "alignment") return presetAlignment();
+  if (preset === "character-size") return presetCharacterSize();
+  if (preset === "spacing") return presetSpacing();
+  if (preset === "wrapping") return presetWrapping();
+  if (preset === "codepage") return presetCodepage();
+  if (preset === "native-qr") return presetQr();
+  if (preset === "code128") return presetBarcode();
+  if (preset === "feed-cut") return presetFeedCut();
+  return presetFullDiagnostic();
+}
+
+export function buildEscPosPlaygroundJob(job: EscPosPlaygroundJob): Buffer {
+  if (job.kind === "preset") return buildEscPosPreset(job.preset);
+  if (job.kind === "text") return buildTextTest(job.options);
+  if (job.kind === "qr") {
+    return Buffer.concat([
+      bytes(ESC, 0x40, ESC, 0x61, 0x01),
+      qrCode(job.payload, job.moduleSize, job.errorCorrection),
+      line(),
+      paperFinish(job.feedLines, job.cut)
+    ]);
+  }
+  if (job.kind === "barcode") {
+    return Buffer.concat([
+      bytes(ESC, 0x40, ESC, 0x61, 0x01),
+      code128(job.payload, job.width, job.height),
+      paperFinish(job.feedLines, job.cut)
+    ]);
+  }
+  if (job.kind === "paper") {
+    return Buffer.concat([
+      bytes(ESC, 0x40),
+      line("QuickCart paper feed and cut test"),
+      paperFinish(job.feedLines, job.cut)
+    ]);
+  }
+
+  return Buffer.concat([
+    bytes(ESC, 0x40, ESC, 0x61, 0x01),
+    buildRasterCommand(job.command, job.image),
+    bytes(ESC, 0x61, 0x00),
+    paperFinish(job.feedLines, job.cut)
+  ]);
+}
+
+export function buildEscPosTestReceipt(): Buffer {
+  return buildEscPosPreset("full-diagnostic");
 }

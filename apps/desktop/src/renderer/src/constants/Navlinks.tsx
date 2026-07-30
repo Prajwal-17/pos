@@ -61,7 +61,7 @@ export const navLinks: NavlinkType[] = [
   },
   {
     href: "/printer-test",
-    title: "Printer test",
+    title: "Print playground",
     element: <PrinterTestPage />,
     icon: <Printer size={24} />
   },

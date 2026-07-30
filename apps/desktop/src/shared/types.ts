@@ -698,7 +698,76 @@ export type ImagePrintResult = {
   height: number;
 };
 
+export type SystemPrinterInfo = {
+  name: string;
+  displayName: string;
+  description: string;
+};
+
+export type EscPosPresetId =
+  | "full-diagnostic"
+  | "font-styles"
+  | "alignment"
+  | "character-size"
+  | "spacing"
+  | "wrapping"
+  | "codepage"
+  | "native-qr"
+  | "code128"
+  | "feed-cut";
+
+export type EscPosTextOptions = {
+  text: string;
+  font: "a" | "b";
+  align: "left" | "center" | "right";
+  bold: boolean;
+  underline: 0 | 1 | 2;
+  reverse: boolean;
+  widthScale: number;
+  heightScale: number;
+  lineSpacing: number | null;
+  characterSpacing: number;
+  feedLines: number;
+  cut: "none" | "full" | "partial";
+};
+
+export type MonochromeRasterData = {
+  dataBase64: string;
+  width: number;
+  height: number;
+  stride: number;
+};
+
+export type EscPosPlaygroundJob =
+  | { kind: "preset"; preset: EscPosPresetId }
+  | { kind: "text"; options: EscPosTextOptions }
+  | {
+      kind: "qr";
+      payload: string;
+      moduleSize: number;
+      errorCorrection: "l" | "m" | "q" | "h";
+      feedLines: number;
+      cut: "none" | "full" | "partial";
+    }
+  | {
+      kind: "barcode";
+      payload: string;
+      width: number;
+      height: number;
+      feedLines: number;
+      cut: "none" | "full" | "partial";
+    }
+  | { kind: "paper"; feedLines: number; cut: "none" | "full" | "partial" }
+  | {
+      kind: "raster";
+      command: "gs-v-0" | "esc-star" | "gs-l";
+      image: MonochromeRasterData;
+      feedLines: number;
+      cut: "none" | "full" | "partial";
+    };
+
 export interface RawPrintApi {
+  listPrinters: () => Promise<ApiResponse<SystemPrinterInfo[]>>;
   printTest: (printerName: string) => Promise<ApiResponse<RawPrintResult>>;
   printReceipt: (
     printerName: string,
@@ -708,8 +777,11 @@ export interface RawPrintApi {
     printerName: string,
     image: ReceiptImageData
   ) => Promise<ApiResponse<ImagePrintResult>>;
+  printPlayground: (
+    printerName: string,
+    job: EscPosPlaygroundJob
+  ) => Promise<ApiResponse<RawPrintResult>>;
 }
-
 export interface ZoomApi {
   getZoom: () => Promise<{ zoomFactor: number }>;
   setZoom: (factor: number) => Promise<{ zoomFactor: number }>;
