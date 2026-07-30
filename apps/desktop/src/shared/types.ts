@@ -687,12 +687,27 @@ export type RawPrintResult = {
   bytesWritten: number;
 };
 
+export type ReceiptImageData = {
+  dataUrl: string;
+  width: number;
+  height: number;
+};
+
+export type ImagePrintResult = {
+  width: number;
+  height: number;
+};
+
 export interface RawPrintApi {
   printTest: (printerName: string) => Promise<ApiResponse<RawPrintResult>>;
   printReceipt: (
     printerName: string,
     receipt: RawReceiptData
   ) => Promise<ApiResponse<RawPrintResult>>;
+  printImage: (
+    printerName: string,
+    image: ReceiptImageData
+  ) => Promise<ApiResponse<ImagePrintResult>>;
 }
 
 export interface ZoomApi {

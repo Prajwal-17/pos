@@ -96,7 +96,8 @@ const PrinterTestPage = () => {
 
         <p className="text-muted-foreground text-xs">
           Raw mode is Windows-only and prints ASCII text for maximum printer compatibility. The
-          saved printer name is also used by the Raw print button on the billing page.
+          saved printer name is also used by the Raw print and Image print buttons on the billing
+          page.
         </p>
       </div>
     </main>

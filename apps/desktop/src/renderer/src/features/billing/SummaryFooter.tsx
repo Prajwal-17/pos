@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import useImageReceiptPrint from "@/hooks/billing/useImageReceiptPrint";
 import useRawReceiptPrint from "@/hooks/billing/useRawReceiptPrint";
 import useReceiptPrint from "@/hooks/billing/useReceiptPrint";
 import useTransaction from "@/hooks/billing/useTransaction";
 import { useBillingTabsStore } from "@/store/billing/billingTabsStore";
 import { flushSync, forceSync } from "@/utils/syncWorker";
 import { TRANSACTION_TYPE } from "@shared/types";
-import { ArrowUpRight, FileText, Loader2, Printer, Save } from "lucide-react";
+import { ArrowUpRight, FileText, Image as ImageIcon, Loader2, Printer, Save } from "lucide-react";
 import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
@@ -20,8 +21,9 @@ export const SummaryFooter = () => {
   const { subtotal, grandTotal } = useTransaction();
   const { printReceipt } = useReceiptPrint();
   const { printRawReceipt } = useRawReceiptPrint();
+  const { printImageReceipt } = useImageReceiptPrint();
 
-  type LoadingAction = "print" | "raw-print" | "exit" | "pdf" | null;
+  type LoadingAction = "print" | "raw-print" | "image-print" | "exit" | "pdf" | null;
   const [loadingAction, setLoadingAction] = useState<LoadingAction>(null);
 
   const waitForSync = useCallback(async (): Promise<boolean> => {
@@ -77,6 +79,27 @@ export const SummaryFooter = () => {
       setLoadingAction(null);
     }
   }, [waitForSync, printRawReceipt, navigate, type]);
+
+  const handleSaveAndImagePrint = useCallback(async () => {
+    setLoadingAction("image-print");
+    try {
+      const synced = await waitForSync();
+      if (!synced) return;
+
+      const result = await printImageReceipt();
+      if (result.status === "error") {
+        toast.error(result.error.message);
+        return;
+      }
+      toast.success("Receipt image sent to the thermal printer");
+      navigate(`/dashboard/${type}`);
+    } catch (error) {
+      console.error("Image print failed", error);
+      toast.error(error instanceof Error ? error.message : "Image print failed");
+    } finally {
+      setLoadingAction(null);
+    }
+  }, [waitForSync, printImageReceipt, navigate, type]);
 
   const handleSaveAndExit = useCallback(async () => {
     setLoadingAction("exit");
@@ -174,6 +197,11 @@ export const SummaryFooter = () => {
       <Button variant="outline" disabled={loadingAction !== null} onClick={handleSaveAndRawPrint}>
         {loadingAction === "raw-print" ? <Loader2 className="animate-spin" /> : <Printer />}
         {loadingAction === "raw-print" ? "Sending..." : "Raw print"}
+      </Button>
+
+      <Button variant="outline" disabled={loadingAction !== null} onClick={handleSaveAndImagePrint}>
+        {loadingAction === "image-print" ? <Loader2 className="animate-spin" /> : <ImageIcon />}
+        {loadingAction === "image-print" ? "Rendering..." : "Image print"}
       </Button>
 
       <Button variant="outline" disabled={loadingAction !== null} onClick={handleSaveAndExit}>
