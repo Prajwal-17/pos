@@ -1,3 +1,4 @@
+import html2canvas from "html2canvas";
 import type { MonochromeRasterData, ReceiptImageData } from "@shared/types";
 
 export const THERMAL_PRINT_WIDTH_PX = 576;
@@ -11,26 +12,6 @@ type ThermalRenderOptions = {
 function normalizedThreshold(value = 210): number {
   if (!Number.isFinite(value)) return 210;
   return Math.max(0, Math.min(255, Math.round(value)));
-}
-
-function copyComputedStyles(source: Element, target: Element): void {
-  const computedStyle = window.getComputedStyle(source);
-  const targetStyle = (target as HTMLElement | SVGElement).style;
-
-  for (const property of computedStyle) {
-    targetStyle.setProperty(
-      property,
-      computedStyle.getPropertyValue(property),
-      computedStyle.getPropertyPriority(property)
-    );
-  }
-
-  const sourceChildren = Array.from(source.children);
-  const targetChildren = Array.from(target.children);
-  sourceChildren.forEach((child, index) => {
-    const targetChild = targetChildren[index];
-    if (targetChild) copyComputedStyles(child, targetChild);
-  });
 }
 
 function loadImage(url: string): Promise<HTMLImageElement> {
@@ -104,43 +85,27 @@ export async function receiptElementToPng(
 
   const scale = THERMAL_PRINT_WIDTH_PX / bounds.width;
   const outputHeight = Math.ceil(bounds.height * scale);
+  const sourceCanvas = await html2canvas(element, {
+    allowTaint: false,
+    backgroundColor: "#ffffff",
+    height: bounds.height,
+    logging: false,
+    removeContainer: true,
+    scale,
+    useCORS: true,
+    width: bounds.width
+  });
+
   const [canvas, context] = makeCanvas(outputHeight);
-
-  const clone = element.cloneNode(true) as HTMLElement;
-  copyComputedStyles(element, clone);
-  clone.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
-  clone.style.margin = "0";
-  clone.style.width = `${bounds.width}px`;
-  clone.style.maxWidth = "none";
-  clone.style.transform = "none";
-
-  const serializedReceipt = new XMLSerializer().serializeToString(clone);
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg"
-      width="${THERMAL_PRINT_WIDTH_PX}"
-      height="${outputHeight}"
-      viewBox="0 0 ${bounds.width} ${bounds.height}">
-      <foreignObject x="0" y="0" width="${bounds.width}" height="${bounds.height}">
-        ${serializedReceipt}
-      </foreignObject>
-    </svg>
-  `;
-
-  const svgUrl = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));
-
-  try {
-    const image = await loadImage(svgUrl);
-    context.drawImage(image, 0, 0, canvas.width, canvas.height);
-    applyThermalThreshold(
-      context,
-      canvas.width,
-      canvas.height,
-      normalizedThreshold(options.threshold)
-    );
-    return canvasToReceiptImage(canvas);
-  } finally {
-    URL.revokeObjectURL(svgUrl);
-  }
+  context.imageSmoothingEnabled = false;
+  context.drawImage(sourceCanvas, 0, 0, canvas.width, canvas.height);
+  applyThermalThreshold(
+    context,
+    canvas.width,
+    canvas.height,
+    normalizedThreshold(options.threshold)
+  );
+  return canvasToReceiptImage(canvas);
 }
 
 export async function imageFileToReceiptPng(
