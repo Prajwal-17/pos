@@ -1,5 +1,5 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useAppPreferences } from "@/hooks/useAppPreferences";
+import { useAppPreferences } from "@/features/preferences/useAppPreferences";
 import { cn } from "@/lib/utils";
 import { useBillingSessionStore } from "@/store/billing/billingSessionStore";
 import { useBillingTabsStore } from "@/store/billing/billingTabsStore";

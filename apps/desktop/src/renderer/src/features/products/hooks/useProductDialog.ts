@@ -1,6 +1,6 @@
-import { blobToDataUrl } from "@/features/productDialog/productImageCrop";
+import { blobToDataUrl } from "@/features/products/dialog/productImageCrop";
 import { apiClient } from "@/lib/apiClient";
-import { useProductsStore } from "@/store/productsStore";
+import { useProductsStore } from "@/features/products/products.store";
 import { dirtyFieldsProductSchema, updateProductSchema } from "@shared/schemas/products.schema";
 import {
   ACTION_TYPE,

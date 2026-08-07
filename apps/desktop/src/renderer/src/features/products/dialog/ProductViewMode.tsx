@@ -1,6 +1,6 @@
 import { ProductImage } from "@/components/app-ui/product-image";
 import { getProductImageUrl } from "@/constants";
-import { useProductsStore } from "@/store/productsStore";
+import { useProductsStore } from "@/features/products/products.store";
 import { formatDateStr } from "@shared/utils/dateUtils";
 import { generateProductSnapshot } from "@shared/utils/productSnapshot";
 import { formatRupee } from "@shared/utils/utils";

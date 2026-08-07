@@ -1,6 +1,6 @@
 import { apiClient } from "@/lib/apiClient";
 import { useAppStore } from "@/app/app.store";
-import { useOnboardingStore } from "@/store/onboardingStore";
+import { useOnboardingStore } from "@/features/onboarding/onboarding.store";
 import { onboardingSchema } from "@shared/schemas/onboarding.schema";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";

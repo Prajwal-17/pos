@@ -1,5 +1,5 @@
-import { useProductHistory } from "@/hooks/products/useProductHistory";
-import { useProductsStore } from "@/store/productsStore";
+import { useProductHistory } from "@/features/products/hooks/useProductHistory";
+import { useProductsStore } from "@/features/products/products.store";
 import { formatDateStrToISTDateTimeStr } from "@shared/utils/dateUtils";
 import { formatRupee } from "@shared/utils/utils";
 import { AlertCircle, ArrowRight, Clock, Clock3, Loader2 } from "lucide-react";

@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { getProductImageUrl, PRODUCT_UNITS } from "@/constants";
-import { useProductDialog } from "@/hooks/products/useProductDialog";
-import { useProductsStore } from "@/store/productsStore";
+import { useProductDialog } from "@/features/products/hooks/useProductDialog";
+import { useProductsStore } from "@/features/products/products.store";
 import { fromMilliUnits } from "@shared/utils/milliUnits";
 import { formatRupee } from "@shared/utils/utils";
 import { ACTION_TYPE, DIALOG_MODE } from "@shared/types";

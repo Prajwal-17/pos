@@ -14,7 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { CUSTOMER_SORT_OPTIONS } from "@/constants";
-import { useCustomersInfinite } from "@/hooks/customers/useCustomersInfinite";
+import { useCustomersInfinite } from "@/features/customers/hooks/useCustomersInfinite";
 import { cn } from "@/lib/utils";
 import {
   CUSTOMER_SORT_BY,
@@ -36,7 +36,7 @@ const TYPE_FILTERS: { key: CustomerType; label: string }[] = [
   { key: CUSTOMER_TYPE.HOTEL, label: "Hotel" }
 ];
 
-export function CustomerListPage() {
+export function CustomerListView() {
   const navigate = useNavigate();
   const { openAddForm } = useCustomerActions();
   const searchInputRef = useRef<HTMLInputElement>(null);

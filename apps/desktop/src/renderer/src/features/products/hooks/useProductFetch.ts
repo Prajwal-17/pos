@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/apiClient";
-import { useProductsStore, type ProductsFormType } from "@/store/productsStore";
+import { useProductsStore, type ProductsFormType } from "@/features/products/products.store";
 import type { ProductSearchItemDTO } from "@shared/types";
 import { paisaToRupeeString } from "@shared/utils/utils";
 import { useQuery } from "@tanstack/react-query";

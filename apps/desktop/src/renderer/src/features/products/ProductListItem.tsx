@@ -13,8 +13,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getProductImageUrl, ignoredWeight } from "@/constants";
-import { useProductDialog } from "@/hooks/products/useProductDialog";
-import { useProductsStore } from "@/store/productsStore";
+import { useProductDialog } from "@/features/products/hooks/useProductDialog";
+import { useProductsStore } from "@/features/products/products.store";
 import {
   ACTION_TYPE,
   DIALOG_MODE,

@@ -1,6 +1,6 @@
 import { PRODUCTS_SEARCH_DELAY, PRODUCTS_SEARCH_PAGE_SIZE } from "@/constants";
 import { apiClient } from "@/lib/apiClient";
-import { useProductsStore } from "@/store/productsStore";
+import { useProductsStore } from "@/features/products/products.store";
 import { useSearchDropdownStore } from "@/store/searchDropdownStore";
 import {
   type BillingProductDTO,
@@ -11,7 +11,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useEffect, useMemo, useRef } from "react";
 import toast from "react-hot-toast";
-import useDebounce from "../useDebounce";
+import useDebounce from "@/hooks/useDebounce";
 
 export const PRODUCTSEARCH_TYPE = {
   PRODUCTPAGE: "product-page",

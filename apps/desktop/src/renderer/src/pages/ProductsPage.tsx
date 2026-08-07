@@ -1,8 +1,8 @@
 import { ViewModal } from "@/features/dashboard/ViewModal";
-import { ProductDialog } from "@/features/productDialog/ProductDialog";
+import { ProductDialog } from "@/features/products/dialog/ProductDialog";
 import ProductHeader from "@/features/products/ProductHeader";
 import ProductResults from "@/features/products/ProductResults";
-import { useProductsStore } from "@/store/productsStore";
+import { useProductsStore } from "@/features/products/products.store";
 import { useViewModalStore } from "@/store/viewModalStore";
 
 export default function ProductsPage() {

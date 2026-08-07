@@ -1,20 +1,20 @@
-import { useCustomer } from "@/hooks/customers/useCustomer";
+import { useCustomer } from "@/features/customers/hooks/useCustomer";
 import { LoaderCircle } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { CustomerActionsProvider } from "./CustomerActionsContext";
 import { type CustomerActions } from "./customerActions";
-import { CustomerDetailPage } from "./detail/CustomerDetailPage";
+import { CustomerDetailView } from "./detail/CustomerDetailView";
 import { AdjustBalanceDialog } from "./dialogs/AdjustBalanceDialog";
 import { CustomerFormDialog } from "./dialogs/CustomerFormDialog";
 import { CustomerSearchModal } from "./dialogs/CustomerSearchModal";
 import { PaymentDialog } from "./dialogs/PaymentDialog";
 import { QuickSaleDialog } from "./dialogs/QuickSaleDialog";
-import { CustomerListPage } from "./list/CustomerListPage";
+import { CustomerListView } from "./list/CustomerListView";
 
 //  /customers             → list
 //  /customers/:customerId → detail
-export function CustomerModule() {
+export function CustomersScreen() {
   const { customerId } = useParams<{ customerId: string }>();
   const isDetail = customerId !== undefined;
 
@@ -64,14 +64,14 @@ export function CustomerModule() {
               <LoaderCircle className="text-muted-foreground size-7 animate-spin" />
             </div>
           ) : (
-            <CustomerDetailPage
+            <CustomerDetailView
               key={customerId ?? "none"}
               customerId={customerId!}
               customer={selected}
             />
           )
         ) : (
-          <CustomerListPage />
+          <CustomerListView />
         )}
 
         {formOpen && (

@@ -12,9 +12,9 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useProductDialog } from "@/hooks/products/useProductDialog";
-import { useProductFetch } from "@/hooks/products/useProductFetch";
-import { useProductsStore } from "@/store/productsStore";
+import { useProductDialog } from "@/features/products/hooks/useProductDialog";
+import { useProductFetch } from "@/features/products/hooks/useProductFetch";
+import { useProductsStore } from "@/features/products/products.store";
 import {
   ACTION_TYPE,
   DIALOG_MODE,

@@ -19,9 +19,9 @@ import {
   useCustomerTransactions,
   type CustomerTxn,
   type TxnSortBy
-} from "@/hooks/customers/useCustomerTransactions";
-import type { MutationVariables } from "@/hooks/customers/useCustomerTxnMutations";
-import { useCustomerTxnMutations } from "@/hooks/customers/useCustomerTxnMutations";
+} from "@/features/customers/hooks/useCustomerTransactions";
+import type { MutationVariables } from "@/features/customers/hooks/useCustomerTxnMutations";
+import { useCustomerTxnMutations } from "@/features/customers/hooks/useCustomerTxnMutations";
 import { cn } from "@/lib/utils";
 import { TXN_TABLE_ALIGN, type TxnTableColMeta } from "@/types";
 import { CUSTOMER_TXN_SORT, TRANSACTION_TYPE, type TransactionType } from "@shared/types";

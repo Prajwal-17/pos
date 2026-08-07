@@ -1,6 +1,6 @@
 import quickcartLogo from "@/assets/quickcart.svg";
 import { ONBOARDING_FEATURES, ONBOARDING_STEPS, PRODUCT_NAME } from "@/constants";
-import { useOnboardingStore } from "@/store/onboardingStore";
+import { useOnboardingStore } from "@/features/onboarding/onboarding.store";
 import { AnimatePresence, motion } from "motion/react";
 import { OnboardingComplete } from "./OnboardingComplete";
 import { OnboardingStepper } from "./OnboardingStepper";

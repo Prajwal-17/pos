@@ -1,8 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PaymentDialog } from "@/features/customers/dialogs/PaymentDialog";
-import { useCustomer } from "@/hooks/customers/useCustomer";
-import { useCustomerLedgerSummary } from "@/hooks/customers/useCustomerLedger";
+import { useCustomer } from "@/features/customers/hooks/useCustomer";
+import { useCustomerLedgerSummary } from "@/features/customers/hooks/useCustomerLedger";
 import { cn } from "@/lib/utils";
 import { useBillingSessionStore } from "@/store/billing/billingSessionStore";
 import { useBillingTabsStore } from "@/store/billing/billingTabsStore";

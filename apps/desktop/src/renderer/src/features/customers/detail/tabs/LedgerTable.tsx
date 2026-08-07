@@ -21,8 +21,8 @@ import {
   AlertDialogTitle
 } from "@/components/ui/alert-dialog";
 import { LEDGER_SORT_OPTIONS, LEDGER_TABLE_PAGE_SIZE, LEDGER_TYPE_OPTIONS } from "@/constants";
-import { useCustomerLedger } from "@/hooks/customers/useCustomerLedger";
-import { useDeleteLedgerEntry } from "@/hooks/customers/useLedgerMutations";
+import { useCustomerLedger } from "@/features/customers/hooks/useCustomerLedger";
+import { useDeleteLedgerEntry } from "@/features/customers/hooks/useLedgerMutations";
 import { cn } from "@/lib/utils";
 import { TXN_TABLE_ALIGN, type TxnTableColMeta } from "@/types";
 import type { LedgerEntry, LedgerSort, LedgerTypeFilter } from "@shared/types";

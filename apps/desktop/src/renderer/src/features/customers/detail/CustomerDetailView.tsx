@@ -6,11 +6,11 @@ import { UserX } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { DetailHeader } from "./DetailHeader";
 import { DetailTabs } from "./DetailTabs";
-import { EmptyTab } from "./shared/EmptyTab";
+import { EmptyTab } from "./EmptyTab";
 
 const VALID_TABS = Object.values(CUSTOMER_DETAIL_TAB);
 
-export function CustomerDetailPage({
+export function CustomerDetailView({
   customerId,
   customer
 }: {

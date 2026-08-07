@@ -11,7 +11,7 @@ import {
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import useDebounce from "../useDebounce";
+import useDebounce from "@/hooks/useDebounce";
 
 type CustomersPageResult = {
   data: Customer[];

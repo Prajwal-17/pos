@@ -1,5 +1,5 @@
-import { useProductsStore } from "@/store/productsStore";
-import { ProductDialog } from "../productDialog/ProductDialog";
+import { useProductsStore } from "@/features/products/products.store";
+import { ProductDialog } from "@/features/products/dialog/ProductDialog";
 
 export const ProductDialogWrapper = () => {
   const openProductDialog = useProductsStore((state) => state.openProductDialog);

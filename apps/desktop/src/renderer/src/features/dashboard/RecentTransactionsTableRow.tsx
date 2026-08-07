@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { MutationVariables } from "@/hooks/dashboard/useDashboard";
-import { getCustomerAvatarStyle } from "@/lib/customerAvatar";
+import { getCustomerAvatarStyle } from "@/features/customers/customerAvatar";
 import { cn } from "@/lib/utils";
 import { TRANSACTION_TYPE, type TransactionType, type UnifiedTransaction } from "@shared/types";
 import { formatDateStrToISTDateStr } from "@shared/utils/dateUtils";
