@@ -1,12 +1,12 @@
-import { useDashboard } from "@/hooks/dashboard/useDashboard";
-import { useInfiniteScroll } from "@/hooks/dashboard/useInfiniteScroll";
-import { useViewModalStore } from "@/store/viewModalStore";
+import { useDashboard } from "@/features/transactions/hooks/useDashboard";
+import { useInfiniteScroll } from "@/features/transactions/hooks/useInfiniteScroll";
+import { useViewModalStore } from "@/features/transactions/store/viewModal.store";
 import { DASHBOARD_TYPE, type DashboardType } from "@shared/types";
 import { LoaderCircle, ReceiptIndianRupee } from "lucide-react";
 import { useParams } from "react-router-dom";
-import DashboardTableRow from "./DashboardTableRow";
+import TransactionTableRow from "./TransactionTableRow";
 
-export const DashboardTable = () => {
+export const TransactionTable = () => {
   const { deleteMutation, convertMutation, duplicateMutation } = useDashboard();
   const { type } = useParams();
   const { parentRef, rowVirtualizer, status, hasNextPage, transactionData, totalTransactions } =
@@ -72,7 +72,7 @@ export const DashboardTable = () => {
                           data-index={virtualRow.index}
                           ref={rowVirtualizer.measureElement}
                         >
-                          <DashboardTableRow
+                          <TransactionTableRow
                             pathname={type as DashboardType}
                             transaction={transaction}
                             isLoaderRow={isLoaderRow}

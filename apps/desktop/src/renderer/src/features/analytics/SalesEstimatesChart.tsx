@@ -32,7 +32,7 @@ const chartConfig = {
   }
 };
 
-export function SalesEstimateChart() {
+export function SalesEstimatesChart() {
   const [timePeriod, setTimePeriod] = useState<TimePeriodType>(TIME_PERIOD.LAST_7_DAYS);
 
   const { data, isError, error, isSuccess } = useQuery({

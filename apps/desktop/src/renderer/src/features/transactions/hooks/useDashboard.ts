@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/apiClient";
-import { useDashboardStore } from "@/store/dashboardStore";
+import { useDashboardStore } from "@/features/transactions/store/dashboard.store";
 import { toSentenceCase } from "@/utils";
 import { SortOption, type SortType, type TransactionType } from "@shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";

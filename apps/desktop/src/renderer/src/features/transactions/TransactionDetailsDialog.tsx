@@ -13,9 +13,9 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useViewModal } from "@/hooks/dashboard/useViewModal";
+import { useViewModal } from "@/features/transactions/hooks/useViewModal";
 import { cn } from "@/lib/utils";
-import { useViewModalStore } from "@/store/viewModalStore";
+import { useViewModalStore } from "@/features/transactions/store/viewModal.store";
 import { BATCH_CHECK_ACTION, type DashboardType } from "@shared/types";
 import { formatDateStrToISTDateTimeStr } from "@shared/utils/dateUtils";
 import { fromMilliUnits } from "@shared/utils/milliUnits";
@@ -160,7 +160,7 @@ function TransactionActions({
   );
 }
 
-export const ViewModal = ({ type, id }: { type: DashboardType; id: string }) => {
+export const TransactionDetailsDialog = ({ type, id }: { type: DashboardType; id: string }) => {
   const navigate = useNavigate();
   const setIsViewModalOpen = useViewModalStore((state) => state.setIsViewModalOpen);
 

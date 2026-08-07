@@ -42,7 +42,7 @@ import {
 import { motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 import { useCustomerActions } from "../../customerActions";
-import { useViewModalStore } from "@/store/viewModalStore";
+import { useViewModalStore } from "@/features/transactions/store/viewModal.store";
 import { EditLedgerDialog } from "../../dialogs/EditLedgerDialog";
 import { buildLedgerColumns } from "./LedgerColumns";
 

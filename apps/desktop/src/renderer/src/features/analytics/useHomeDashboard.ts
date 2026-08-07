@@ -1,7 +1,7 @@
 import { apiClient } from "@/lib/apiClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import type { MutationVariables } from "./dashboard/useDashboard";
+import type { MutationVariables } from "@/features/transactions/hooks/useDashboard";
 
 export const useHomeDashboard = ({ type }: { type: string }) => {
   const queryClient = useQueryClient();

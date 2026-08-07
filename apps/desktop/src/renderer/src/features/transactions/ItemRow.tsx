@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import type { MutationVariables } from "@/hooks/dashboard/useViewModal";
+import type { MutationVariables } from "@/features/transactions/hooks/useViewModal";
 import { cn } from "@/lib/utils";
 import {
   UPDATE_QTY_ACTION,

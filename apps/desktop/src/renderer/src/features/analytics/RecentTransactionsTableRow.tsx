@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import type { MutationVariables } from "@/hooks/dashboard/useDashboard";
+import type { MutationVariables } from "@/features/transactions/hooks/useDashboard";
 import { getCustomerAvatarStyle } from "@/features/customers/customerAvatar";
 import { cn } from "@/lib/utils";
 import { TRANSACTION_TYPE, type TransactionType, type UnifiedTransaction } from "@shared/types";

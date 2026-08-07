@@ -1,5 +1,5 @@
 import type { Calendar } from "@/components/ui/calendar";
-import { useDashboardStore } from "@/store/dashboardStore";
+import { useDashboardStore } from "@/features/transactions/store/dashboard.store";
 import { useEffect, useState } from "react";
 import type { DateRange } from "react-day-picker";
 

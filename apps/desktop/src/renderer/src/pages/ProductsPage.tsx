@@ -1,9 +1,9 @@
-import { ViewModal } from "@/features/dashboard/ViewModal";
+import { TransactionDetailsDialog } from "@/features/transactions/TransactionDetailsDialog";
 import { ProductDialog } from "@/features/products/dialog/ProductDialog";
 import ProductHeader from "@/features/products/ProductHeader";
 import ProductResults from "@/features/products/ProductResults";
 import { useProductsStore } from "@/features/products/products.store";
-import { useViewModalStore } from "@/store/viewModalStore";
+import { useViewModalStore } from "@/features/transactions/store/viewModal.store";
 
 export default function ProductsPage() {
   const openProductDialog = useProductsStore((state) => state.openProductDialog);
@@ -16,7 +16,7 @@ export default function ProductsPage() {
       <ProductHeader />
       <ProductResults />
       {openProductDialog && <ProductDialog />}
-      {isViewModalOpen && transactionId && <ViewModal type={transactionType} id={transactionId} />}
+      {isViewModalOpen && transactionId && <TransactionDetailsDialog type={transactionType} id={transactionId} />}
     </div>
   );
 }

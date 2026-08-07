@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import type { MutationVariables } from "@/hooks/dashboard/useDashboard";
+import type { MutationVariables } from "@/features/transactions/hooks/useDashboard";
 import { getCustomerAvatarStyle } from "@/features/customers/customerAvatar";
 import { cn } from "@/lib/utils";
 import type { UnifiedTransaction } from "@shared/types";
@@ -40,7 +40,7 @@ import { memo, useCallback, useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 
-const DashboardTableRow = ({
+const TransactionTableRow = ({
   pathname,
   transaction,
   isLoaderRow,
@@ -351,4 +351,4 @@ function memoComparator(prev: any, next: any) {
   return true;
 }
 
-export default memo(DashboardTableRow, memoComparator);
+export default memo(TransactionTableRow, memoComparator);

@@ -6,12 +6,12 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { sortOptions } from "@/constants";
-import { useDashboard } from "@/hooks/dashboard/useDashboard";
+import { useDashboard } from "@/features/transactions/hooks/useDashboard";
 import type { SortType } from "@shared/types";
-import { DashboardTable } from "./DashboardTable";
+import { TransactionTable } from "./TransactionTable";
 import { DateRangePicker } from "./DateRangePicker";
 
-export const DashboardCard = () => {
+export const TransactionListPanel = () => {
   const { sortBy, setSortBy } = useDashboard();
 
   return (
@@ -42,7 +42,7 @@ export const DashboardCard = () => {
         </Select>
         <DateRangePicker />
       </div>
-      <DashboardTable />
+      <TransactionTable />
     </div>
   );
 };

@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 import { MetricCard } from "./MetricCard";
 import { StatCard } from "./StatCard";
 
-export const MetricsComponent = () => {
+export const DashboardMetrics = () => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["metrics-summary"],
     queryFn: () => apiClient.get<MetricsSummary>("api/dashboard/summary")

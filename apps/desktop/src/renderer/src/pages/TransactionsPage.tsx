@@ -1,6 +1,6 @@
 import { DASHBOARD_TYPE, type DashboardType } from "@shared/types";
 import { Navigate, useParams } from "react-router-dom";
-import TransactionsScreen from "@/features/transactionDashboard/TransactionsScreen";
+import TransactionsScreen from "@/features/transactions/TransactionsScreen";
 
 const TransactionsPage = () => {
   const { type } = useParams<{ type: string }>();

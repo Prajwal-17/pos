@@ -5,7 +5,7 @@ import {
   CardTitle
 } from "@/components/app-ui/compact-card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useHomeDashboard } from "@/hooks/useHomeDashboard";
+import { useHomeDashboard } from "@/features/analytics/useHomeDashboard";
 import { apiClient } from "@/lib/apiClient";
 import {
   TRANSACTION_TYPE,
@@ -19,7 +19,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import RecentTransactionsTableRow from "./RecentTransactionsTableRow";
 
-export function RecentActivitiesTable() {
+export function RecentTransactionsTable() {
   const [type, setType] = useState<TransactionType>(TRANSACTION_TYPE.SALE);
   const { deleteMutation, convertMutation } = useHomeDashboard({ type });
 

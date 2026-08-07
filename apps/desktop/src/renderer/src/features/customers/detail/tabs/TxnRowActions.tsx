@@ -18,7 +18,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { CustomerTxn } from "@/features/customers/hooks/useCustomerTransactions";
 import type { MutationVariables } from "@/features/customers/hooks/useCustomerTxnMutations";
-import { useViewModalStore } from "@/store/viewModalStore";
+import { useViewModalStore } from "@/features/transactions/store/viewModal.store";
 import { TRANSACTION_TYPE, type TransactionType } from "@shared/types";
 import type { UseMutationResult } from "@tanstack/react-query";
 import {

@@ -4,7 +4,7 @@ import {
   CompactCardContent as CardContent
 } from "@/components/app-ui/compact-card";
 import { cn } from "@/lib/utils";
-import { useDashboardStore } from "@/store/dashboardStore";
+import { useDashboardStore } from "@/features/transactions/store/dashboard.store";
 import { TREND_OPTION, type TrendType } from "@shared/types";
 import { ArrowUpRight, TrendingDown, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";

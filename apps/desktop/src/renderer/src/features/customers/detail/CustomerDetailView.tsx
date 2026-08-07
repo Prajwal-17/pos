@@ -1,5 +1,5 @@
-import { ViewModal } from "@/features/dashboard/ViewModal";
-import { useViewModalStore } from "@/store/viewModalStore";
+import { TransactionDetailsDialog } from "@/features/transactions/TransactionDetailsDialog";
+import { useViewModalStore } from "@/features/transactions/store/viewModal.store";
 import { CUSTOMER_DETAIL_TAB, type CustomerDetailTab } from "@/types";
 import { DASHBOARD_TYPE, type Customer, type DashboardType } from "@shared/types";
 import { UserX } from "lucide-react";
@@ -54,7 +54,7 @@ export function CustomerDetailView({
         value={activeTab}
         onTabChange={handleTabChange}
       />
-      {isViewModalOpen && <ViewModal type={viewModalType} id={transactionId} />}
+      {isViewModalOpen && <TransactionDetailsDialog type={viewModalType} id={transactionId} />}
     </div>
   );
 }

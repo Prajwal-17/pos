@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { PAGE_SIZE, useProductTransactions } from "@/features/products/hooks/useProductTransactions";
 import { useProductsStore } from "@/features/products/products.store";
-import { useViewModalStore } from "@/store/viewModalStore";
+import { useViewModalStore } from "@/features/transactions/store/viewModal.store";
 import { DASHBOARD_TYPE, TRANSACTION_TYPE, type ProductTransaction } from "@shared/types";
 import { formatDateStrToISTDateStr } from "@shared/utils/dateUtils";
 import { formatRupee } from "@shared/utils/utils";

@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { ViewModal } from "@/features/dashboard/ViewModal";
-import { DashboardCard } from "@/features/transactionDashboard/DashboardCard";
-import { useInfiniteScroll } from "@/hooks/dashboard/useInfiniteScroll";
+import { TransactionDetailsDialog } from "@/features/transactions/TransactionDetailsDialog";
+import { TransactionListPanel } from "@/features/transactions/TransactionListPanel";
+import { useInfiniteScroll } from "@/features/transactions/hooks/useInfiniteScroll";
 import { cn } from "@/lib/utils";
-import { useViewModalStore } from "@/store/viewModalStore";
+import { useViewModalStore } from "@/features/transactions/store/viewModal.store";
 import { DASHBOARD_TYPE, type DashboardType } from "@shared/types";
 import { formatRupee } from "@shared/utils/utils";
 import { IndianRupee, Plus, ShoppingCart } from "lucide-react";
@@ -59,8 +59,8 @@ const TransactionsScreen = ({ type }: { type: DashboardType }) => {
         </Button>
       </div>
 
-      <DashboardCard />
-      {isViewModalOpen && <ViewModal type={type} id={transactionId} />}
+      <TransactionListPanel />
+      {isViewModalOpen && <TransactionDetailsDialog type={type} id={transactionId} />}
     </div>
   );
 };
