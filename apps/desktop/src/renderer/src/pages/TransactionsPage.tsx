@@ -1,8 +1,8 @@
 import { DASHBOARD_TYPE, type DashboardType } from "@shared/types";
 import { Navigate, useParams } from "react-router-dom";
-import Dashboard from "./Dashboard";
+import TransactionsScreen from "@/features/transactionDashboard/TransactionsScreen";
 
-const DashboardPage = () => {
+const TransactionsPage = () => {
   const { type } = useParams<{ type: string }>();
 
   const validTypes: DashboardType[] = [DASHBOARD_TYPE.SALES, DASHBOARD_TYPE.ESTIMATES];
@@ -11,7 +11,7 @@ const DashboardPage = () => {
     return <Navigate to="/not-found" />;
   }
 
-  return <Dashboard type={type as DashboardType} />;
+  return <TransactionsScreen type={type as DashboardType} />;
 };
 
-export default DashboardPage;
+export default TransactionsPage;

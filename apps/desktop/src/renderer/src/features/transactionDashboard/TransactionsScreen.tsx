@@ -9,7 +9,7 @@ import { formatRupee } from "@shared/utils/utils";
 import { IndianRupee, Plus, ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const Dashboard = ({ type }: { type: DashboardType }) => {
+const TransactionsScreen = ({ type }: { type: DashboardType }) => {
   const navigate = useNavigate();
   const { totalRevenue, totalTransactions } = useInfiniteScroll(type);
   const isSales = type === DASHBOARD_TYPE.SALES;
@@ -65,4 +65,4 @@ const Dashboard = ({ type }: { type: DashboardType }) => {
   );
 };
 
-export default Dashboard;
+export default TransactionsScreen;

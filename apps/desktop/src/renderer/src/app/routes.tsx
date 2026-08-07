@@ -1,18 +1,18 @@
 import { createHashRouter, Navigate } from "react-router-dom";
-import RootLayout from "./components/layouts/RootLayout";
-import { AppearanceSection } from "./features/settings/sections/AppearanceSection";
-import { BillingSection } from "./features/settings/sections/BillingSection";
-import { ExportsSection } from "./features/settings/sections/ExportsSection";
-import { StoreProfileSection } from "./features/settings/sections/StoreProfileSection";
-import BillingPage from "./pages/billing/BillingPage";
-import CustomersPage from "./pages/customers/CustomersPage";
-import DashboardPage from "./pages/dashboard/DashboardPage";
-import PdfInvoicePage from "./pages/export/pdf/PdfInvoicePage";
-import HomePage from "./pages/home/HomePage";
-import NotFoundPage from "./pages/NotFoundPage";
-import ProductsPage from "./pages/products/ProductsPage";
-import ReportsPage from "./pages/reports/ReportsPage";
-import SettingsPage from "./pages/settings/SettingsPage";
+import RootLayout from "./layouts/RootLayout";
+import { AppearanceSection } from "@/features/settings/sections/AppearanceSection";
+import { BillingSection } from "@/features/settings/sections/BillingSection";
+import { ExportsSection } from "@/features/settings/sections/ExportsSection";
+import { StoreProfileSection } from "@/features/settings/sections/StoreProfileSection";
+import BillingPage from "@/pages/BillingPage";
+import CustomersPage from "@/pages/CustomersPage";
+import TransactionsPage from "@/pages/TransactionsPage";
+import PdfInvoicePage from "@/pages/PdfInvoicePage";
+import HomePage from "@/pages/HomePage";
+import NotFoundPage from "@/pages/NotFoundPage";
+import ProductsPage from "@/pages/ProductsPage";
+import ReportsPage from "@/pages/ReportsPage";
+import SettingsPage from "@/pages/SettingsPage";
 
 export const router = createHashRouter([
   {
@@ -37,7 +37,7 @@ export const router = createHashRouter([
       },
       {
         path: "dashboard/:type",
-        element: <DashboardPage />
+        element: <TransactionsPage />
       },
       {
         path: "reports",

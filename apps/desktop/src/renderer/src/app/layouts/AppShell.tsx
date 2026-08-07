@@ -1,9 +1,9 @@
 import { cn } from "@/lib/utils";
-import { useSidebarStore } from "@/store/sidebarStore";
+import { useSidebarStore } from "@/app/sidebar.store";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Outlet, matchPath, useLocation } from "react-router-dom";
-import { Sidebar } from "../Sidebar";
+import { Sidebar } from "./Sidebar";
 import { BillingSidebar } from "./BillingSidebar";
 
 const COMPACT_SHELL_QUERY = "(max-width: 1119px)";

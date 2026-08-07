@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/apiClient";
-import { useAppStore } from "@/store/appStore";
+import { useAppStore } from "@/app/app.store";
 import type { AppPreferencesResponse } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";

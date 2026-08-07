@@ -1,9 +1,9 @@
-import Customers from "@/pages/customers/CustomersPage";
-import Dashboard from "@/pages/dashboard/DashboardPage";
-import Home from "@/pages/home/HomePage";
-import ProductsPage from "@/pages/products/ProductsPage";
-import Reports from "@/pages/reports/ReportsPage";
-import SettingsPage from "@/pages/settings/SettingsPage";
+import Customers from "@/pages/CustomersPage";
+import TransactionsPage from "@/pages/TransactionsPage";
+import Home from "@/pages/HomePage";
+import ProductsPage from "@/pages/ProductsPage";
+import Reports from "@/pages/ReportsPage";
+import SettingsPage from "@/pages/SettingsPage";
 import {
   ChartColumn,
   House,
@@ -42,13 +42,13 @@ export const navLinks: NavlinkType[] = [
   {
     href: "/dashboard/sales",
     title: "Sales",
-    element: <Dashboard />,
+    element: <TransactionsPage />,
     icon: <ShoppingCart size={24} />
   },
   {
     href: "/dashboard/estimates",
     title: "Estimates",
-    element: <Dashboard />,
+    element: <TransactionsPage />,
     icon: <ReceiptText size={24} />
   },
   {

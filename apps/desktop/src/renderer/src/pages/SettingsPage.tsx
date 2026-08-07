@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { settingsNavigation } from "../../features/settings/settingsNavigation";
+import { settingsNavigation } from "@/features/settings/settingsNavigation";
 
 const SettingsPage = () => {
   return (

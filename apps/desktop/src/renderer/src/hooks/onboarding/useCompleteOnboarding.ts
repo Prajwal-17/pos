@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/apiClient";
-import { useAppStore } from "@/store/appStore";
+import { useAppStore } from "@/app/app.store";
 import { useOnboardingStore } from "@/store/onboardingStore";
 import { onboardingSchema } from "@shared/schemas/onboarding.schema";
 import { useMutation } from "@tanstack/react-query";

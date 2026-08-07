@@ -1,5 +1,5 @@
 import quickcartLogo from "@/assets/quickcart.svg";
-import { navLinks } from "@/constants/Navlinks";
+import { navLinks } from "@/app/navigation";
 import { apiClient } from "@/lib/apiClient";
 import { cn } from "@/lib/utils";
 import type { StoreProfile } from "@shared/types";
@@ -7,8 +7,8 @@ import { useQuery } from "@tanstack/react-query";
 import { FileText, ShoppingCart } from "lucide-react";
 import { useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Button } from "../ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const mainLinks = navLinks.filter((item) => item.href !== "/settings");
 const systemLinks = navLinks.filter((item) => item.href === "/settings");

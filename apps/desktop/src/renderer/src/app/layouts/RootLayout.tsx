@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
-import useAppBootstrap from "@/hooks/useAppBootstrap";
-import { useAppStore } from "@/store/appStore";
+import useAppBootstrap from "@/app/useAppBootstrap";
+import { useAppStore } from "@/app/app.store";
 import { useQueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { LoaderCircle } from "lucide-react";

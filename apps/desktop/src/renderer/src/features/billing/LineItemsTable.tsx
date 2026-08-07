@@ -10,7 +10,7 @@ import { useActiveTabId } from "@/hooks/billing/useActiveTabId";
 import type { LineItem } from "@/store/billing/billingSession.types";
 import { useBillingSessionStore } from "@/store/billing/billingSessionStore";
 import { useProductsStore } from "@/store/productsStore";
-import { useSidebarStore } from "@/store/sidebarStore";
+import { useSidebarStore } from "@/app/sidebar.store";
 import { processSyncQueue } from "@/utils/syncWorker";
 import {
   DndContext,

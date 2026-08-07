@@ -1,14 +1,14 @@
 import quickcartLogo from "@/assets/quickcart.svg";
-import { navLinks } from "@/constants/Navlinks";
+import { navLinks } from "@/app/navigation";
 import { apiClient } from "@/lib/apiClient";
 import { cn } from "@/lib/utils";
-import { useSidebarStore } from "@/store/sidebarStore";
+import { useSidebarStore } from "@/app/sidebar.store";
 import type { StoreProfile } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import { FileText, ShoppingCart } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 
 const MIN_SIDEBAR_WIDTH = 216;
 const MAX_SIDEBAR_WIDTH = 280;
