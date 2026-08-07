@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import type { LineItem } from "@/features/billing/store/billingSession.types";
 import { useBillingSessionStore } from "@/features/billing/store/billingSession.store";
 import { useSearchDropdownStore } from "@/features/billing/product-search/searchDropdown.store";
-import { getCheckStatusColor, updateCheckedQuantity } from "@/utils";
+import { getCheckStatusColor, updateCheckedQuantity } from "@/utils/renderer.utils";
 import { processSyncQueue } from "@/features/billing/syncWorker";
 import type { DraggableAttributes, DraggableSyntheticListeners } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";

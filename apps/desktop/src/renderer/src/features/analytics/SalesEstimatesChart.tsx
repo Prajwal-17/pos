@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { timePeriodOptions } from "@/constants";
+import { timePeriodOptions } from "@/constants/renderer.constants";
 import { apiClient } from "@/lib/apiClient";
 import { TIME_PERIOD, type ChartDataType, type TimePeriodType } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";

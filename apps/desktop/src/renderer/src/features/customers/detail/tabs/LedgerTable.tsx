@@ -20,11 +20,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from "@/components/ui/alert-dialog";
-import { LEDGER_SORT_OPTIONS, LEDGER_TABLE_PAGE_SIZE, LEDGER_TYPE_OPTIONS } from "@/constants";
+import { LEDGER_SORT_OPTIONS, LEDGER_TABLE_PAGE_SIZE, LEDGER_TYPE_OPTIONS } from "@/constants/renderer.constants";
 import { useCustomerLedger } from "@/features/customers/hooks/useCustomerLedger";
 import { useDeleteLedgerEntry } from "@/features/customers/hooks/useLedgerMutations";
 import { cn } from "@/lib/utils";
-import { TXN_TABLE_ALIGN, type TxnTableColMeta } from "@/types";
+import { TXN_TABLE_ALIGN, type TxnTableColMeta } from "@/types/renderer.types";
 import type { LedgerEntry, LedgerSort, LedgerTypeFilter } from "@shared/types";
 import { LEDGER_SORT, LEDGER_TYPE_FILTER } from "@shared/types";
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";

@@ -1,5 +1,5 @@
 import { ProductImage } from "@/components/app-ui/product-image";
-import { getProductImageUrl } from "@/constants";
+import { getProductImageUrl } from "@/constants/renderer.constants";
 import { useProductsStore } from "@/features/products/products.store";
 import { formatDateStr } from "@shared/utils/dateUtils";
 import { generateProductSnapshot } from "@shared/utils/productSnapshot";

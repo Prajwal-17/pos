@@ -1,4 +1,4 @@
-import { SYNCSTATUS } from "@/types";
+import { SYNCSTATUS } from "@/types/renderer.types";
 import { type BillingProductDTO, type UnifiedTransactionItem } from "@shared/types";
 import { paisaToRupees } from "@shared/utils/utils";
 import { create } from "zustand";

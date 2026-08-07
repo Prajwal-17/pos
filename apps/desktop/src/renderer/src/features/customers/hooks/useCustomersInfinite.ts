@@ -1,4 +1,4 @@
-import { CUSTOMERS_PAGE_SIZE, CUSTOMERS_SEARCH_DELAY } from "@/constants";
+import { CUSTOMERS_PAGE_SIZE, CUSTOMERS_SEARCH_DELAY } from "@/constants/renderer.constants";
 import { apiClient } from "@/lib/apiClient";
 import {
   CUSTOMER_SORT_BY,

@@ -1,5 +1,5 @@
 import quickcartLogo from "@/assets/quickcart.svg";
-import { ONBOARDING_FEATURES, ONBOARDING_STEPS, PRODUCT_NAME } from "@/constants";
+import { ONBOARDING_FEATURES, ONBOARDING_STEPS, PRODUCT_NAME } from "@/constants/renderer.constants";
 import { useOnboardingStore } from "@/features/onboarding/onboarding.store";
 import { AnimatePresence, motion } from "motion/react";
 import { OnboardingComplete } from "./OnboardingComplete";

@@ -1,6 +1,6 @@
 import { TransactionDetailsDialog } from "@/features/transactions/TransactionDetailsDialog";
 import { useViewModalStore } from "@/features/transactions/store/viewModal.store";
-import { CUSTOMER_DETAIL_TAB, type CustomerDetailTab } from "@/types";
+import { CUSTOMER_DETAIL_TAB, type CustomerDetailTab } from "@/types/renderer.types";
 import { DASHBOARD_TYPE, type Customer, type DashboardType } from "@shared/types";
 import { UserX } from "lucide-react";
 import { useSearchParams } from "react-router-dom";

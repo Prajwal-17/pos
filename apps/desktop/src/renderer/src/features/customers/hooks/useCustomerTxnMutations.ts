@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/apiClient";
-import { toSentenceCase } from "@/utils";
+import { toSentenceCase } from "@/utils/renderer.utils";
 import { type TransactionType } from "@shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";

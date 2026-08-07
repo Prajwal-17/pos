@@ -14,7 +14,7 @@ import {
   TXN_TABLE_PAGE_SIZE,
   TXN_TABLE_SEARCH_DEBOUNCE_MS,
   TXN_TABLE_SORT_OPTIONS
-} from "@/constants";
+} from "@/constants/renderer.constants";
 import {
   useCustomerTransactions,
   type CustomerTxn,
@@ -23,7 +23,7 @@ import {
 import type { MutationVariables } from "@/features/customers/hooks/useCustomerTxnMutations";
 import { useCustomerTxnMutations } from "@/features/customers/hooks/useCustomerTxnMutations";
 import { cn } from "@/lib/utils";
-import { TXN_TABLE_ALIGN, type TxnTableColMeta } from "@/types";
+import { TXN_TABLE_ALIGN, type TxnTableColMeta } from "@/types/renderer.types";
 import { CUSTOMER_TXN_SORT, TRANSACTION_TYPE, type TransactionType } from "@shared/types";
 import { formatDateStrToISTDateStr } from "@shared/utils/dateUtils";
 import { formatRupee } from "@shared/utils/utils";

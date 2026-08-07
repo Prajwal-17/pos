@@ -1,5 +1,5 @@
 import type { LineItem } from "@/features/billing/store/billingSession.types";
-import { SYNCSTATUS } from "@/types";
+import { SYNCSTATUS } from "@/types/renderer.types";
 import {
   TRANSACTION_TYPE,
   UPDATE_QTY_ACTION,

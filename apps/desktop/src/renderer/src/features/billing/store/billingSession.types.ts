@@ -1,4 +1,4 @@
-import type { SyncStatus } from "@/types";
+import type { SyncStatus } from "@/types/renderer.types";
 import type { BillStatus, TransactionType } from "@shared/types";
 
 export type LineItem = {

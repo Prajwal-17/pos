@@ -1,9 +1,9 @@
 import { ProductImage } from "@/components/app-ui/product-image";
-import { HighlightedText } from "@/components/highlighted-text";
+import { HighlightedText } from "@/components/app-ui/highlighted-text";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { getProductImageUrl, ignoredWeight } from "@/constants";
+import { getProductImageUrl, ignoredWeight } from "@/constants/renderer.constants";
 import { PRODUCTSEARCH_TYPE, useProductSearch } from "@/features/products/hooks/useProductSearch";
 import { useAppPreferences } from "@/features/preferences/useAppPreferences";
 import { useBillingSessionStore } from "@/features/billing/store/billingSession.store";

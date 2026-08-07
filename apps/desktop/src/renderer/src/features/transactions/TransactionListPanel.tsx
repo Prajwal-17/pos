@@ -5,7 +5,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { sortOptions } from "@/constants";
+import { sortOptions } from "@/constants/renderer.constants";
 import { useDashboard } from "@/features/transactions/hooks/useDashboard";
 import type { SortType } from "@shared/types";
 import { TransactionTable } from "./TransactionTable";

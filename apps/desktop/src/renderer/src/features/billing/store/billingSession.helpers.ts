@@ -1,4 +1,4 @@
-import { SYNCSTATUS } from "@/types";
+import { SYNCSTATUS } from "@/types/renderer.types";
 import { BILLSTATUS, TRANSACTION_TYPE, type UnifiedTransactionItem } from "@shared/types";
 import { fromMilliUnits, toMilliUnits } from "@shared/utils/milliUnits";
 import { paisaToRupees, rupeesToPaisa } from "@shared/utils/utils";

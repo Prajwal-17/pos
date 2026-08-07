@@ -6,7 +6,7 @@ import {
   filterDirtyLineItems,
   filterValidLineItems,
   normalizeLineItems
-} from "@/utils";
+} from "@/utils/renderer.utils";
 import { BILLSTATUS, type SyncResponse } from "@shared/types";
 import debounce from "lodash.debounce";
 

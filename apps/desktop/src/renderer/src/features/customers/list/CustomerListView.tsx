@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { CUSTOMER_SORT_OPTIONS } from "@/constants";
+import { CUSTOMER_SORT_OPTIONS } from "@/constants/renderer.constants";
 import { useCustomersInfinite } from "@/features/customers/hooks/useCustomersInfinite";
 import { cn } from "@/lib/utils";
 import {

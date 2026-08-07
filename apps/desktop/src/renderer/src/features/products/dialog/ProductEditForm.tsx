@@ -10,7 +10,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { getProductImageUrl, PRODUCT_UNITS } from "@/constants";
+import { getProductImageUrl, PRODUCT_UNITS } from "@/constants/renderer.constants";
 import { useProductDialog } from "@/features/products/hooks/useProductDialog";
 import { useProductsStore } from "@/features/products/products.store";
 import { fromMilliUnits } from "@shared/utils/milliUnits";

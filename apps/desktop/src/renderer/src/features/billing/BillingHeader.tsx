@@ -28,7 +28,7 @@ import {
   TimePickerSeparator,
   TimePickerTrigger
 } from "@/components/ui/time-picker";
-import { DEFAULT_HOUR } from "@/constants";
+import { DEFAULT_HOUR } from "@/constants/renderer.constants";
 import { useCustomer } from "@/features/customers/hooks/useCustomer";
 import { apiClient } from "@/lib/apiClient";
 import { billingCoordinator } from "@/features/billing/store/billingCoordinator";

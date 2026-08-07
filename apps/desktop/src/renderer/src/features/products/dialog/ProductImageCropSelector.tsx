@@ -2,7 +2,7 @@ import { ProductImage } from "@/components/app-ui/product-image";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { getProductImageUrl } from "@/constants";
+import { getProductImageUrl } from "@/constants/renderer.constants";
 import { cn } from "@/lib/utils";
 import { Check, ImagePlus, LoaderCircle, Scissors, Trash2, Upload } from "lucide-react";
 import type { ChangeEvent, DragEvent, KeyboardEvent } from "react";
