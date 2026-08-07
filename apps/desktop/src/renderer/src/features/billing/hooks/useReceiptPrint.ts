@@ -1,5 +1,5 @@
-import { useBillingTabsStore } from "@/store/billing/billingTabsStore";
-import { useReceiptRefStore } from "@/store/useReceiptRefStore";
+import { useBillingTabsStore } from "@/features/billing/store/billingTabs.store";
+import { useReceiptRefStore } from "@/features/billing/store/receiptRef.store";
 import { useCallback, useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 

@@ -1,6 +1,6 @@
-import { useBillingSessionStore } from "@/store/billing/billingSessionStore";
-import { useBillingTabsStore } from "@/store/billing/billingTabsStore";
-import { useSearchDropdownStore } from "@/store/searchDropdownStore";
+import { useBillingSessionStore } from "@/features/billing/store/billingSession.store";
+import { useBillingTabsStore } from "@/features/billing/store/billingTabs.store";
+import { useSearchDropdownStore } from "@/features/billing/product-search/searchDropdown.store";
 import { useEffect, useRef } from "react";
 
 const useBillingReset = (type: any, id: any) => {

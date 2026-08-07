@@ -1,6 +1,6 @@
 import { apiClient } from "@/lib/apiClient";
-import { useBillingSessionStore } from "@/store/billing/billingSessionStore";
-import { useBillingTabsStore } from "@/store/billing/billingTabsStore";
+import { useBillingSessionStore } from "@/features/billing/store/billingSession.store";
+import { useBillingTabsStore } from "@/features/billing/store/billingTabs.store";
 import {
   TRANSACTION_TYPE,
   type TransactionType,

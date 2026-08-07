@@ -1,10 +1,10 @@
-import { cancelSyncQueue } from "@/utils/syncWorker";
+import { cancelSyncQueue } from "@/features/billing/syncWorker";
 import { TRANSACTION_TYPE, type TransactionType } from "@shared/types";
 import { v4 as uuidv4 } from "uuid";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
-import { useBillingSessionStore } from "./billingSessionStore";
+import { useBillingSessionStore } from "./billingSession.store";
 
 export const MAX_BILLING_TABS = 8;
 

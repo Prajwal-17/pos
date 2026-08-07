@@ -1,4 +1,4 @@
 import React from "react";
 import SearchDropdown from "./SearchDropdown";
 
-export const MemoizedSearchDropdown = React.memo(SearchDropdown);
+export const MemoizedProductSearchDropdown = React.memo(SearchDropdown);

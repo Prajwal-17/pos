@@ -1,7 +1,7 @@
 import { PRODUCTS_SEARCH_DELAY, PRODUCTS_SEARCH_PAGE_SIZE } from "@/constants";
 import { apiClient } from "@/lib/apiClient";
 import { useProductsStore } from "@/features/products/products.store";
-import { useSearchDropdownStore } from "@/store/searchDropdownStore";
+import { useSearchDropdownStore } from "@/features/billing/product-search/searchDropdown.store";
 import {
   type BillingProductDTO,
   type PaginatedApiResponse,

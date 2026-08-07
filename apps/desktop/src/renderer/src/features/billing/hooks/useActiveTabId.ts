@@ -1,4 +1,4 @@
-import { useBillingTabsStore } from "@/store/billing/billingTabsStore";
+import { useBillingTabsStore } from "@/features/billing/store/billingTabs.store";
 import { useCallback } from "react";
 
 export function useActiveTabId() {

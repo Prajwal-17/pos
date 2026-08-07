@@ -1,6 +1,6 @@
 import type { TransactionType } from "@shared/types";
-import { useBillingSessionStore } from "./billingSessionStore";
-import { useBillingTabsStore } from "./billingTabsStore";
+import { useBillingSessionStore } from "./billingSession.store";
+import { useBillingTabsStore } from "./billingTabs.store";
 
 export const billingCoordinator = {
   addTab(type: TransactionType, routePath: string, transactionNo: number | null = null) {

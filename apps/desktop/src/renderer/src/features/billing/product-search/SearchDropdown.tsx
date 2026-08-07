@@ -6,11 +6,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { getProductImageUrl, ignoredWeight } from "@/constants";
 import { PRODUCTSEARCH_TYPE, useProductSearch } from "@/features/products/hooks/useProductSearch";
 import { useAppPreferences } from "@/features/preferences/useAppPreferences";
-import { useBillingSessionStore } from "@/store/billing/billingSessionStore";
-import { useBillingTabsStore } from "@/store/billing/billingTabsStore";
+import { useBillingSessionStore } from "@/features/billing/store/billingSession.store";
+import { useBillingTabsStore } from "@/features/billing/store/billingTabs.store";
 import { useProductsStore } from "@/features/products/products.store";
-import { useSearchDropdownStore } from "@/store/searchDropdownStore";
-import { processSyncQueue } from "@/utils/syncWorker";
+import { useSearchDropdownStore } from "@/features/billing/product-search/searchDropdown.store";
+import { processSyncQueue } from "@/features/billing/syncWorker";
 import { ACTION_TYPE, DIALOG_MODE, PRODUCT_SORT_BY } from "@shared/types";
 import { formatDateStr } from "@shared/utils/dateUtils";
 import { paisaToRupeeString } from "@shared/utils/utils";

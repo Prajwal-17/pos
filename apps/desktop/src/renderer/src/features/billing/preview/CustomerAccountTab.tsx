@@ -4,8 +4,8 @@ import { PaymentDialog } from "@/features/customers/dialogs/PaymentDialog";
 import { useCustomer } from "@/features/customers/hooks/useCustomer";
 import { useCustomerLedgerSummary } from "@/features/customers/hooks/useCustomerLedger";
 import { cn } from "@/lib/utils";
-import { useBillingSessionStore } from "@/store/billing/billingSessionStore";
-import { useBillingTabsStore } from "@/store/billing/billingTabsStore";
+import { useBillingSessionStore } from "@/features/billing/store/billingSession.store";
+import { useBillingTabsStore } from "@/features/billing/store/billingTabs.store";
 import { formatDateStr } from "@shared/utils/dateUtils";
 import { formatRupee } from "@shared/utils/utils";
 import {

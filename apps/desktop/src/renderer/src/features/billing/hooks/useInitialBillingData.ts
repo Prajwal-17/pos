@@ -1,6 +1,6 @@
 import { apiClient } from "@/lib/apiClient";
-import type { PrefillCustomer } from "@/store/billing/billingSession.types";
-import { useBillingSessionStore } from "@/store/billing/billingSessionStore";
+import type { PrefillCustomer } from "@/features/billing/store/billingSession.types";
+import { useBillingSessionStore } from "@/features/billing/store/billingSession.store";
 import { TRANSACTION_TYPE, type Customer, type TransactionType } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
