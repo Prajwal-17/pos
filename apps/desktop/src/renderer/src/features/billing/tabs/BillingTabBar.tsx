@@ -65,7 +65,7 @@ const BillingTabBar = () => {
   const isAtLimit = tabs.length >= MAX_BILLING_TABS;
 
   return (
-    <div className="border-b-frame bg-card flex h-10 shrink-0 items-end justify-between border-b px-2 select-none">
+    <div className="border-b-frame bg-surface-2 flex h-10 shrink-0 items-end justify-between border-b px-2 select-none">
       <div className="flex flex-1 [scrollbar-width:none] items-end gap-0.5 overflow-x-auto [&::-webkit-scrollbar]:hidden">
         {tabs.map((tab, index) => (
           <div key={tab.id} className="flex items-end gap-0.5">
@@ -104,14 +104,14 @@ const BillingTabBar = () => {
               className="cursor-pointer"
               onClick={() => void handleNewTab(TRANSACTION_TYPE.SALE)}
             >
-              <span className="bg-success h-2.5 w-2.5 rounded-full" />
+              <span className="bg-selection-border h-2.5 w-2.5 rounded-full" />
               New Sale
             </DropdownMenuItem>
             <DropdownMenuItem
               className="cursor-pointer"
               onClick={() => void handleNewTab(TRANSACTION_TYPE.ESTIMATE)}
             >
-              <span className="bg-info h-2.5 w-2.5 rounded-full" />
+              <span className="bg-selection-border h-2.5 w-2.5 rounded-full" />
               New Estimate
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -126,7 +126,7 @@ const BillingTabBar = () => {
             <button
               type="button"
               onClick={handleClosePage}
-              className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive flex size-7 cursor-pointer items-center justify-center rounded-(--radius-control) transition-colors"
+              className="text-muted-foreground hover:bg-destructive-surface hover:text-destructive flex size-7 cursor-pointer items-center justify-center rounded-(--radius-control) transition-colors"
             >
               <X size={23} />
             </button>

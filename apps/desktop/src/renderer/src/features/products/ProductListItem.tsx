@@ -61,7 +61,7 @@ export default function ProductListItem({ product }: { product: ProductSearchIte
   };
 
   return (
-    <div className="bg-card hover:bg-muted/50 active:bg-muted group flex min-h-(--product-row-height) items-center gap-2.5 border-b px-3 py-2 transition-colors">
+    <div className="bg-card hover:bg-accent active:bg-muted group flex min-h-(--product-row-height) items-center gap-2.5 border-b px-3 py-2 transition-colors">
       <ProductImage
         src={product.imageUrl ? getProductImageUrl(product.imageUrl) : null}
         alt={product.name || "Product"}
@@ -156,7 +156,7 @@ export default function ProductListItem({ product }: { product: ProductSearchIte
             <TooltipTrigger asChild>
               <button
                 onClick={() => setActiveDialog(PRODUCT_OPERATION.PERMANENT_DELETE)}
-                className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive flex size-8 cursor-pointer items-center justify-center rounded-(--radius-control) transition-colors"
+                className="text-muted-foreground hover:bg-destructive-surface hover:text-destructive flex size-8 cursor-pointer items-center justify-center rounded-(--radius-control) transition-colors"
               >
                 <Trash2 className="size-4" />
               </button>
@@ -214,7 +214,7 @@ export default function ProductListItem({ product }: { product: ProductSearchIte
             <TooltipTrigger asChild>
               <button
                 onClick={() => setActiveDialog(PRODUCT_OPERATION.SOFT_DELETE)}
-                className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive flex size-8 cursor-pointer items-center justify-center rounded-(--radius-control) transition-colors"
+                className="text-muted-foreground hover:bg-destructive-surface hover:text-destructive flex size-8 cursor-pointer items-center justify-center rounded-(--radius-control) transition-colors"
               >
                 <Trash2 className="size-4" />
               </button>
@@ -257,7 +257,7 @@ export default function ProductListItem({ product }: { product: ProductSearchIte
           <AlertDialogFooter>
             <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive hover:bg-destructive/80 text-destructive-foreground cursor-pointer"
+              className="bg-destructive hover:bg-destructive-hover text-destructive-foreground cursor-pointer"
               onClick={() => softDeleteProductMutation.mutate(product.id)}
               disabled={softDeleteProductMutation.isPending}
             >
@@ -283,7 +283,7 @@ export default function ProductListItem({ product }: { product: ProductSearchIte
           <AlertDialogFooter>
             <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive hover:bg-destructive/80 text-destructive-foreground cursor-pointer"
+              className="bg-destructive hover:bg-destructive-hover text-destructive-foreground cursor-pointer"
               onClick={() =>
                 permanentDeleteProductMutation.mutate({
                   productId: product.id,
@@ -314,7 +314,7 @@ export default function ProductListItem({ product }: { product: ProductSearchIte
           <AlertDialogFooter>
             <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-primary hover:bg-primary/80 text-primary-foreground cursor-pointer"
+              className="bg-primary hover:bg-primary-hover text-primary-foreground cursor-pointer"
               onClick={() => restoreProductMutation.mutate(product.id)}
               disabled={restoreProductMutation.isPending}
             >

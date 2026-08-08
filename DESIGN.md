@@ -2,27 +2,43 @@
 name: QuickCart Desktop
 description: "A compact, keyboard-first billing workspace for fast and dependable shop-counter operation."
 colors:
-  canvas: "#f4f3ef"
+  canvas: "#f1f3f5"
   surface-1: "#ffffff"
-  surface-2: "#eceae3"
-  surface-3: "#e2dfd5"
-  border-standard: "#d8d5cc"
-  border-frame: "#c3bfb4"
-  border-strong: "#999487"
-  ink: "#1d1e1b"
-  ink-muted: "#4b4e46"
-  ink-subtle: "#696c63"
-  primary: "#292b26"
-  primary-hover: "#171815"
+  surface-2: "#dde3e8"
+  surface-3: "#d0d8df"
+  border-standard: "#d7dde3"
+  border-frame: "#c3ccd5"
+  border-strong: "#96a2ae"
+  ink: "#17202a"
+  ink-muted: "#46515d"
+  ink-subtle: "#66717d"
+  primary: "#222a31"
+  primary-hover: "#11171c"
   on-primary: "#ffffff"
-  brand: "#4b6cb0"
-  brand-hover: "#3b5690"
-  brand-soft: "#e3e9f4"
-  brand-foreground: "#21375d"
-  success: "#25613c"
-  warning: "#9a5a0a"
-  destructive: "#b33a2e"
-  info: "#3e6478"
+  brand: "#52616d"
+  brand-hover: "#3d4a55"
+  brand-soft: "#e3e7ea"
+  brand-foreground: "#26323c"
+  selection: "#c8d2da"
+  selection-foreground: "#26323c"
+  selection-border: "#52616d"
+  success: "#1f6a3d"
+  success-surface: "#c6dfcf"
+  success-border: "#56886a"
+  success-hover: "#185430"
+  warning: "#754600"
+  warning-surface: "#ebca8f"
+  warning-border: "#a86e17"
+  warning-hover: "#603900"
+  destructive: "#9f2017"
+  destructive-surface: "#f3c9c5"
+  destructive-border: "#bb5c53"
+  destructive-hover: "#861a13"
+  info: "#52616d"
+  info-surface: "#e3e7ea"
+  info-border: "#96a2ae"
+  info-hover: "#3d4a55"
+  chart-blue: "#4b6cb0"
   chart-green: "#3f7450"
   chart-terracotta: "#b86745"
   chart-steel: "#527187"
@@ -35,6 +51,7 @@ colors:
   invoice-text: "#171815"
   invoice-muted: "#4b4e46"
   invoice-accent: "#292b26"
+  invoice-brand: "#4b6cb0"
   invoice-border: "#aaa596"
   invoice-table-header: "#eceae3"
 typography:
@@ -132,8 +149,9 @@ components:
     padding: "0 8px"
     height: "40px"
   navigation-row-active:
-    backgroundColor: "{colors.brand-soft}"
-    textColor: "{colors.brand-foreground}"
+    backgroundColor: "{colors.selection}"
+    textColor: "{colors.selection-foreground}"
+    borderColor: "{colors.selection-border}"
   table-row:
     backgroundColor: "{colors.surface-1}"
     textColor: "{colors.ink}"
@@ -165,21 +183,21 @@ QuickCart currently has one supported light visual system. Do not introduce an i
 
 ## Colors
 
-The neutral system carries most of the interface. Use `canvas` for the application background, `surface-1` for working panels, and the stronger neutral surfaces only for grouping, hover, or selected regions. Use solid border tokens to establish hierarchy; avoid low-opacity hairlines for important boundaries.
+The cool-neutral system carries most of the interface. Use `canvas` for the application background, `surface-1` for working panels, `surface-2` for neutral hover and secondary grouping, and `surface-3` for stronger neutral separation. Persistent selections never reuse the hover surface: they use `selection`, `selection-foreground`, and `selection-border` with an additional rail, filled icon, or active border. Use solid border tokens to establish hierarchy; avoid low-opacity hairlines for important boundaries.
 
 Color roles are deliberately separate:
 
 - `primary` is the dependable charcoal action color. It owns generic high-priority actions such as New Sale, Add Product, Add Row, Save Changes, and confirmations.
-- `brand` is the restrained blue accent. It identifies QuickCart, active navigation, selection, and focus. It is not the default fill for every button.
-- `success`, `warning`, `destructive`, and `info` communicate meaning. They must not be repurposed because they happen to look attractive in a composition.
-- Sales retain a permanent `success` identity; estimates retain a permanent `info` identity. Apply that distinction consistently to billing tabs, route markers, transaction labels, and workflow-specific Save & Print actions. Always pair color with text or an icon.
+- `brand` is the graphite accent. It identifies QuickCart, focus, and selection boundaries. Persistent generic selections use the dedicated selection tokens; `brand-soft` is decorative only, for accents such as avatars and icon containers. Brand color is not the default fill for every button.
+- `success`, `warning`, `destructive`, and `info` communicate meaning. Each role has explicit surface, border, and hover tokens. They must not be repurposed because they happen to look attractive in a composition.
+- Sales, estimates, payments, adjustments, and customer types are categories, not statuses. Render them with neutral labels, icons, and text. Reserve semantic color for states that require interpretation or action: saved or checked, partial or warning, due or error, and destructive operations.
 - `search-highlight` is a narrow semantic exception: it marks the matching characters inside search results. It is not a brand color, active-row fill, or button hover.
 - The MRP palette is reserved for MRP and price-comparison badges.
-- Chart series use brand blue, green, terracotta, steel, and charcoal. Legends and direct labels are required whenever color alone would be ambiguous.
+- Chart series use the pinned `chart-blue`, green, terracotta, steel, and charcoal. Legends and direct labels are required whenever color alone would be ambiguous.
 
-Invoice colors are isolated from the screen theme. Receipt and A4 output may reference only the `invoice-*` tokens for paper, text, rules, headers, and accents. A screen-theme change must never silently alter print legibility.
+Invoice colors are isolated from the screen theme. `invoice-brand` and `chart-blue` remain pinned to `#4b6cb0`. Receipt and A4 output may reference only the `invoice-*` tokens for paper, text, rules, headers, and accents. A screen-theme change must never silently alter print legibility.
 
-Text and interactive contrast must meet WCAG AA: at least 4.5:1 for normal text, 3:1 for large text, and 3:1 for component boundaries and meaningful icons. Muted color is for supporting information, not required instructions, totals, or row identifiers. Do not use alpha variants such as `/40` or `/50` for critical text or borders.
+Text and interactive contrast must meet WCAG AA: at least 4.5:1 for normal text, 3:1 for large text, and 3:1 for component boundaries and meaningful icons. Muted color is for supporting information, not required instructions, totals, or row identifiers. Do not use alpha-derived backgrounds or borders for persistent operational states. Opacity remains valid only for disabled content, overlays, skeletons, or decoration that carries no meaning.
 
 ## Typography
 
@@ -250,8 +268,8 @@ QuickCart uses borders before shadows. Depth communicates stacking, not importan
 
 - **Level 0 — canvas and inline regions:** no shadow.
 - **Level 1 — working panels and compact cards:** standard or frame border; normally no shadow, with `shadow-xs` allowed for a small detached summary.
-- **Level 2 — dropdowns, popovers, menus, and hover previews:** strong border with `shadow-md`.
-- **Level 3 — dialogs, drawers, and modal overlays:** strong frame, `shadow-lg`, and a clear backdrop.
+- **Level 2 — dropdowns, popovers, menus, and hover previews:** frame border with `shadow-md`.
+- **Level 3 — dialogs, drawers, and modal overlays:** frame border, `shadow-lg`, and a clear backdrop.
 
 Do not stack multiple shadowed cards inside another shadowed card. Do not use elevation to compensate for weak spacing or unclear grouping. Receipt preview docking is separated by a frame border; it receives a shadow only while behaving as an overlay.
 
@@ -275,17 +293,17 @@ Do not copy a primitive into a feature folder to avoid understanding it. Do not 
 
 ### Shared primitives
 
-- **Buttons:** Default actions are charcoal. Outline is the standard secondary action. Destructive is used only for irreversible or materially harmful operations. Compact buttons are 32px; default buttons are 36px; 40px is reserved for the primary workflow action. A button label states the outcome, such as “Save & Print,” not a vague “Continue.”
+- **Buttons:** Default actions are charcoal. Outline actions and inputs use the quiet frame border; semantic actions use their explicit hover tokens. Focus remains clearly visible without adding a permanent high-contrast outline. Outline is the standard secondary action. Destructive is used only for irreversible or materially harmful operations. Compact buttons are 32px; default buttons are 36px; 40px is reserved for the primary workflow action. A button label states the outcome, such as “Save & Print,” not a vague “Continue.”
 - **Inputs and selects:** Default to 36px with body text. Labels remain visible outside the field; placeholders show format or example, never the only label. Invalid state includes specific inline text and `aria-invalid`, not color alone.
 - **Cards:** Use `CompactCard` for dense application panels. Card padding does not create page layout; the parent owns inter-panel spacing. Avoid nested cards when a divider or section heading is sufficient.
-- **Dialogs:** Header and footer stay visible; the body owns vertical scrolling. Content must fit within the 650px baseline with viewport-safe maximum height. Focus is trapped, Escape closes when safe, and focus returns to the trigger. Destructive confirmations name the object and consequence.
-- **Tabs:** Use tabs only for peer views of the same object. The shared tab list uses the control radius, a standard border, compact internal padding and spacing, muted inactive labels, and a brand-soft active surface. Sale and estimate tabs may replace only the active color with their semantic success or info treatment. Tab bars remain one compact row; overflow scrolls horizontally without widening the page.
+- **Dialogs:** Dialogs use a white working surface and a quiet frame border. Header and footer stay visible; the body owns vertical scrolling. Content must fit within the 650px baseline with viewport-safe maximum height. Focus is trapped, Escape closes when safe, and focus returns to the trigger. Destructive confirmations name the object and consequence.
+- **Tabs:** Use tabs only for peer views of the same object. Shared peer-view tabs use a quiet neutral strip with a white active working surface and a graphite underline. Billing document tabs keep neutral surfaces, graphite markers, and explicit Sale or Estimate labels; category color is not used. Tab bars remain one compact row; overflow scrolls horizontally without widening the page.
 - **Tooltips:** Support unfamiliar icon-only controls and billing-rail navigation. They never contain essential instructions and never replace accessible names.
-- **Badges and statuses:** Use short nouns or past-participle states. Preserve the semantic color mapping and include readable text. Avoid using badges as decoration.
+- **Badges and statuses:** Category badges use the neutral outline contract. Status badges may use named solid semantic surfaces and borders with short nouns or past-participle states, always with readable text. Avoid using badges as decoration.
 
 ### Data and financial components
 
-Tables have a distinct header, aligned columns, 42–44px rows, and a stable action region. Row hover is subtle; keyboard focus and selected state must be equally clear. Actions appear on hover **and** focus/selection so keyboard users do not lose functionality. Loading, empty, error, and end-of-results states occupy the table frame without shifting surrounding controls.
+Tables have a distinct header, aligned columns, 42–44px rows, and a stable action region. Row hover uses the neutral `surface-2`; keyboard focus and persistent selection use the dedicated selection surface plus a 4px leading rail or equivalent solid marker, so hover and selection cannot be mistaken for each other. Actions appear on hover **and** focus/selection so keyboard users do not lose functionality. Loading, empty, error, and end-of-results states occupy the table frame without shifting surrounding controls.
 
 Summary cards put the label and amount in one deliberate horizontal composition when width permits. The amount owns the flexible or right-aligned region, uses tabular numerals, and must handle large Indian-formatted values. Do not stack a small label above an amount when doing so leaves unusable horizontal space or causes the number to collide with neighboring cards.
 
@@ -294,7 +312,7 @@ Summary cards put the label and amount in one deliberate horizontal composition 
 Billing is the highest-priority interaction surface and follows a fixed hierarchy:
 
 1. Billing tab bar with type identity, sync state, new-tab action, and close.
-2. Transaction header with sale/estimate identity, number, customer, date/time, balance context, and secondary transaction actions.
+2. Transaction header with an explicit sale/estimate label, number, customer, date/time, balance context, and secondary transaction actions.
 3. One compact line-item toolbar; the count-column toggle remains directly visible, not hidden in an overflow menu.
 4. Semantic line-item grid and product search.
 5. Notes and payment information in scrolling content.
@@ -303,7 +321,7 @@ Billing is the highest-priority interaction surface and follows a fixed hierarch
 
 The quantity control reads `− quantity +`. Product search supports Arrow Up/Down, Enter to select, Escape to dismiss, and a predictable transition to the next empty row. Its sort/filter bar stays slimmer than a data row, the dropdown clamps to the available viewport, and matched text uses `search-highlight`. Search results keep a stable 54px virtualized height.
 
-Sale and estimate identity is persistent, but generic creation actions remain charcoal. “Save PDF” on an unsaved bill must explain that the bill must first be saved; it must never fail silently. Sync feedback uses explicit saving, saved, and error language without changing the footer’s geometry.
+Sale and estimate labels remain explicit, while navigation, tabs, badges, and creation actions use the neutral/charcoal application contract. “Save PDF” on an unsaved bill must explain that the bill must first be saved; it must never fail silently. Sync feedback uses explicit saving, saved, and error language without changing the footer’s geometry.
 
 ### Feature compositions and states
 
@@ -321,7 +339,7 @@ All interactive work must be possible by keyboard. Use native elements and Radix
 - Reuse semantic tokens and shared components; update the design contract when a genuinely new reusable role is introduced.
 - Keep frequent actions visible and stable. Put rare configuration behind progressive disclosure.
 - Design and test populated, empty, loading, error, disabled, long-name, large-amount, and keyboard-focus states together.
-- Preserve sale-green and estimate-steel identity across every transaction surface while keeping generic primary actions charcoal.
+- Keep transaction categories neutral and explicitly labeled; reserve green, amber, and red for success, partial/warning, and due/error states.
 - Keep print styles isolated and verify both 80mm receipt and A4 output after invoice changes.
 - Update a virtualizer estimate whenever the corresponding row height changes.
 - Use `cn()` for conditional classes and shared rupee/date utilities for display formatting.
@@ -329,7 +347,8 @@ All interactive work must be possible by keyboard. Use native elements and Radix
 ### Don't
 
 - Do not use app zoom, CSS `zoom`, a smaller root font, or transform scaling as a layout system.
-- Do not use brand blue for generic primary actions, success green for navigation, or the search-match yellow outside matched text.
+- Do not use brand color for generic primary actions, use semantic colors for ordinary categories, or use the search-match yellow outside matched text.
+- Do not use `brand-soft` or alpha-derived semantic fills for hover, selection, checked, partial, error, or other persistent operational states.
 - Do not invent new surface colors, shadows, radii, or one-off heights inside a feature.
 - Do not hide a common billing control in a menu merely to make a toolbar look cleaner.
 - Do not truncate money, rely on hover-only actions, or let wrapped text break virtualized row geometry.

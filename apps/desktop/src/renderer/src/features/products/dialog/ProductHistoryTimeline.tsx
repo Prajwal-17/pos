@@ -25,7 +25,7 @@ function DiffRow({
           {oldVal ? formatRupee(oldVal) : "N/A"}
         </span>
         <ArrowRight className="text-muted-foreground/30 h-4 w-4" strokeWidth={3} />
-        <span className="text-success text-base font-bold tracking-tight">
+        <span className="text-foreground text-base font-semibold tracking-tight">
           {newVal ? formatRupee(newVal) : "N/A"}
         </span>
       </div>

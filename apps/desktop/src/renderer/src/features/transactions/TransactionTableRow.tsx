@@ -157,7 +157,7 @@ const TransactionTableRow = ({
           ) : null}
         </div>
       ) : (
-        <div className="bg-card hover:bg-muted/50 active:bg-muted border-border grid min-h-12 grid-cols-12 items-center gap-2 border-b px-3 py-1 text-sm transition-colors">
+        <div className="bg-card hover:bg-accent active:bg-muted border-border grid min-h-12 grid-cols-12 items-center gap-2 border-b px-3 py-1 text-sm transition-colors">
           <div className="col-span-2 flex flex-col justify-center">
             <span className="text-foreground text-sm leading-tight font-semibold tabular-nums">
               {transaction.createdAt
@@ -242,7 +242,7 @@ const TransactionTableRow = ({
                 <AlertDialogFooter>
                   <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
                   <AlertDialogAction
-                    className="bg-destructive hover:bg-destructive/90 text-destructive-foreground cursor-pointer"
+                    className="bg-destructive hover:bg-destructive-hover text-destructive-foreground cursor-pointer"
                     onClick={onDelete}
                   >
                     {deleteMutation.isPending ? "Deleting..." : "Delete"}

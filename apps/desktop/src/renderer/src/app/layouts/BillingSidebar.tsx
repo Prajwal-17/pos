@@ -38,9 +38,6 @@ export const BillingSidebar = () => {
 
   const renderNavItem = (item: (typeof navLinks)[number]) => {
     const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-    const isSaleLink = item.href === "/dashboard/sales";
-    const isEstimateLink = item.href === "/dashboard/estimates";
-
     return (
       <IconTooltip key={item.href} label={item.title}>
         <Link
@@ -50,11 +47,7 @@ export const BillingSidebar = () => {
             "flex size-10 items-center justify-center rounded-(--radius-control) transition-colors duration-150 outline-none [&_svg]:size-4.5",
             "focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2",
             isActive
-              ? isSaleLink
-                ? "bg-success/10 text-success"
-                : isEstimateLink
-                  ? "bg-info/10 text-info"
-                  : "bg-accent text-accent-foreground"
+              ? "bg-selection text-selection-foreground ring-selection-border ring-1 ring-inset"
               : "text-sidebar-foreground/60 hover:bg-muted hover:text-sidebar-foreground"
           )}
         >
@@ -96,7 +89,7 @@ export const BillingSidebar = () => {
               asChild
               size="icon-lg"
               variant="outline"
-              className="border-info/40 bg-info/10 text-info hover:bg-info/15"
+              className="border-frame bg-card text-foreground hover:border-frame hover:bg-surface-2 hover:text-foreground"
             >
               <Link to="/billing/estimates/create" aria-label="New Estimate">
                 <FileText className="size-4.5" />

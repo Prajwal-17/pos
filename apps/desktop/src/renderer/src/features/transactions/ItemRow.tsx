@@ -48,9 +48,11 @@ export const ItemRow = ({
     <tr
       className={cn(
         "border-border hover:bg-accent border-b text-sm transition-colors",
-        checked && "bg-success/20 hover:bg-success/20",
-        partial && "bg-warning/20 hover:bg-warning/20",
-        !checked && !partial && "bg-card"
+        checked &&
+          "border-success-border border-l-success bg-success-surface hover:bg-success-surface border-l-4",
+        partial &&
+          "border-warning-border border-l-warning bg-warning-surface hover:bg-warning-surface border-l-4",
+        !checked && !partial && "bg-card border-l-4 border-l-transparent"
       )}
     >
       <td className="text-muted-foreground h-11.5 px-2 text-center font-medium tabular-nums">
@@ -83,12 +85,12 @@ export const ItemRow = ({
             aria-label={checked ? "Mark item unchecked" : "Mark item complete"}
             disabled={!canModify || isUpdating}
             className={cn(
-              "focus-visible:ring-ring/50 flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-(--radius-control) border transition-[border-color,box-shadow,background-color,color] focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+              "focus-visible:ring-ring flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-(--radius-control) border transition-[border-color,box-shadow,background-color,color] focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
               checked
                 ? "border-success bg-success text-success-foreground"
                 : partial
                   ? "border-warning bg-warning text-warning-foreground"
-                  : "border-border bg-muted/70 text-muted-foreground hover:border-foreground hover:text-foreground"
+                  : "border-border-strong bg-card text-muted-foreground hover:bg-accent hover:text-foreground"
             )}
           >
             {isUpdating ? (
@@ -118,7 +120,7 @@ export const ItemRow = ({
             onClick={() => handleUpdateQty(UPDATE_QTY_ACTION.INCREMENT)}
             disabled={!canModify || isUpdating || checked}
             aria-label="Increase checked quantity"
-            className="border-border/70 bg-muted/60 hover:bg-background size-8 cursor-pointer rounded-(--radius-control) shadow-none"
+            className="border-frame bg-secondary hover:bg-accent size-8 cursor-pointer rounded-(--radius-control) shadow-none"
           >
             <Plus className="size-4" />
           </Button>
@@ -128,7 +130,7 @@ export const ItemRow = ({
             onClick={() => handleUpdateQty(UPDATE_QTY_ACTION.DECREMENT)}
             disabled={!canModify || isUpdating || item.checkedQty === 0}
             aria-label="Decrease checked quantity"
-            className="border-border/70 bg-muted/60 hover:bg-background size-8 cursor-pointer rounded-(--radius-control) shadow-none"
+            className="border-frame bg-secondary hover:bg-accent size-8 cursor-pointer rounded-(--radius-control) shadow-none"
           >
             <Minus className="size-4" />
           </Button>

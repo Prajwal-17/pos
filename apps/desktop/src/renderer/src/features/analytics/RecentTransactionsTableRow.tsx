@@ -74,7 +74,7 @@ const RecentTransactionsTableRow = ({
 
   return (
     <div>
-      <div className="hover:bg-muted/40 bg-card border-border/50 grid grid-cols-12 gap-4 border-b px-6 py-2 text-lg">
+      <div className="hover:bg-accent bg-card border-border/50 grid grid-cols-12 gap-4 border-b px-6 py-2 text-lg">
         <div className="col-span-2 flex flex-col items-start justify-start font-medium">
           <span className="text-xl font-semibold">
             {transaction.createdAt
@@ -145,7 +145,7 @@ const RecentTransactionsTableRow = ({
               <AlertDialogFooter>
                 <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
                 <AlertDialogAction
-                  className="bg-destructive hover:bg-destructive/80 text-destructive-foreground cursor-pointer"
+                  className="bg-destructive hover:bg-destructive-hover text-destructive-foreground cursor-pointer"
                   onClick={onDelete}
                 >
                   {deleteMutation.isPending ? "Deleting..." : "Delete"}
@@ -182,7 +182,7 @@ const RecentTransactionsTableRow = ({
                   <AlertDialogFooter>
                     <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
                     <AlertDialogAction
-                      className="bg-primary hover:bg-primary/80 text-primary-foreground cursor-pointer"
+                      className="bg-primary hover:bg-primary-hover text-primary-foreground cursor-pointer"
                       onClick={onConvert}
                       disabled={convertMutation.isPending}
                     >

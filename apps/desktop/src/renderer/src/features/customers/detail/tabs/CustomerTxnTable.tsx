@@ -280,7 +280,7 @@ export function CustomerTxnTable({
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="border-border bg-muted/50 text-foreground hover:bg-muted/60 h-9 cursor-pointer gap-2 px-3 text-sm font-medium shadow-none transition-colors"
+              className="border-border bg-muted/50 text-foreground hover:bg-accent h-9 cursor-pointer gap-2 px-3 text-sm font-medium shadow-none transition-colors"
             >
               <ArrowDownAZ className="size-4" />
               {activeSortLabel}
@@ -312,7 +312,7 @@ export function CustomerTxnTable({
           <button
             type="button"
             onClick={clearFilters}
-            className="text-destructive hover:bg-destructive/10 flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors"
+            className="text-destructive hover:bg-destructive-surface flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors"
           >
             <X className="size-3.5" />
             Clear
@@ -334,12 +334,7 @@ export function CustomerTxnTable({
               state: { prefillCustomer: { id: customerId, name: customerName } }
             })
           }
-          className={cn(
-            "h-9 cursor-pointer gap-1.5 px-3.5 text-sm font-semibold",
-            type === TRANSACTION_TYPE.SALE
-              ? "hover:bg-primary-hover"
-              : "bg-info text-info-foreground hover:bg-info/90"
-          )}
+          className="h-9 cursor-pointer gap-1.5 px-3.5 text-sm font-semibold hover:bg-primary-hover"
         >
           <Plus className="size-4" />
           {addLabel}

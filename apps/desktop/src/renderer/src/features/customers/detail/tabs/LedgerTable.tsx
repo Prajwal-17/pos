@@ -171,7 +171,7 @@ export function LedgerTable({ customerId }: { customerId: string }) {
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="border-border bg-muted/50 text-foreground hover:bg-muted/60 h-9 cursor-pointer gap-2 px-3 text-sm font-medium shadow-none transition-colors"
+              className="border-border bg-muted/50 text-foreground hover:bg-accent h-9 cursor-pointer gap-2 px-3 text-sm font-medium shadow-none transition-colors"
             >
               <Tags className="size-4" />
               Type: {activeType.label}
@@ -204,7 +204,7 @@ export function LedgerTable({ customerId }: { customerId: string }) {
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="border-border bg-muted/50 text-foreground hover:bg-muted/60 h-9 cursor-pointer gap-2 px-3 text-sm font-medium shadow-none transition-colors"
+              className="border-border bg-muted/50 text-foreground hover:bg-accent h-9 cursor-pointer gap-2 px-3 text-sm font-medium shadow-none transition-colors"
             >
               <ArrowDownAZ className="size-4" />
               {activeSortLabel}
@@ -236,7 +236,7 @@ export function LedgerTable({ customerId }: { customerId: string }) {
           <button
             type="button"
             onClick={clearFilters}
-            className="text-destructive hover:bg-destructive/10 flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors"
+            className="text-destructive hover:bg-destructive-surface flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors"
           >
             <X className="size-3.5" />
             Clear
@@ -264,7 +264,7 @@ export function LedgerTable({ customerId }: { customerId: string }) {
         <Button
           variant="outline"
           onClick={openAdjust}
-          className="hover:bg-muted/60 border-border bg-muted/50 text-foreground h-9 cursor-pointer gap-2 px-3 text-sm font-medium shadow-none transition-colors"
+          className="hover:bg-accent border-border bg-muted/50 text-foreground h-9 cursor-pointer gap-2 px-3 text-sm font-medium shadow-none transition-colors"
         >
           <Scale className="size-4" />
           Adjust Balance
@@ -457,7 +457,7 @@ export function LedgerTable({ customerId }: { customerId: string }) {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive hover:bg-destructive/80 text-destructive-foreground cursor-pointer"
+              className="bg-destructive hover:bg-destructive-hover text-destructive-foreground cursor-pointer"
               disabled={deleteEntry.isPending}
               onClick={() => {
                 if (deletingEntry) {

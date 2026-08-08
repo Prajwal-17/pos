@@ -76,13 +76,13 @@ export function PaymentDialog({
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder=""
-                className="border-ring/20 focus-visible:border-ring h-10 [appearance:textfield] overflow-hidden border-2 pr-20 text-xl! font-semibold tracking-[-0.02em] text-ellipsis tabular-nums [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                className="border-frame focus-visible:border-ring h-10 [appearance:textfield] overflow-hidden border-2 pr-20 text-xl! font-semibold tracking-[-0.02em] text-ellipsis tabular-nums [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
               />
               {outstanding > 0 && (
                 <button
                   type="button"
                   onClick={() => setAmount(String(paisaToRupees(outstanding)))}
-                  className="border-ring/20 bg-muted/60 text-primary hover:bg-primary/10 focus-visible:ring-ring/50 absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer rounded-md border px-2.5 py-1 text-xs font-semibold tracking-wide uppercase transition-colors outline-none focus-visible:ring-[3px]"
+                  className="border-frame bg-secondary text-primary hover:bg-surface-3 focus-visible:ring-ring absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer rounded-md border px-2.5 py-1 text-xs font-semibold tracking-wide uppercase transition-colors outline-none focus-visible:ring-[3px]"
                 >
                   Full
                 </button>
@@ -113,7 +113,7 @@ export function PaymentDialog({
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Optional note…"
-              className="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 min-h-12 w-full resize-y rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px]"
+              className="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring min-h-12 w-full resize-y rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px]"
             />
           </div>
 

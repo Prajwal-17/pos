@@ -20,12 +20,12 @@ export function AccountingTab({ customerId }: { customerId: string }) {
     ? "text-muted-foreground"
     : isDue
       ? "text-destructive"
-      : "text-success";
+      : "text-foreground";
   const balanceIconTone = isSettled
     ? "bg-muted text-muted-foreground"
     : isDue
-      ? "bg-destructive/10 text-destructive"
-      : "bg-success/15 text-success";
+      ? "bg-destructive-surface text-destructive"
+      : "bg-secondary text-foreground";
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">

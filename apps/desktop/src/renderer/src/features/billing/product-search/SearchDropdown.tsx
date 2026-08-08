@@ -619,8 +619,8 @@ const SearchDropdown = ({ rowId }: { rowId: string }) => {
                           <div
                             className={`group relative flex h-13.5 items-center gap-2.5 rounded-(--radius-control) px-3 transition-colors duration-150 hover:cursor-pointer ${
                               highlightedIndex === virtualRow.index
-                                ? "bg-brand/25 text-brand-foreground hover:bg-brand/25"
-                                : "hover:bg-brand/25 hover:text-brand-foreground"
+                                ? "border-selection-border bg-selection text-selection-foreground hover:bg-selection [&_.text-foreground]:text-selection-foreground [&_.text-muted-foreground]:text-selection-foreground"
+                                : "hover:bg-accent hover:text-foreground"
                             }`}
                             onClick={() => selectProduct(virtualRow.index)}
                             onMouseDown={(e) => e.preventDefault()}
@@ -632,7 +632,7 @@ const SearchDropdown = ({ rowId }: { rowId: string }) => {
                           >
                             <span
                               aria-hidden="true"
-                              className={`bg-brand absolute top-0 left-0 h-full w-1 rounded-r-full transition-opacity ${
+                              className={`bg-selection-border absolute top-0 left-0 h-full w-1 rounded-r-full transition-opacity ${
                                 highlightedIndex === virtualRow.index ? "opacity-100" : "opacity-0"
                               }`}
                             />
@@ -670,7 +670,7 @@ const SearchDropdown = ({ rowId }: { rowId: string }) => {
                               </div>
                             </div>
 
-                            <div className="text-success shrink-0 text-right text-xl font-bold tabular-nums">
+                            <div className="text-foreground shrink-0 text-right text-xl font-semibold tabular-nums">
                               ₹ {paisaToRupeeString(product.price)}
                             </div>
 

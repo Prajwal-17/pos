@@ -7,7 +7,7 @@ import { motion } from "motion/react";
 // are duplicated — keep in sync with :root when tokens change).
 const STEP_COLORS = {
   completed: "#25613c", // --success
-  active: "#4b6cb0", // --brand
+  active: "#52616d", // --brand
   inactive: "#eceae3", // --surface-2
   activeBorder: "#3b5690", // --brand-hover
   inactiveBorder: "#d8d5cc", // --border-standard

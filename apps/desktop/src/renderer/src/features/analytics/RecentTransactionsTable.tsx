@@ -44,14 +44,14 @@ export function RecentTransactionsTable() {
         <Tabs value={type} onValueChange={(value) => setType(value as TransactionType)}>
           <TabsList>
             <TabsTrigger
-              className="data-[state=active]:bg-success/10 data-[state=active]:text-success cursor-pointer"
+              className="cursor-pointer"
               value={TRANSACTION_TYPE.SALE}
             >
               {TRANSACTION_TYPE.SALE.charAt(0).toUpperCase()}
               {TRANSACTION_TYPE.SALE.slice(1)}
             </TabsTrigger>
             <TabsTrigger
-              className="data-[state=active]:bg-info/10 data-[state=active]:text-info cursor-pointer"
+              className="cursor-pointer"
               value={TRANSACTION_TYPE.ESTIMATE}
             >
               {TRANSACTION_TYPE.ESTIMATE.charAt(0).toUpperCase()}

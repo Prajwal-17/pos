@@ -15,14 +15,6 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { isWithinTwoDays } from "@shared/utils/dateUtils";
 
-const typePillClass: Record<LedgerEntryType, string> = {
-  [LEDGER_ENTRY_TYPE.SALE]: "border-success/25 bg-success/10 text-success",
-  [LEDGER_ENTRY_TYPE.QUICK_SALE]: "border-success/25 bg-success/10 text-success",
-  [LEDGER_ENTRY_TYPE.PAYMENT]: "border-success/25 bg-success/15 text-success",
-  [LEDGER_ENTRY_TYPE.ADJUSTMENT]: "border-warning/30 bg-warning/15 text-warning",
-  [LEDGER_ENTRY_TYPE.OPENING_BALANCE]: "bg-secondary text-muted-foreground border-border"
-};
-
 const typeLabel: Record<LedgerEntryType, string> = {
   [LEDGER_ENTRY_TYPE.SALE]: "Sale",
   [LEDGER_ENTRY_TYPE.QUICK_SALE]: "Quick Sale",
@@ -72,7 +64,7 @@ export function buildLedgerColumns(opts: LedgerColumnsOptions = {}): ColumnDef<L
         return (
           <Badge
             variant="outline"
-            className={cn("px-2 py-0.5 text-xs font-medium capitalize", typePillClass[type])}
+            className="border-frame bg-card text-muted-foreground px-2 py-0.5 text-xs font-medium capitalize"
           >
             {typeLabel[type]}
           </Badge>
@@ -146,7 +138,7 @@ export function buildLedgerColumns(opts: LedgerColumnsOptions = {}): ColumnDef<L
       cell: ({ row }) => {
         const amountPaid = row.original.amountPaid;
         return amountPaid > 0 ? (
-          <span className="text-success text-sm font-semibold tabular-nums">
+          <span className="text-foreground text-sm font-semibold tabular-nums">
             {formatRupee(amountPaid)}
           </span>
         ) : (
@@ -165,7 +157,7 @@ export function buildLedgerColumns(opts: LedgerColumnsOptions = {}): ColumnDef<L
           <span
             className={cn(
               "text-sm font-semibold tabular-nums",
-              balance === 0 ? "text-muted-foreground" : isDue ? "text-destructive" : "text-success"
+              balance === 0 ? "text-muted-foreground" : isDue ? "text-destructive" : "text-foreground"
             )}
           >
             {formatRupee(Math.abs(balance))}

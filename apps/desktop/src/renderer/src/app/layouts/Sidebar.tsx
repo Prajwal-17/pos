@@ -205,9 +205,6 @@ export const Sidebar = ({ variant = "docked" }: SidebarProps) => {
 
   const renderNavItem = (item: (typeof navLinks)[number]) => {
     const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-    const isSaleLink = item.href === "/dashboard/sales";
-    const isEstimateLink = item.href === "/dashboard/estimates";
-
     return (
       <Link
         to={item.href}
@@ -221,11 +218,7 @@ export const Sidebar = ({ variant = "docked" }: SidebarProps) => {
           "relative flex h-(--nav-row-height) w-full items-center gap-2 rounded-(--radius-control) px-2 font-medium transition-colors duration-150 outline-none",
           "focus-visible:ring-ring focus-visible:ring-offset-sidebar focus-visible:ring-2 focus-visible:ring-offset-2",
           isActive
-            ? isSaleLink
-              ? "bg-success/10 text-success font-semibold"
-              : isEstimateLink
-                ? "bg-info/10 text-info font-semibold"
-                : "bg-accent text-accent-foreground font-semibold"
+            ? "bg-selection text-selection-foreground ring-selection-border font-semibold ring-1 ring-inset"
             : "text-sidebar-foreground/70 hover:bg-muted hover:text-sidebar-foreground"
         )}
       >
@@ -233,11 +226,7 @@ export const Sidebar = ({ variant = "docked" }: SidebarProps) => {
           className={cn(
             "flex size-8 shrink-0 items-center justify-center rounded-(--radius-control) transition-colors duration-150 [&_svg]:size-4.5",
             isActive
-              ? isSaleLink
-                ? "bg-success text-success-foreground"
-                : isEstimateLink
-                  ? "bg-info text-info-foreground"
-                  : "bg-sidebar-primary text-sidebar-primary-foreground"
+              ? "bg-sidebar-primary text-sidebar-primary-foreground"
               : "bg-sidebar-accent text-sidebar-foreground/55"
           )}
         >
@@ -306,7 +295,7 @@ export const Sidebar = ({ variant = "docked" }: SidebarProps) => {
             <Button
               asChild
               variant="outline"
-              className="border-info/40 bg-info/10 text-info hover:bg-info/15 h-9 w-full cursor-pointer justify-center gap-2 px-3 text-sm font-medium"
+              className="border-frame bg-card text-foreground hover:border-frame hover:bg-surface-2 hover:text-foreground h-9 w-full cursor-pointer justify-center gap-2 px-3 text-sm font-medium"
             >
               <Link to="/billing/estimates/create" onClick={handleBillingShortcutClick}>
                 <FileText className="size-4.5" />

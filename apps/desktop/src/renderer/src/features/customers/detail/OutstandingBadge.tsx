@@ -3,9 +3,9 @@ import { formatRupee } from "@shared/utils/utils";
 
 /**
  * Outstanding badge.
- * - Positive outstanding → they owe → destructive tone.
- * - Negative outstanding → advance → success tone.
- * - Zero → settled → neutral muted.
+ * - Positive outstanding → neutral badge with destructive text and Dr label.
+ * - Negative outstanding → neutral badge with Cr label.
+ * - Zero → settled neutral.
  */
 export function OutstandingBadge({
   outstanding,
@@ -19,7 +19,7 @@ export function OutstandingBadge({
   const isZero = outstanding === 0;
   const isDue = outstanding > 0;
   const amount = formatRupee(Math.abs(outstanding));
-  const label = isZero ? "Settled" : amount;
+  const label = isZero ? "Settled" : amount + (isDue ? " Dr" : " Cr");
 
   return (
     <span
@@ -27,10 +27,10 @@ export function OutstandingBadge({
         "inline-flex items-center gap-1.5 rounded-lg border font-medium tabular-nums",
         size === "md" ? "px-3 py-1 text-sm" : "px-2.5 py-0.5 text-xs",
         isZero
-          ? "bg-muted text-muted-foreground border-border"
+          ? "border-frame bg-card text-muted-foreground"
           : isDue
-            ? "bg-destructive/10 text-destructive border-destructive/25"
-            : "bg-success/15 text-success border-success/25",
+            ? "border-frame bg-card text-destructive"
+            : "border-frame bg-card text-foreground",
         className
       )}
     >

@@ -78,7 +78,7 @@ const LineItemRow = memo(
       <div key={item.rowId} data-billing-row-id={item.rowId} className="relative">
         <div
           className={cn(
-            "group focus-within:border-border-strong grid min-h-(--billing-row-height) w-full items-center gap-1 rounded-(--radius-control) border px-1 transition-[background-color,border-color] duration-150",
+            "group focus-within:border-frame grid min-h-(--billing-row-height) w-full items-center gap-1 rounded-(--radius-control) border px-1 transition-[background-color,border-color] duration-150",
             checkedColor,
             dragHandle?.isDragging && "ring-primary/30 shadow-lg ring-2",
             isCountColumnVisible ? "billing-grid-count" : "billing-grid"
@@ -103,7 +103,7 @@ const LineItemRow = memo(
               <button
                 type="button"
                 aria-label={`Delete row ${idx + 1}`}
-                className="text-destructive/75 hover:bg-destructive/10 hover:text-destructive flex size-7 items-center justify-center rounded-(--radius-control) opacity-0 transition-[opacity,color,background-color] group-focus-within:opacity-100 group-hover:opacity-100 focus:opacity-100"
+                className="text-destructive/75 hover:bg-destructive-surface hover:text-destructive flex size-7 items-center justify-center rounded-(--radius-control) opacity-0 transition-[opacity,color,background-color] group-focus-within:opacity-100 group-hover:opacity-100 focus:opacity-100"
                 onClick={() => {
                   const tabId = getActiveTabId();
                   if (!tabId) return;
@@ -118,7 +118,7 @@ const LineItemRow = memo(
           <div className="relative min-w-0">
             <input
               value={item.productSnapshot}
-              className="focus-visible:border-ring focus-visible:ring-ring/50 bg-background text-foreground placeholder:text-muted-foreground/80 border-border/80 h-9 w-full rounded-(--radius-control) border px-3 py-2 text-base font-semibold shadow-none transition-[border-color,box-shadow,background-color,color] focus-visible:ring-2"
+              className="focus-visible:border-ring focus-visible:ring-ring bg-background text-foreground placeholder:text-muted-foreground/80 border-border/80 h-9 w-full rounded-(--radius-control) border px-3 py-2 text-base font-semibold shadow-none transition-[border-color,box-shadow,background-color,color] focus-visible:ring-2"
               onClick={(e) => {
                 setItemQuery((e.target as HTMLInputElement).value);
                 setActiveRowId(item.rowId);
@@ -162,7 +162,7 @@ const LineItemRow = memo(
                   setQtyPresetOpen(idx);
                 }}
                 value={item.quantity}
-                className="focus-visible:border-ring focus-visible:ring-ring/50 placeholder:text-muted-foreground/60 min-w-0 flex-1 appearance-none rounded-md bg-transparent px-1 py-2 text-center text-sm font-semibold tabular-nums transition-[border-color,box-shadow,background-color,color] focus-visible:ring-2 focus-visible:ring-offset-0"
+                className="focus-visible:border-ring focus-visible:ring-ring placeholder:text-muted-foreground/60 min-w-0 flex-1 appearance-none rounded-md bg-transparent px-1 py-2 text-center text-sm font-semibold tabular-nums transition-[border-color,box-shadow,background-color,color] focus-visible:ring-2 focus-visible:ring-offset-0"
                 onChange={(e) => {
                   const tabId = getActiveTabId();
                   if (!tabId) return;
@@ -217,7 +217,7 @@ const LineItemRow = memo(
                     processSyncQueue(tabId);
                   }
                 }}
-                className="focus-visible:border-ring focus-visible:ring-ring/50 bg-background text-foreground placeholder:text-muted-foreground/60 border-border/80 h-full w-full appearance-none rounded-(--radius-control) border py-2 pr-3 pl-8 text-right text-sm font-semibold tabular-nums focus-visible:ring-2 disabled:cursor-not-allowed"
+                className="focus-visible:border-ring focus-visible:ring-ring bg-background text-foreground placeholder:text-muted-foreground/60 border-border/80 h-full w-full appearance-none rounded-(--radius-control) border py-2 pr-3 pl-8 text-right text-sm font-semibold tabular-nums focus-visible:ring-2 disabled:cursor-not-allowed"
               />
             </div>
           </div>
@@ -252,7 +252,7 @@ const LineItemRow = memo(
                   ? "border-success bg-success text-success-foreground"
                   : partiallyChecked
                     ? "border-warning bg-warning text-warning-foreground"
-                    : "border-border bg-muted/70 text-muted-foreground hover:border-foreground hover:text-foreground"
+                    : "border-border-strong bg-card text-muted-foreground hover:bg-accent hover:text-foreground"
               }`}
             >
               {checked && <Check strokeWidth={3} size={18} />}
@@ -283,7 +283,7 @@ const LineItemRow = memo(
                     processSyncQueue(tabId);
                   }}
                   disabled={checked}
-                  className="border-border/70 bg-muted/60 hover:bg-background flex h-8 w-8 cursor-pointer items-center justify-center rounded-(--radius-control) p-0 shadow-none"
+                  className="border-frame bg-secondary hover:bg-accent flex h-8 w-8 cursor-pointer items-center justify-center rounded-(--radius-control) p-0 shadow-none"
                 >
                   <Plus className="size-4" />
                 </Button>
@@ -304,7 +304,7 @@ const LineItemRow = memo(
                     processSyncQueue(tabId);
                   }}
                   disabled={item.checkedQty === 0}
-                  className="border-border/70 bg-muted/60 hover:bg-background flex h-8 w-8 cursor-pointer items-center justify-center rounded-(--radius-control) p-0 shadow-none"
+                  className="border-frame bg-secondary hover:bg-accent flex h-8 w-8 cursor-pointer items-center justify-center rounded-(--radius-control) p-0 shadow-none"
                 >
                   <Minus className="size-4" />
                 </Button>

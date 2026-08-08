@@ -227,15 +227,17 @@ export function CustomerListTable({
                         aria-selected={virtualRow.index === activeIndex}
                         onClick={() => onRowClick(row)}
                         className={cn(
-                          "border-border/70 hover:bg-accent relative w-full border-b text-left transition-colors",
+                          "border-border/70 relative w-full border-b text-left transition-colors",
                           "grid min-h-11 cursor-pointer grid-cols-11 items-center gap-2 px-3 py-1 text-sm",
                           "last:border-b-0",
-                          virtualRow.index === activeIndex && "bg-accent"
+                          virtualRow.index === activeIndex
+                            ? "border-selection-border bg-selection text-selection-foreground [&_.text-foreground]:text-selection-foreground [&_.text-muted-foreground]:text-selection-foreground"
+                            : "hover:bg-accent"
                         )}
                       >
                         <span
                           className={cn(
-                            "bg-primary absolute top-0 left-0 h-full w-0.5 rounded-r-full transition-opacity",
+                            "bg-selection-border absolute top-0 left-0 h-full w-1 rounded-r-full transition-opacity",
                             virtualRow.index === activeIndex ? "opacity-100" : "opacity-0"
                           )}
                         />

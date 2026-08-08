@@ -300,9 +300,9 @@ export const CustomerNameInput = ({ customerType }: { customerType?: string | nu
 };
 
 const typeBadgeClass: Record<string, string> = {
-  cash: "bg-muted text-muted-foreground border-border",
-  account: "bg-info/15 text-info border-info/25",
-  hotel: "bg-primary/10 text-primary border-primary/25"
+  cash: "border-frame bg-card text-muted-foreground",
+  account: "border-frame bg-card text-muted-foreground",
+  hotel: "border-frame bg-card text-muted-foreground"
 };
 
 function CustomerRow({
@@ -329,14 +329,15 @@ function CustomerRow({
       style={{ height: rowHeight() }}
       className={cn(
         "relative flex w-full items-center justify-between gap-2 px-3 text-left transition-colors",
-        "hover:bg-accent",
-        isActive && "bg-accent"
+        isActive || isSelected
+          ? "border-selection-border bg-selection text-selection-foreground [&_.text-foreground]:text-selection-foreground [&_.text-muted-foreground]:text-selection-foreground"
+          : "hover:bg-accent"
       )}
     >
       <span
         className={cn(
-          "bg-primary absolute top-0 left-0 h-full w-0.5 rounded-r-full transition-opacity",
-          isActive ? "opacity-100" : "opacity-0"
+          "bg-selection-border absolute top-0 left-0 h-full w-1 rounded-r-full transition-opacity",
+          isActive || isSelected ? "opacity-100" : "opacity-0"
         )}
       />
       <div className="min-w-0 flex-1">
@@ -366,7 +367,10 @@ function CustomerRow({
           {outstanding === 0 ? "-" : formatRupee(Math.abs(outstanding))}
         </span>
         <Check
-          className={cn("h-3.5 w-3.5", isSelected ? "text-primary opacity-100" : "opacity-0")}
+          className={cn(
+            "h-3.5 w-3.5",
+            isSelected ? "text-selection-border opacity-100" : "opacity-0"
+          )}
         />
       </div>
     </button>

@@ -8,9 +8,9 @@ import { useCustomerActions } from "../customerActions";
 import { OutstandingBadge } from "./OutstandingBadge";
 
 const typeBadgeClass: Record<string, string> = {
-  cash: "bg-muted text-muted-foreground border-border",
-  account: "bg-info/15 text-info border-info/25",
-  hotel: "bg-primary/10 text-primary border-primary/25"
+  cash: "border-frame bg-card text-muted-foreground",
+  account: "border-frame bg-card text-muted-foreground",
+  hotel: "border-frame bg-card text-muted-foreground"
 };
 
 // pinned slim tabs toolbar in customer workspace

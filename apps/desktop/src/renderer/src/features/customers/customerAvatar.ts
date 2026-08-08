@@ -1,10 +1,10 @@
 export const CUSTOMER_AVATAR_STYLES = [
   "bg-brand-soft text-brand-foreground",
-  "bg-success/15 text-success",
-  "bg-info/15 text-info",
+  "bg-success-surface text-success",
+  "bg-info-surface text-info",
   "bg-primary/10 text-primary",
-  "bg-destructive/10 text-destructive",
-  "bg-warning/15 text-warning"
+  "bg-destructive-surface text-destructive",
+  "bg-warning-surface text-warning"
 ] as const;
 
 function stableHash(value: string): number {

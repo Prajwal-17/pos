@@ -111,7 +111,7 @@ export function ProductDialog() {
         onKeyDownCapture={(e) => {
           if (productMutation.isPending) e.preventDefault();
         }}
-        className="flex h-[min(760px,calc(100dvh-1.5rem))] w-[calc(100vw-1.5rem)] min-w-0 flex-col overflow-hidden p-0 sm:max-w-6xl"
+        className="border-frame bg-card flex h-[min(760px,calc(100dvh-1.5rem))] w-[calc(100vw-1.5rem)] min-w-0 flex-col overflow-hidden p-0 sm:max-w-6xl"
       >
         <Tabs
           value={activeTab}
@@ -190,7 +190,7 @@ export function ProductDialog() {
                               <Button
                                 variant="outline"
                                 onClick={() => setActiveDialog(PRODUCT_OPERATION.RESTORE)}
-                                className="text-success border-success/30 hover:bg-success/10 h-10 cursor-pointer gap-2 px-5 text-sm font-semibold transition-all duration-160 ease-out active:scale-[0.97]"
+                                className="border-frame text-foreground hover:bg-surface-2 h-10 cursor-pointer gap-2 px-5 text-sm font-semibold transition-all duration-160 ease-out active:scale-[0.97]"
                               >
                                 <RotateCcw className="h-4 w-4" />
                                 Restore
@@ -284,7 +284,7 @@ export function ProductDialog() {
                   animate={{ opacity: 1, y: 0 }}
                   className="flex h-full flex-col items-center justify-center gap-4"
                 >
-                  <div className="bg-destructive/10 flex h-16 w-16 items-center justify-center rounded-2xl">
+                  <div className="bg-destructive-surface flex h-16 w-16 items-center justify-center rounded-2xl">
                     <AlertTriangle className="text-destructive h-8 w-8" />
                   </div>
                   <h3 className="text-foreground text-lg font-semibold">Failed to load product</h3>
@@ -380,7 +380,7 @@ export function ProductDialog() {
             <AlertDialogFooter>
               <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
               <AlertDialogAction
-                className="bg-destructive hover:bg-destructive/80 text-destructive-foreground cursor-pointer"
+                className="bg-destructive hover:bg-destructive-hover text-destructive-foreground cursor-pointer"
                 onClick={() => productId && softDeleteProductMutation.mutate(productId)}
                 disabled={softDeleteProductMutation.isPending}
               >
@@ -406,7 +406,7 @@ export function ProductDialog() {
             <AlertDialogFooter>
               <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
               <AlertDialogAction
-                className="bg-destructive hover:bg-destructive/80 text-destructive-foreground cursor-pointer"
+                className="bg-destructive hover:bg-destructive-hover text-destructive-foreground cursor-pointer"
                 onClick={() =>
                   productId &&
                   permanentDeleteProductMutation.mutate({
@@ -438,7 +438,7 @@ export function ProductDialog() {
             <AlertDialogFooter>
               <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
               <AlertDialogAction
-                className="bg-primary hover:bg-primary/80 text-primary-foreground cursor-pointer"
+                className="bg-primary hover:bg-primary-hover text-primary-foreground cursor-pointer"
                 onClick={() => productId && restoreProductMutation.mutate(productId)}
                 disabled={restoreProductMutation.isPending}
               >

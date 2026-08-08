@@ -39,7 +39,7 @@ export const OnboardingComplete = () => {
         transition={{ type: "spring", stiffness: 280, damping: 18, delay: 0.1 }}
         className="relative"
       >
-        <div className="bg-success/15 flex size-16 items-center justify-center rounded-full">
+        <div className="bg-success-surface flex size-16 items-center justify-center rounded-full">
           <CheckCircle2 className="text-success size-9" strokeWidth={1.5} />
         </div>
         {/* rings */}
@@ -55,7 +55,7 @@ export const OnboardingComplete = () => {
               repeatDelay: 0.5,
               ease: "easeOut"
             }}
-            className="border-success/40 absolute inset-0 rounded-full border-2"
+            className="border-success-border absolute inset-0 rounded-full border-2"
           />
         ))}
       </motion.div>

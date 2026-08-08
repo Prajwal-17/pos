@@ -42,12 +42,18 @@ const BillingPreviewPanel = () => {
         onValueChange={handleValueChange}
         className="flex h-full min-h-0 flex-1 flex-col gap-0"
       >
-        <div className="flex h-10 shrink-0 items-center gap-1 border-b px-2">
-          <TabsList className="grid h-8 min-w-0 flex-1 grid-cols-2">
-            <TabsTrigger value="bill" className="cursor-pointer">
+        <div className="border-b-frame bg-surface-2 flex h-10 shrink-0 items-center gap-1 border-b px-2">
+          <TabsList className="grid h-full min-w-0 flex-1 grid-cols-2 rounded-none border-0 bg-transparent p-0">
+            <TabsTrigger
+              value="bill"
+              className="data-[state=active]:border-b-selection-border cursor-pointer rounded-none border-0 border-b-2 border-b-transparent bg-transparent data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-none"
+            >
               Preview
             </TabsTrigger>
-            <TabsTrigger value="customer" className="cursor-pointer">
+            <TabsTrigger
+              value="customer"
+              className="data-[state=active]:border-b-selection-border cursor-pointer rounded-none border-0 border-b-2 border-b-transparent bg-transparent data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-none"
+            >
               Customer
             </TabsTrigger>
           </TabsList>

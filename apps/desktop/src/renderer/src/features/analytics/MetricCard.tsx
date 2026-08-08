@@ -21,8 +21,6 @@ export function MetricCard({ label, value, changePercent, href, trend }: MetricC
   const navigate = useNavigate();
   const setDate = useDashboardStore((state) => state.setDate);
   const isPositive = typeof changePercent === "number" ? changePercent >= 0 : undefined;
-  const isSaleMetric = href === "/dashboard/sales";
-  const isEstimateMetric = href === "/dashboard/estimates";
 
   const formattedChange =
     typeof changePercent === "number"
@@ -42,22 +40,11 @@ export function MetricCard({ label, value, changePercent, href, trend }: MetricC
   };
 
   return (
-    <Card
-      className={cn(
-        "bg-card border py-2",
-        isSaleMetric && "border-success/30",
-        isEstimateMetric && "border-info/30"
-      )}
-    >
+    <Card className="border-border bg-card border py-2">
       <CardContent className="px-3 py-0">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span
-              className={cn(
-                "text-sm leading-5 font-medium",
-                isSaleMetric ? "text-success" : isEstimateMetric ? "text-info" : "text-foreground"
-              )}
-            >
+            <span className="text-foreground text-sm leading-5 font-medium">
               {label}
             </span>
           </div>
@@ -65,7 +52,7 @@ export function MetricCard({ label, value, changePercent, href, trend }: MetricC
           {href ? (
             <div
               onClick={handleLink}
-              className="bg-secondary/70 text-foreground/70 border-border hover:bg-secondary/90 hover:text-foreground inline-flex items-center justify-center rounded-(--radius-control) border p-1 transition-colors"
+              className="bg-secondary text-foreground/70 border-border hover:bg-surface-3 hover:text-foreground inline-flex items-center justify-center rounded-(--radius-control) border p-1 transition-colors"
             >
               <ArrowUpRight size={18} />
             </div>
@@ -87,8 +74,8 @@ export function MetricCard({ label, value, changePercent, href, trend }: MetricC
                   "px-2 py-0.5 text-xs",
                   typeof isPositive === "boolean"
                     ? isPositive
-                      ? "bg-success/15 text-success border-transparent"
-                      : "bg-destructive/15 text-destructive border-transparent"
+                      ? "bg-success-surface text-success border-success-border"
+                      : "bg-destructive-surface text-destructive border-destructive-border"
                     : ""
                 )}
               >

@@ -70,7 +70,7 @@ export const StoreIdentityStep = () => {
               setFormData({ storeName: e.target.value });
               if (errors.storeName) setErrors((prev) => ({ ...prev, storeName: "" }));
             }}
-            className={`h-9 text-sm font-medium ${errors.storeName ? "border-destructive focus-visible:ring-destructive/30" : ""}`}
+            className={`h-9 text-sm font-medium ${errors.storeName ? "border-destructive focus-visible:ring-destructive-border" : ""}`}
           />
           {errors.storeName && (
             <motion.p

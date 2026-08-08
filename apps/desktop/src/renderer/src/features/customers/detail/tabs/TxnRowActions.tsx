@@ -153,7 +153,7 @@ function TxnRowActionsInner({
                 type="button"
                 onClick={() => setActiveDialog("delete")}
                 aria-label={`Delete ${type} ${txn.transactionNo}`}
-                className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive cursor-pointer rounded-md p-1.5 transition-colors"
+                className="text-muted-foreground hover:bg-destructive-surface hover:text-destructive cursor-pointer rounded-md p-1.5 transition-colors"
               >
                 <Trash2 className="size-4" />
               </button>
@@ -226,7 +226,7 @@ function TxnRowActionsInner({
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/80"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive-hover"
               onClick={onDelete}
             >
               {deleteMutation.isPending ? "Deleting…" : "Delete"}

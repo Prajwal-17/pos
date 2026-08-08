@@ -41,9 +41,9 @@ import { useNavigate } from "react-router-dom";
 import { ItemRow } from "./ItemRow";
 
 const customerTypeBadgeClass: Record<string, string> = {
-  cash: "bg-muted text-muted-foreground border-border",
-  account: "bg-info/10 text-info border-info",
-  hotel: "bg-primary/10 text-primary border-primary"
+  cash: "border-frame bg-card text-muted-foreground",
+  account: "border-frame bg-card text-muted-foreground",
+  hotel: "border-frame bg-card text-muted-foreground"
 };
 
 function formatRelativeTime(dateStr?: string): string | null {
@@ -146,7 +146,7 @@ function TransactionActions({
           <Button
             variant="ghost"
             className={cn(
-              "text-destructive hover:bg-destructive/10 hover:text-destructive",
+              "text-destructive hover:bg-destructive-surface hover:text-destructive",
               isRail && "w-full"
             )}
             onClick={onDeleteRequest}
@@ -282,12 +282,7 @@ export const TransactionDetailsDialog = ({ type, id }: { type: DashboardType; id
             <div className="flex min-w-0 items-center gap-2">
               <Badge
                 variant="outline"
-                className={cn(
-                  "shrink-0 rounded-md px-2 py-0.5 text-xs font-semibold",
-                  isSales
-                    ? "bg-success/10 text-success border-success"
-                    : "bg-info/10 text-info border-info"
-                )}
+                className="border-frame bg-card text-muted-foreground shrink-0 rounded-md px-2 py-0.5 text-xs font-semibold"
               >
                 {transactionLabel}
               </Badge>
@@ -409,7 +404,7 @@ export const TransactionDetailsDialog = ({ type, id }: { type: DashboardType; id
                     <span
                       className={cn(
                         "shrink-0 text-right tabular-nums",
-                        customerOutstanding > 0 ? "text-destructive" : "text-success"
+                        customerOutstanding > 0 ? "text-destructive" : "text-foreground"
                       )}
                     >
                       <span className="block text-xs font-medium">
@@ -656,7 +651,7 @@ export const TransactionDetailsDialog = ({ type, id }: { type: DashboardType; id
             <AlertDialogFooter>
               <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
               <AlertDialogAction
-                className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                className="bg-destructive hover:bg-destructive-hover text-destructive-foreground"
                 onClick={(event) => {
                   event.preventDefault();
                   onDelete();

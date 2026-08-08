@@ -16,9 +16,9 @@ function rowHeight() {
 }
 
 const typeBadgeClass: Record<string, string> = {
-  cash: "bg-muted text-muted-foreground border-border",
-  account: "bg-info/15 text-info border-info/25",
-  hotel: "bg-primary/10 text-primary border-primary/25"
+  cash: "border-frame bg-card text-muted-foreground",
+  account: "border-frame bg-card text-muted-foreground",
+  hotel: "border-frame bg-card text-muted-foreground"
 };
 
 export function CustomerSearchModal({ onClose }: { onClose: () => void }) {
@@ -249,13 +249,14 @@ function CustomerRow({
       style={{ height: rowHeight() }}
       className={cn(
         "relative flex w-full items-center justify-between gap-3 pr-3 pl-4 text-left transition-colors",
-        "hover:bg-accent",
-        isActive && "bg-accent"
+        isActive
+          ? "border-selection-border bg-selection text-selection-foreground [&_.text-foreground]:text-selection-foreground [&_.text-muted-foreground]:text-selection-foreground"
+          : "hover:bg-accent"
       )}
     >
       <span
         className={cn(
-          "bg-primary absolute top-0 left-0 h-full w-0.5 rounded-r-full transition-opacity",
+          "bg-selection-border absolute top-0 left-0 h-full w-1 rounded-r-full transition-opacity",
           isActive ? "opacity-100" : "opacity-0"
         )}
       />

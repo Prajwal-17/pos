@@ -145,7 +145,7 @@ export function ProductTransactionsTable() {
                   delay: idx * 0.025,
                   ease: [0.23, 1, 0.32, 1]
                 }}
-                className="hover:bg-muted/40 bg-card border-border/50 grid min-h-12 grid-cols-12 items-center gap-3 border-b px-3 py-1 text-sm"
+                className="hover:bg-accent bg-card border-border/50 grid min-h-12 grid-cols-12 items-center gap-3 border-b px-3 py-1 text-sm"
               >
                 <div className="col-span-2 flex flex-col items-start justify-center">
                   <span className="text-foreground text-base font-semibold">
@@ -158,11 +158,7 @@ export function ProductTransactionsTable() {
 
                 <div className="col-span-1 flex items-center">
                   <span
-                    className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-bold tracking-wide ${
-                      txn.type === TRANSACTION_TYPE.SALE
-                        ? "bg-success/10 text-success"
-                        : "bg-info/10 text-info"
-                    }`}
+                    className="border-frame bg-card text-muted-foreground inline-flex items-center rounded-md border px-2.5 py-1 text-xs font-semibold"
                   >
                     {txn.type === TRANSACTION_TYPE.SALE ? "Sale" : "Estimate"}
                   </span>

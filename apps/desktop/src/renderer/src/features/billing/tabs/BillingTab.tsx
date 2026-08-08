@@ -23,22 +23,18 @@ export const BillingTab = ({
   onSelect: () => void;
   onClose: (event: React.MouseEvent) => void;
 }) => {
-  const isSale = tab.type === TRANSACTION_TYPE.SALE;
-
   return (
     <button
       type="button"
       onClick={onSelect}
       className={cn(
-        "group focus-visible:ring-ring/30 relative flex h-9 cursor-pointer items-center gap-2 rounded-t-[var(--radius-control)] px-3 text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset",
+        "group focus-visible:ring-ring relative flex h-9 cursor-pointer items-center gap-2 rounded-t-[var(--radius-control)] border-x border-t border-transparent px-3 text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset",
         isActive
-          ? isSale
-            ? "bg-success/10 text-success"
-            : "bg-info/10 text-info"
-          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+          ? "border-frame bg-card text-foreground"
+          : "text-muted-foreground hover:bg-surface-3 hover:text-foreground"
       )}
     >
-      <span className={cn("size-2 shrink-0 rounded-full", isSale ? "bg-success" : "bg-info")} />
+      <span className="bg-selection-border size-2 shrink-0 rounded-full" />
       <span className="max-w-32 truncate">{getTabLabel(tab)}</span>
       <span
         role="button"
@@ -49,12 +45,7 @@ export const BillingTab = ({
         <X className="size-3.5" />
       </span>
       {isActive && (
-        <span
-          className={cn(
-            "absolute right-2 bottom-0 left-2 h-0.5",
-            isSale ? "bg-success" : "bg-info"
-          )}
-        />
+        <span className="bg-selection-border absolute right-0 bottom-0 left-0 h-0.5" />
       )}
     </button>
   );

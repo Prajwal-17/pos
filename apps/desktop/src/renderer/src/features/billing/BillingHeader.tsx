@@ -178,11 +178,7 @@ const BillingHeader = () => {
       <div className="flex min-w-0 items-center justify-between gap-3">
         <div className="flex min-w-0 items-baseline gap-2">
           <span
-            className={
-              type === DASHBOARD_TYPE.SALES
-                ? "text-success text-base font-bold"
-                : "text-info text-base font-bold"
-            }
+            className="text-foreground text-base font-semibold"
           >
             {type === DASHBOARD_TYPE.SALES ? "Sale" : "Estimate"}
           </span>
@@ -289,7 +285,7 @@ const BillingHeader = () => {
           <span
             className={
               isDue
-                ? "bg-destructive/10 text-destructive mb-0.5 shrink-0 rounded-(--radius-control) px-2.5 py-1.5 text-xs font-semibold tabular-nums"
+                ? "bg-destructive-surface text-destructive mb-0.5 shrink-0 rounded-(--radius-control) px-2.5 py-1.5 text-xs font-semibold tabular-nums"
                 : "bg-muted text-muted-foreground mb-0.5 shrink-0 rounded-(--radius-control) px-2.5 py-1.5 text-xs font-semibold"
             }
           >

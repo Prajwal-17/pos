@@ -101,7 +101,7 @@ export const OwnerContactStep = () => {
                 field.onChange(e.target.value);
                 if (errors[field.id]) setErrors((prev) => ({ ...prev, [field.id]: "" }));
               }}
-              className={`h-9 text-sm font-medium ${errors[field.id] ? "border-destructive focus-visible:ring-destructive/30" : ""}`}
+              className={`h-9 text-sm font-medium ${errors[field.id] ? "border-destructive focus-visible:ring-destructive-border" : ""}`}
             />
             {errors[field.id] && (
               <motion.p

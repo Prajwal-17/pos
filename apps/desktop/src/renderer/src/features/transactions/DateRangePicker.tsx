@@ -24,7 +24,7 @@ export const DateRangePicker = () => {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button className="bg-secondary text-foreground hover:bg-secondary/80 flex h-8 cursor-pointer items-center gap-1.5 rounded-(--radius-control) px-2.5 text-sm font-medium">
+        <button className="bg-secondary text-foreground hover:bg-surface-3 flex h-8 cursor-pointer items-center gap-1.5 rounded-(--radius-control) px-2.5 text-sm font-medium">
           <CalendarIcon className="text-foreground size-4" />
           {date?.from?.toLocaleDateString("en-IN", {
             dateStyle: "medium"
@@ -43,10 +43,10 @@ export const DateRangePicker = () => {
         <div className="grid grid-cols-5 gap-1">
           {calendarPresets.map((preset, idx) => (
             <Button
-              variant={selectedPreset === preset.value ? "default" : "outline"}
+              variant="outline"
               size="sm"
               key={idx}
-              className={`h-7 cursor-pointer px-2 text-xs font-medium ${selectedPreset === preset.value ? "" : "hover:bg-accent hover:text-accent-foreground"}`}
+              className={`h-7 cursor-pointer px-2 text-xs font-medium ${selectedPreset === preset.value ? "border-selection-border bg-selection text-selection-foreground" : "hover:bg-accent hover:text-foreground"}`}
               onClick={() => {
                 const dateValue = preset.getRange();
                 setTempDate(dateValue);

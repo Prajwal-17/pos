@@ -27,11 +27,11 @@ const kindIcon: Record<ActivityKind, LucideIcon> = {
 };
 
 const kindIconClass: Record<ActivityKind, string> = {
-  sale: "text-info",
-  estimate: "text-primary",
-  payment: "text-success",
+  sale: "text-muted-foreground",
+  estimate: "text-muted-foreground",
+  payment: "text-muted-foreground",
   adjustment: "text-muted-foreground",
-  quick_sale: "text-warning",
+  quick_sale: "text-muted-foreground",
   opening_balance: "text-muted-foreground"
 };
 

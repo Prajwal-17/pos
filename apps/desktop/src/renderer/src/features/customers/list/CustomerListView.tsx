@@ -193,7 +193,7 @@ export function CustomerListView() {
                           "flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                           active
                             ? "bg-foreground/10 text-foreground"
-                            : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                            : "text-muted-foreground hover:bg-accent hover:text-foreground"
                         )}
                       >
                         {option.label}
@@ -223,7 +223,7 @@ export function CustomerListView() {
                         setTypeFilter(CUSTOMER_TYPE.ALL);
                         setIncludeArchived(false);
                       }}
-                      className="border-destructive/40 text-destructive hover:bg-destructive/10 w-full cursor-pointer justify-center gap-1.5 text-xs font-medium"
+                      className="border-destructive-border text-destructive hover:bg-destructive-surface w-full cursor-pointer justify-center gap-1.5 text-xs font-medium"
                     >
                       <X className="size-3.5" />
                       Clear all filters
@@ -313,7 +313,7 @@ export function CustomerListView() {
             <button
               type="button"
               onClick={clearFilters}
-              className="text-destructive hover:bg-destructive/10 flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors"
+              className="text-destructive hover:bg-destructive-surface flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors"
             >
               <X className="size-3.5" />
               Clear all
@@ -361,7 +361,7 @@ function FilterChip({
         <button
           type="button"
           onClick={onRemove}
-          className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer rounded-md p-0.5 transition-colors"
+          className="text-muted-foreground hover:text-destructive hover:bg-destructive-surface cursor-pointer rounded-md p-0.5 transition-colors"
         >
           <X className="size-3.5" />
         </button>

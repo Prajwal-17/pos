@@ -34,7 +34,7 @@ const BillingNotes = ({ className }: BillingNotesProps) => {
           processSyncQueue(activeTabId);
         }}
         placeholder="Delivery instructions, remarks, internal notes…"
-        className="border-input placeholder:text-muted-foreground/60 focus-visible:border-ring focus-visible:ring-ring/50 min-h-32 w-full flex-1 resize-none rounded-lg border bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px]"
+        className="border-input placeholder:text-muted-foreground/60 focus-visible:border-ring focus-visible:ring-ring min-h-32 w-full flex-1 resize-none rounded-lg border bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px]"
       />
     </section>
   );

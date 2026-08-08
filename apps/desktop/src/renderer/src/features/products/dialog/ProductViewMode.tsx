@@ -84,7 +84,7 @@ export const ProductViewMode = () => {
           valueClassName="text-lg font-semibold"
         />
 
-        <div className="bg-secondary/10 border-border/50 mt-1 rounded-(--radius-panel) border px-3 py-2">
+        <div className="bg-secondary border-border mt-1 rounded-(--radius-panel) border px-3 py-2">
           <div className="divide-border/50 divide-y">
             <InfoRow
               label="Total Qty Sold"

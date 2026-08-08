@@ -88,7 +88,7 @@ export default function ProductHeader() {
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="border-border bg-muted/50 text-foreground hover:bg-muted/60 relative cursor-pointer gap-2 px-3.5 text-sm font-semibold shadow-none transition-all"
+              className="border-border bg-muted/50 text-foreground hover:bg-accent relative cursor-pointer gap-2 px-3.5 text-sm font-semibold shadow-none transition-all"
             >
               <SlidersHorizontal className="size-4" />
               Filter
@@ -117,7 +117,7 @@ export default function ProductHeader() {
                     className={`flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                       filterType === option.value
                         ? "bg-foreground/10 text-foreground"
-                        : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
                     }`}
                   >
                     {option.label}
@@ -164,7 +164,7 @@ export default function ProductHeader() {
                   className={`flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                     hasMrp
                       ? "bg-foreground/10 text-foreground"
-                      : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
                   }`}
                 >
                   Has MRP
@@ -175,7 +175,7 @@ export default function ProductHeader() {
                   className={`flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                     hasPurchasePrice
                       ? "bg-foreground/10 text-foreground"
-                      : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
                   }`}
                 >
                   Has Purchase Price
@@ -202,7 +202,7 @@ export default function ProductHeader() {
                       if (hasMrp) toggleMrpFilter();
                       if (hasPurchasePrice) togglePurchasePriceFilter();
                     }}
-                    className="border-destructive/40 text-destructive hover:bg-destructive/10 w-full cursor-pointer justify-center gap-1.5 text-sm font-medium"
+                    className="border-destructive-border text-destructive hover:bg-destructive-surface w-full cursor-pointer justify-center gap-1.5 text-sm font-medium"
                   >
                     <X className="h-4 w-4" />
                     Clear selection
@@ -217,7 +217,7 @@ export default function ProductHeader() {
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="border-border bg-muted/50 text-foreground hover:bg-muted/60 cursor-pointer gap-2 px-3.5 text-sm font-semibold shadow-none transition-all"
+              className="border-border bg-muted/50 text-foreground hover:bg-accent cursor-pointer gap-2 px-3.5 text-sm font-semibold shadow-none transition-all"
             >
               <ArrowDownAZ className="size-4" />
               {activeSortLabel ?? "Sort"}
@@ -329,7 +329,7 @@ export default function ProductHeader() {
 
           <button
             onClick={() => setFilterOpen(true)}
-            className="text-muted-foreground hover:text-foreground hover:bg-muted/50 flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors"
+            className="text-muted-foreground hover:text-foreground hover:bg-accent flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors"
           >
             <Plus className="size-3.5" />
             Add filter
@@ -359,7 +359,7 @@ export default function ProductHeader() {
                 if (hasMrp) toggleMrpFilter();
                 if (hasPurchasePrice) togglePurchasePriceFilter();
               }}
-              className="text-destructive hover:text-destructive hover:bg-destructive/8 flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors"
+              className="text-destructive hover:text-destructive hover:bg-destructive-surface flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors"
             >
               <X className="size-3.5" />
               Clear all
@@ -391,7 +391,7 @@ function FilterChip({
       {onRemove && (
         <button
           onClick={onRemove}
-          className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 ml-0.5 cursor-pointer rounded-md p-1 transition-colors"
+          className="text-muted-foreground hover:text-destructive hover:bg-destructive-surface ml-0.5 cursor-pointer rounded-md p-1 transition-colors"
         >
           <X className="h-4 w-4" />
         </button>
