@@ -1,12 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useBillingTabsStore } from "@/features/billing/store/billingTabs.store";
-import { useReferenceWindowStore } from "@/features/billing/store/referenceWindow.store";
+import {
+  useReferenceWindowStore,
+  type ReferenceImageMetadata
+} from "@/features/billing/store/referenceWindow.store";
 import { cn } from "@/lib/utils";
 import {
+  CloudUpload,
   FileImage,
   GripVertical,
-  ImagePlus,
+  LoaderCircle,
   Minus,
   Plus,
   RotateCcw,
@@ -27,8 +31,12 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
+import {
+  deleteReferenceImageBlob,
+  loadReferenceImageBlob,
+  saveReferenceImageBlob
+} from "./referenceImage.storage";
 
-const REFERENCE_IMAGE_STORAGE_KEY = "quickcart-billing-reference-image-v1";
 const REFERENCE_WINDOW_SIZE_KEY = "quickcart-billing-reference-window-size-v2";
 const MAX_SOURCE_FILE_SIZE = 12 * 1024 * 1024;
 const MAX_IMAGE_EDGE = 1_800;
@@ -47,9 +55,8 @@ type Point = { x: number; y: number };
 type Size = { width: number; height: number };
 type WindowFrame = Point & Size;
 
-type ReferenceImage = {
-  dataUrl: string;
-  fileName: string;
+type ProcessedReferenceImage = {
+  blob: Blob;
   width: number;
   height: number;
 };
@@ -70,34 +77,6 @@ type ImageInteraction = {
 
 const clamp = (value: number, minimum: number, maximum: number) =>
   Math.min(maximum, Math.max(minimum, value));
-
-const getImageStorageKey = (tabId: string) => `${REFERENCE_IMAGE_STORAGE_KEY}:${tabId}`;
-
-const readReferenceImage = (tabId: string): ReferenceImage | null => {
-  try {
-    const savedImage = window.sessionStorage.getItem(getImageStorageKey(tabId));
-    if (!savedImage) return null;
-
-    const parsed = JSON.parse(savedImage) as Partial<ReferenceImage>;
-    if (
-      typeof parsed.dataUrl !== "string" ||
-      typeof parsed.fileName !== "string" ||
-      typeof parsed.width !== "number" ||
-      typeof parsed.height !== "number"
-    ) {
-      return null;
-    }
-
-    return {
-      dataUrl: parsed.dataUrl,
-      fileName: parsed.fileName,
-      width: parsed.width,
-      height: parsed.height
-    };
-  } catch {
-    return null;
-  }
-};
 
 const readWindowSize = (): Size => {
   try {
@@ -133,14 +112,15 @@ const saveWindowSize = ({ width, height }: Size) => {
   }
 };
 
-const processImageFile = (
-  file: File
-): Promise<Pick<ReferenceImage, "dataUrl" | "width" | "height">> =>
+const createCanvasBlob = (canvas: HTMLCanvasElement, mimeType: string): Promise<Blob | null> =>
+  new Promise((resolve) => canvas.toBlob(resolve, mimeType, IMAGE_QUALITY));
+
+const processImageFile = (file: File): Promise<ProcessedReferenceImage> =>
   new Promise((resolve, reject) => {
     const sourceUrl = URL.createObjectURL(file);
     const image = document.createElement("img");
 
-    image.onload = () => {
+    image.onload = async () => {
       URL.revokeObjectURL(sourceUrl);
 
       const scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(image.naturalWidth, image.naturalHeight));
@@ -161,11 +141,14 @@ const processImageFile = (
       context.drawImage(image, 0, 0, width, height);
 
       try {
-        const webpDataUrl = canvas.toDataURL("image/webp", IMAGE_QUALITY);
-        const dataUrl = webpDataUrl.startsWith("data:image/webp")
-          ? webpDataUrl
-          : canvas.toDataURL("image/jpeg", IMAGE_QUALITY);
-        resolve({ dataUrl, width, height });
+        const webpBlob = await createCanvasBlob(canvas, "image/webp");
+        const blob =
+          webpBlob?.type === "image/webp" ? webpBlob : await createCanvasBlob(canvas, "image/jpeg");
+        if (!blob) {
+          reject(new Error("The image could not be prepared for viewing."));
+          return;
+        }
+        resolve({ blob, width, height });
       } catch {
         reject(new Error("The image could not be prepared for viewing."));
       }
@@ -173,7 +156,7 @@ const processImageFile = (
 
     image.onerror = () => {
       URL.revokeObjectURL(sourceUrl);
-      reject(new Error("That image could not be opened. Try a JPG, PNG, or WEBP file."));
+      reject(new Error("That image could not be opened. Try another image."));
     };
 
     image.src = sourceUrl;
@@ -212,6 +195,11 @@ const BillingReferenceWindow = () => {
   const activeTabId = useBillingTabsStore((state) => state.activeTabId);
   const isOpen = useReferenceWindowStore((state) => state.isOpen);
   const setOpen = useReferenceWindowStore((state) => state.setOpen);
+  const referenceImage = useReferenceWindowStore((state) =>
+    activeTabId ? (state.imageMetadataByTabId[activeTabId] ?? null) : null
+  );
+  const setImageMetadata = useReferenceWindowStore((state) => state.setImageMetadata);
+  const removeImageMetadata = useReferenceWindowStore((state) => state.removeImageMetadata);
 
   const storedWindowSize = useMemo(readWindowSize, []);
   const [windowFrame, setWindowFrame] = useState<WindowFrame>({
@@ -220,7 +208,8 @@ const BillingReferenceWindow = () => {
     width: storedWindowSize.width,
     height: storedWindowSize.height
   });
-  const [referenceImage, setReferenceImage] = useState<ReferenceImage | null>(null);
+  const [referenceImageUrl, setReferenceImageUrl] = useState<string | null>(null);
+  const [isLoadingStoredImage, setIsLoadingStoredImage] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isFileDragging, setIsFileDragging] = useState(false);
   const [zoom, setZoom] = useState(MIN_ZOOM);
@@ -235,17 +224,64 @@ const BillingReferenceWindow = () => {
   const imageInteractionRef = useRef<ImageInteraction | null>(null);
   const screenDragDepthRef = useRef(0);
   const didPlaceWindowRef = useRef(false);
+  const referenceImageUrlRef = useRef<string | null>(null);
+
+  const setReferenceImageBlob = useCallback((blob: Blob | null) => {
+    if (referenceImageUrlRef.current) {
+      URL.revokeObjectURL(referenceImageUrlRef.current);
+    }
+    const nextUrl = blob ? URL.createObjectURL(blob) : null;
+    referenceImageUrlRef.current = nextUrl;
+    setReferenceImageUrl(nextUrl);
+  }, []);
 
   useEffect(() => {
-    setReferenceImage(activeTabId ? readReferenceImage(activeTabId) : null);
     setZoom(MIN_ZOOM);
     setPan({ x: 0, y: 0 });
     setIsFileDragging(false);
   }, [activeTabId]);
 
+  useEffect(() => {
+    let cancelled = false;
+    setReferenceImageBlob(null);
+
+    if (!isOpen || !activeTabId || !referenceImage) {
+      setIsLoadingStoredImage(false);
+      return;
+    }
+
+    setIsLoadingStoredImage(true);
+    void loadReferenceImageBlob(referenceImage.blobId)
+      .then((blob) => {
+        if (cancelled) return;
+        if (!blob) {
+          removeImageMetadata(activeTabId);
+          toast.error("The stored item list image could not be found.");
+          return;
+        }
+        setReferenceImageBlob(blob);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        removeImageMetadata(activeTabId);
+        toast.error(error instanceof Error ? error.message : "The stored image could not load.");
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingStoredImage(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTabId, isOpen, referenceImage, removeImageMetadata, setReferenceImageBlob]);
+
   useEffect(
     () => () => {
       useReferenceWindowStore.getState().setOpen(false);
+      if (referenceImageUrlRef.current) {
+        URL.revokeObjectURL(referenceImageUrlRef.current);
+        referenceImageUrlRef.current = null;
+      }
     },
     []
   );
@@ -413,21 +449,38 @@ const BillingReferenceWindow = () => {
   );
 
   const saveReferenceImage = useCallback(
-    (nextImage: ReferenceImage) => {
+    async (nextImage: ProcessedReferenceImage, fileName: string) => {
       if (!activeTabId) return false;
-      try {
-        window.sessionStorage.setItem(getImageStorageKey(activeTabId), JSON.stringify(nextImage));
-        if (useBillingTabsStore.getState().activeTabId === activeTabId) {
-          setReferenceImage(nextImage);
-          resetImageView();
-        }
-        return true;
-      } catch {
-        toast.error("This image is too large to keep with the billing tab.");
+
+      const tabId = activeTabId;
+      const blobId = `${tabId}:${crypto.randomUUID()}`;
+      const previousImage = useReferenceWindowStore.getState().imageMetadataByTabId[tabId];
+
+      await saveReferenceImageBlob(blobId, nextImage.blob);
+
+      const tabStillExists = useBillingTabsStore.getState().tabs.some((tab) => tab.id === tabId);
+      if (!tabStillExists) {
+        await deleteReferenceImageBlob(blobId);
         return false;
       }
+
+      const metadata: ReferenceImageMetadata = {
+        blobId,
+        fileName,
+        width: nextImage.width,
+        height: nextImage.height,
+        mimeType: nextImage.blob.type,
+        byteSize: nextImage.blob.size
+      };
+      setImageMetadata(tabId, metadata);
+
+      if (previousImage && previousImage.blobId !== blobId) {
+        void deleteReferenceImageBlob(previousImage.blobId).catch(() => undefined);
+      }
+      if (useBillingTabsStore.getState().activeTabId === tabId) resetImageView();
+      return true;
     },
-    [activeTabId, resetImageView]
+    [activeTabId, resetImageView, setImageMetadata]
   );
 
   const handleFiles = useCallback(
@@ -446,10 +499,7 @@ const BillingReferenceWindow = () => {
       setIsProcessing(true);
       try {
         const processedImage = await processImageFile(file);
-        saveReferenceImage({
-          ...processedImage,
-          fileName: file.name || "Pasted order sheet"
-        });
+        await saveReferenceImage(processedImage, file.name || "Pasted item list");
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "The image could not be opened.");
       } finally {
@@ -523,11 +573,13 @@ const BillingReferenceWindow = () => {
   }, [activeTabId, handleFiles]);
 
   const handleRemove = () => {
-    if (!activeTabId) return;
-    window.sessionStorage.removeItem(getImageStorageKey(activeTabId));
-    setReferenceImage(null);
+    if (!activeTabId || !referenceImage) return;
+    const blobId = referenceImage.blobId;
+    removeImageMetadata(activeTabId);
+    setReferenceImageBlob(null);
     resetImageView();
-    toast.success("Reference image removed");
+    void deleteReferenceImageBlob(blobId).catch(() => undefined);
+    toast.success("Item list image removed");
   };
 
   const startWindowInteraction = (
@@ -576,7 +628,7 @@ const BillingReferenceWindow = () => {
 
   useEffect(() => {
     const viewport = viewportRef.current;
-    if (!isOpen || !referenceImage || !viewport) return;
+    if (!isOpen || !referenceImageUrl || !viewport) return;
 
     const handleWheel = (event: WheelEvent) => {
       event.preventDefault();
@@ -591,10 +643,10 @@ const BillingReferenceWindow = () => {
 
     viewport.addEventListener("wheel", handleWheel, { passive: false });
     return () => viewport.removeEventListener("wheel", handleWheel);
-  }, [applyZoom, isOpen, referenceImage, zoom]);
+  }, [applyZoom, isOpen, referenceImageUrl, zoom]);
 
   const handleImagePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!referenceImage || event.button !== 0) return;
+    if (!referenceImageUrl || event.button !== 0) return;
     if ((event.target as HTMLElement).closest("button")) return;
     event.currentTarget.focus();
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -674,7 +726,7 @@ const BillingReferenceWindow = () => {
         >
           <div className="bg-card border-frame flex items-center gap-3 rounded-(--radius-panel) border px-5 py-4 shadow-sm">
             <span className="bg-counter-accent-soft text-counter-accent-foreground flex size-10 items-center justify-center rounded-full">
-              <ImagePlus className="size-5" />
+              <CloudUpload className="size-5" />
             </span>
             <div>
               <div className="text-foreground text-sm font-semibold">
@@ -782,13 +834,24 @@ const BillingReferenceWindow = () => {
                 onKeyDown={handleImageKeyDown}
                 className={cn(
                   "bg-muted focus-visible:ring-ring relative min-h-0 flex-1 touch-none overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-inset",
-                  zoom > MIN_ZOOM ? "cursor-grab" : "cursor-zoom-in",
+                  referenceImageUrl
+                    ? zoom > MIN_ZOOM
+                      ? "cursor-grab"
+                      : "cursor-zoom-in"
+                    : "cursor-default",
                   isPanning && "cursor-grabbing"
                 )}
               >
-                {fittedImageSize.width > 0 && (
+                {isLoadingStoredImage && (
+                  <div className="text-muted-foreground absolute inset-0 flex items-center justify-center gap-2 text-xs">
+                    <LoaderCircle className="size-4 animate-spin" />
+                    Loading image…
+                  </div>
+                )}
+
+                {referenceImageUrl && fittedImageSize.width > 0 && (
                   <img
-                    src={referenceImage.dataUrl}
+                    src={referenceImageUrl}
                     alt={`Handwritten order sheet: ${referenceImage.fileName}`}
                     draggable={false}
                     className="pointer-events-none absolute top-1/2 left-1/2 max-w-none shadow-sm select-none"
@@ -884,18 +947,18 @@ const BillingReferenceWindow = () => {
                 {isProcessing ? (
                   <Upload className="size-5 animate-pulse" />
                 ) : (
-                  <ImagePlus className="size-5" />
+                  <CloudUpload className="size-5" />
                 )}
               </span>
               <span className="text-foreground mt-3 text-sm font-semibold">
-                {isProcessing ? "Preparing image…" : "Add the customer’s order sheet"}
+                {isProcessing ? "Preparing image…" : "Upload item list"}
               </span>
               <span className="text-muted-foreground mt-1 max-w-60 text-xs leading-4">
-                Drop an image anywhere on billing, choose a file, or paste directly from WhatsApp.
+                Drop or paste an image, or click to browse.
               </span>
               {!isProcessing && (
-                <span className="text-counter-accent-foreground mt-3 text-xs font-semibold">
-                  JPG, PNG, or WEBP · up to 12 MB
+                <span className="text-muted-foreground mt-2 text-xs">
+                  Most image types · Max 12 MB
                 </span>
               )}
             </button>
