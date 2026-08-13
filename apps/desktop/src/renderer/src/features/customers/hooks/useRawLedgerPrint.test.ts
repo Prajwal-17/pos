@@ -21,6 +21,7 @@ const profile: StoreProfile = {
 
 const printing: PrintingConfig = {
   printerName: "Everycom",
+  defaultPrintMode: "raster",
   extraFeedLines: 4,
   cutMode: "partial",
   showAddress: true,

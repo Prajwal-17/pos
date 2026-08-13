@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/apiClient";
+import { prepareRasterLedger } from "@/features/settings/thermalRaster";
 import {
   LEDGER_ENTRY_TYPE,
   LEDGER_SORT,
@@ -9,6 +10,7 @@ import {
   type LedgerSummary,
   type PaginatedApiResponse,
   type PrintingConfig,
+  type RasterLedgerSegments,
   type RawLedgerStatementData,
   type StoreProfile
 } from "@shared/types";
@@ -200,7 +202,8 @@ export function useRawLedgerPrint() {
   const prepareCustomerLedger = useCallback(
     async (
       customer: LedgerPrintCustomer,
-      selection: LedgerPrintSelection = COMPLETE_LEDGER_SELECTION
+      selection: LedgerPrintSelection = COMPLETE_LEDGER_SELECTION,
+      options: { includeHeader?: boolean; includeFooter?: boolean } = {}
     ) => {
       if (!customer.id.trim()) throw new Error("Choose a customer before printing their ledger.");
 
@@ -220,15 +223,22 @@ export function useRawLedgerPrint() {
         throw new Error("No account entries were found in the selected date range.");
       }
 
-      return {
-        statement: buildRawLedgerStatementData(
-          customer.name,
-          entries,
-          summary,
-          profile,
-          preferences.config.printing
-        )
-      };
+      const statement = buildRawLedgerStatementData(
+        customer.name,
+        entries,
+        summary,
+        profile,
+        preferences.config.printing
+      );
+      let raster: RasterLedgerSegments | undefined;
+      if (preferences.config.printing.defaultPrintMode === "raster") {
+        try {
+          raster = await prepareRasterLedger(statement, options);
+        } catch (error) {
+          console.warn("High-quality ledger preparation failed; device text will be used.", error);
+        }
+      }
+      return { statement, raster };
     },
     []
   );
@@ -237,9 +247,9 @@ export function useRawLedgerPrint() {
     async (
       customer: LedgerPrintCustomer,
       selection: LedgerPrintSelection = COMPLETE_LEDGER_SELECTION
-    ): Promise<{ bytesWritten: number }> => {
-      const { statement } = await prepareCustomerLedger(customer, selection);
-      const response = await window.rawPrintApi.printLedger(statement);
+    ) => {
+      const { statement, raster } = await prepareCustomerLedger(customer, selection);
+      const response = await window.rawPrintApi.printLedger(statement, raster);
       if (response.status === "error") throw new Error(response.error.message);
       return response.data;
     },

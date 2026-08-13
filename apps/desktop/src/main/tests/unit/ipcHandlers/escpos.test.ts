@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
-import type { RawLedgerStatementData, RawReceiptData } from "../../../../shared/types";
+import type {
+  MonochromeRasterData,
+  RawLedgerStatementData,
+  RawReceiptData
+} from "../../../../shared/types";
 import {
   buildEscPosLedgerStatement,
+  buildEscPosRasterReceipt,
+  buildEscPosRasterReceiptWithLedger,
   buildEscPosReceipt,
   buildEscPosReceiptWithLedger,
   buildUpiUri,
@@ -72,6 +78,25 @@ function statement(overrides: Partial<RawLedgerStatementData> = {}): RawLedgerSt
   };
 }
 
+function raster(fill: number): MonochromeRasterData {
+  return {
+    dataBase64: Buffer.alloc(72, fill).toString("base64"),
+    width: 576,
+    height: 1,
+    stride: 72
+  };
+}
+
+function occurrences(payload: Buffer, command: Buffer): number {
+  let count = 0;
+  let offset = 0;
+  while ((offset = payload.indexOf(command, offset)) >= 0) {
+    count += 1;
+    offset += command.length;
+  }
+  return count;
+}
+
 describe("ESC/POS receipt builder", () => {
   it("word-wraps and hard-wraps within the requested width", () => {
     const wrapped = wrapText("Long product name that should wrap cleanly", 12);
@@ -114,6 +139,15 @@ describe("ESC/POS receipt builder", () => {
     ]);
     expect(lines[0]!.slice(25)).toBe("     2   10.00    20.00");
     expect(lines[1]!.slice(25)).toBe(" ".repeat(23));
+  });
+
+  it("keeps compatibility-mode bytes unchanged when raster fulfillment metadata is present", () => {
+    const original = receipt();
+    const withCheckedQuantity = receipt({
+      items: original.items.map((item) => ({ ...item, checkedQty: 0.75 }))
+    });
+
+    expect(buildEscPosReceipt(withCheckedQuantity)).toEqual(buildEscPosReceipt(original));
   });
 
   it("centers, bolds, and applies 2x2 sizing to the store name", () => {
@@ -260,5 +294,57 @@ describe("ESC/POS customer ledger builder", () => {
 
     expect(payload.toString("ascii")).toContain("Customer: Anita Rs. ?");
     expect(payload.subarray(-6)).toEqual(Buffer.from([ESC, 0x64, 0x06, GS, 0x56, 0x00]));
+  });
+});
+
+describe("hybrid GS v 0 jobs", () => {
+  const rasterHeader = Buffer.from([GS, 0x76, 0x30, 0x00, 72, 0, 1, 0]);
+  const qrCommand = Buffer.from([GS, 0x28, 0x6b]);
+
+  it("prints a raster receipt without QR commands when UPI is disabled", () => {
+    const payload = buildEscPosRasterReceipt(receipt(), { body: raster(0x11) });
+
+    expect(payload.includes(rasterHeader)).toBe(true);
+    expect(payload.includes(qrCommand)).toBe(false);
+    expect(payload.includes(Buffer.from([0x89, 0x50, 0x4e, 0x47]))).toBe(false);
+    expect(occurrences(payload, Buffer.from([GS, 0x56, 0x01]))).toBe(1);
+  });
+
+  it("places native QR commands between body and after-QR raster segments", () => {
+    const withUpi = receipt({
+      upi: { id: "shop@bank", payeeName: "QuickCart Market", includeAmount: true }
+    });
+    const payload = buildEscPosRasterReceipt(withUpi, {
+      body: raster(0x11),
+      afterQr: raster(0x22)
+    });
+    const bodyIndex = payload.indexOf(rasterHeader);
+    const qrIndex = payload.indexOf(qrCommand);
+    const afterQrIndex = payload.indexOf(rasterHeader, bodyIndex + rasterHeader.length);
+
+    expect(bodyIndex).toBeGreaterThanOrEqual(0);
+    expect(qrIndex).toBeGreaterThan(bodyIndex);
+    expect(afterQrIndex).toBeGreaterThan(qrIndex);
+    expect(occurrences(payload, Buffer.from([ESC, 0x64, 0x04]))).toBe(1);
+    expect(occurrences(payload, Buffer.from([GS, 0x56, 0x01]))).toBe(1);
+  });
+
+  it("prints receipt and ledger rasters in order with one final feed and cut", () => {
+    const receiptBody = raster(0x33);
+    const ledgerBody = raster(0x44);
+    const payload = buildEscPosRasterReceiptWithLedger(
+      receipt(),
+      statement({ cutMode: "full" }),
+      { body: receiptBody },
+      { body: ledgerBody }
+    );
+    const firstRaster = payload.indexOf(Buffer.alloc(72, 0x33));
+    const secondRaster = payload.indexOf(Buffer.alloc(72, 0x44));
+
+    expect(firstRaster).toBeGreaterThanOrEqual(0);
+    expect(secondRaster).toBeGreaterThan(firstRaster);
+    expect(occurrences(payload, Buffer.from([ESC, 0x64, 0x04]))).toBe(1);
+    expect(occurrences(payload, Buffer.from([GS, 0x56, 0x00]))).toBe(1);
+    expect(payload.subarray(-6)).toEqual(Buffer.from([ESC, 0x64, 0x04, GS, 0x56, 0x00]));
   });
 });

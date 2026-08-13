@@ -2,7 +2,8 @@ import { buildRawReceiptPreviewData } from "@/features/billing/hooks/useRawRecei
 import { useBillingSessionStore } from "@/features/billing/store/billingSession.store";
 import { useBillingTabsStore } from "@/features/billing/store/billingTabs.store";
 import { useAppPreferences } from "@/features/preferences/useAppPreferences";
-import { ThermalReceiptPaper } from "@/features/settings/ThermalReceiptPreview";
+import { RasterReceiptPaper, ScaledThermalPaper } from "@/features/settings/RasterThermalPaper";
+import { DeviceTextReceiptPaper } from "@/features/settings/ThermalReceiptPreview";
 import { apiClient } from "@/lib/apiClient";
 import type { PrintingConfig, StoreProfile } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
@@ -10,6 +11,7 @@ import { useMemo } from "react";
 
 const FALLBACK_PRINTING: PrintingConfig = {
   printerName: "",
+  defaultPrintMode: "raster",
   extraFeedLines: 4,
   cutMode: "partial",
   showAddress: true,
@@ -67,7 +69,15 @@ export function BillPreview() {
 
   return (
     <div className="flex min-h-full justify-center p-3 pb-16">
-      <ThermalReceiptPaper receipt={receipt} />
+      <div className="w-full max-w-[420px]">
+        {printing.defaultPrintMode === "raster" ? (
+          <ScaledThermalPaper extraFeedLines={receipt.extraFeedLines} cutMode={receipt.cutMode}>
+            <RasterReceiptPaper receipt={receipt} />
+          </ScaledThermalPaper>
+        ) : (
+          <DeviceTextReceiptPaper receipt={receipt} />
+        )}
+      </div>
     </div>
   );
 }

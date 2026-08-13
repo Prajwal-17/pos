@@ -12,6 +12,7 @@ const PREVIEW_ITEMS: RawReceiptItem[] = [
   {
     name: "Premium Basmati Rice Extra Long Grain",
     quantity: "2.5",
+    checkedQty: 2.5,
     unitPricePaisa: 8500,
     totalPaisa: 21250,
     mrpPaisa: 10000
@@ -19,6 +20,7 @@ const PREVIEW_ITEMS: RawReceiptItem[] = [
   {
     name: "Cold Pressed Groundnut Oil 1 Litre Bottle",
     quantity: "1",
+    checkedQty: 0.5,
     unitPricePaisa: 19900,
     totalPaisa: 19900,
     mrpPaisa: 22000

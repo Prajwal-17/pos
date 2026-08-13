@@ -61,6 +61,7 @@ describe("preferences integration", () => {
     expect(defaults.exports.defaultPdfLocation).toContain("Downloads");
     expect(defaults.printing).toEqual({
       printerName: "",
+      defaultPrintMode: "raster",
       extraFeedLines: 4,
       cutMode: "partial",
       showAddress: true,
@@ -98,14 +99,16 @@ describe("preferences integration", () => {
 
     const legacyConfig = {
       billing: current!.config.billing,
-      exports: current!.config.exports
+      exports: current!.config.exports,
+      printing: { printerName: "Legacy printer" }
     } as AppConfig;
     db.update(appPreferences).set({ config: legacyConfig }).run();
 
     const readResponse = await getJson(app, "/api/app-preferences");
     const normalized = await readJson<PreferencesBody>(readResponse);
     expect(normalized.config.printing).toMatchObject({
-      printerName: "",
+      printerName: "Legacy printer",
+      defaultPrintMode: "raster",
       extraFeedLines: 4,
       cutMode: "partial",
       showAddress: true,
@@ -168,6 +171,7 @@ describe("preferences integration", () => {
       },
       printing: {
         printerName: "Everycom",
+        defaultPrintMode: "device-text",
         footerMessage: "Custom footer",
         printUpiQrOnSales: true
       }
@@ -179,6 +183,7 @@ describe("preferences integration", () => {
     const exportsReset = await readJson<PreferencesBody>(exportsResponse);
     expect(exportsReset.config.exports).toEqual(defaults.exports);
     expect(exportsReset.config.printing.footerMessage).toBe("Custom footer");
+    expect(exportsReset.config.printing.defaultPrintMode).toBe("device-text");
     expect(exportsReset.config.billing).toEqual({
       defaultCustomerId: customerId,
       searchDropdown: { scale: 1.2 }
@@ -213,6 +218,7 @@ describe("preferences integration", () => {
       },
       printing: {
         printerName: "Everycom EC-801",
+        defaultPrintMode: "device-text",
         extraFeedLines: 7,
         cutMode: "full",
         showAddress: false,
@@ -246,6 +252,7 @@ describe("preferences integration", () => {
       },
       printing: {
         printerName: "Everycom EC-801",
+        defaultPrintMode: "device-text",
         extraFeedLines: 7,
         cutMode: "full",
         showAddress: false,
@@ -267,6 +274,19 @@ describe("preferences integration", () => {
     expect(db.select().from(appPreferences).get()?.config).toEqual(body.config);
   });
 
+  it("persists both supported default print modes", async () => {
+    await onboard();
+    for (const defaultPrintMode of ["device-text", "raster"] as const) {
+      const response = await requestJson(app, "PATCH", "/api/app-preferences", {
+        printing: { defaultPrintMode }
+      });
+      expect(response.status).toBe(200);
+      expect((await readJson<PreferencesBody>(response)).config.printing.defaultPrintMode).toBe(
+        defaultPrintMode
+      );
+    }
+  });
+
   it.each([
     ["scale below minimum", { billing: { searchDropdown: { scale: 0.79 } } }],
     ["scale above maximum", { billing: { searchDropdown: { scale: 1.51 } } }],
@@ -284,6 +304,7 @@ describe("preferences integration", () => {
     ["excessive printing feed lines", { printing: { extraFeedLines: 11 } }],
     ["fractional printing feed lines", { printing: { extraFeedLines: 1.5 } }],
     ["unknown printing cut mode", { printing: { cutMode: "tear" } }],
+    ["unknown default print mode", { printing: { defaultPrintMode: "png" } }],
     ["non-object printing", { printing: [] }]
   ])("rejects %s without changing preferences", async (_label, payload) => {
     await onboard();

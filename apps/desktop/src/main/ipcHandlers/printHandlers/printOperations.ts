@@ -1,16 +1,22 @@
 import type { WebContents } from "electron/main";
 import type {
   ApiResponse,
+  PrintingConfig,
   RawLedgerStatementData,
+  RawPrintResult,
   RawReceiptData,
   SystemPrinterInfo
 } from "../../../shared/types";
 import { preferencesService } from "../../modules/preferences/preferences.service";
 import {
   buildEscPosLedgerStatement,
+  buildEscPosRasterLedgerStatement,
+  buildEscPosRasterReceipt,
+  buildEscPosRasterReceiptWithLedger,
   buildEscPosReceipt,
   buildEscPosReceiptWithLedger
 } from "./escpos";
+import { validateRasterLedgerSegments, validateRasterReceiptSegments } from "./raster";
 import { sendRawToWindowsPrinter, validatePrinterName } from "./windowsRawPrinter";
 
 const STORE_ID = "default";
@@ -33,12 +39,40 @@ function isSignedPaisa(value: unknown): value is number {
   return typeof value === "number" && Number.isInteger(value);
 }
 
-async function getConfiguredPrinterName(): Promise<string> {
+async function getConfiguredPrinting(): Promise<{
+  printerName: string;
+  printing: PrintingConfig;
+}> {
   const preferences = await preferencesService.getPreferences(STORE_ID);
-  return validatePrinterName(preferences.config.printing.printerName);
+  return {
+    printerName: validatePrinterName(preferences.config.printing.printerName),
+    printing: preferences.config.printing
+  };
 }
 
-export function validateRawReceiptData(receipt: unknown): asserts receipt is RawReceiptData {
+function withReceiptFinishing(receipt: RawReceiptData, printing: PrintingConfig): RawReceiptData {
+  return {
+    ...receipt,
+    extraFeedLines: printing.extraFeedLines,
+    cutMode: printing.cutMode
+  };
+}
+
+function withLedgerFinishing(
+  statement: RawLedgerStatementData,
+  printing: PrintingConfig
+): RawLedgerStatementData {
+  return {
+    ...statement,
+    extraFeedLines: printing.extraFeedLines,
+    cutMode: printing.cutMode
+  };
+}
+
+export function validateRawReceiptData(
+  receipt: unknown,
+  options: { validateFinishing?: boolean } = {}
+): asserts receipt is RawReceiptData {
   if (!receipt || typeof receipt !== "object") {
     throw new Error("Receipt details are required.");
   }
@@ -65,10 +99,17 @@ export function validateRawReceiptData(receipt: unknown): asserts receipt is Raw
     throw new Error("At least one receipt item is required.");
   }
   for (const item of value.items) {
+    const quantity = Number(item?.quantity);
+    const checkedQuantity = item?.checkedQty ?? 0;
     if (
       !item ||
       !item.name?.trim() ||
       !item.quantity?.trim() ||
+      !Number.isFinite(quantity) ||
+      quantity <= 0 ||
+      !Number.isFinite(checkedQuantity) ||
+      checkedQuantity < 0 ||
+      checkedQuantity > quantity ||
       !isPaisa(item.unitPricePaisa) ||
       !isPaisa(item.totalPaisa) ||
       (item.mrpPaisa !== undefined && !isPaisa(item.mrpPaisa))
@@ -83,15 +124,17 @@ export function validateRawReceiptData(receipt: unknown): asserts receipt is Raw
   ) {
     throw new Error("Receipt totals are invalid.");
   }
-  if (
-    !Number.isInteger(value.extraFeedLines) ||
-    value.extraFeedLines! < 0 ||
-    value.extraFeedLines! > 10
-  ) {
-    throw new Error("Receipt feed lines must be between 0 and 10.");
-  }
-  if (value.cutMode !== "partial" && value.cutMode !== "full" && value.cutMode !== "none") {
-    throw new Error("The receipt cut mode is invalid.");
+  if (options.validateFinishing !== false) {
+    if (
+      !Number.isInteger(value.extraFeedLines) ||
+      value.extraFeedLines! < 0 ||
+      value.extraFeedLines! > 10
+    ) {
+      throw new Error("Receipt feed lines must be between 0 and 10.");
+    }
+    if (value.cutMode !== "partial" && value.cutMode !== "full" && value.cutMode !== "none") {
+      throw new Error("The receipt cut mode is invalid.");
+    }
   }
   if (
     value.upi &&
@@ -104,7 +147,8 @@ export function validateRawReceiptData(receipt: unknown): asserts receipt is Raw
 }
 
 export function validateRawLedgerStatementData(
-  statement: unknown
+  statement: unknown,
+  options: { validateFinishing?: boolean } = {}
 ): asserts statement is RawLedgerStatementData {
   if (!statement || typeof statement !== "object") {
     throw new Error("Customer ledger details are required.");
@@ -144,15 +188,17 @@ export function validateRawLedgerStatementData(
   ) {
     throw new Error("Customer ledger totals are invalid.");
   }
-  if (
-    !Number.isInteger(value.extraFeedLines) ||
-    value.extraFeedLines! < 0 ||
-    value.extraFeedLines! > 10
-  ) {
-    throw new Error("Ledger feed lines must be between 0 and 10.");
-  }
-  if (value.cutMode !== "partial" && value.cutMode !== "full" && value.cutMode !== "none") {
-    throw new Error("The ledger cut mode is invalid.");
+  if (options.validateFinishing !== false) {
+    if (
+      !Number.isInteger(value.extraFeedLines) ||
+      value.extraFeedLines! < 0 ||
+      value.extraFeedLines! > 10
+    ) {
+      throw new Error("Ledger feed lines must be between 0 and 10.");
+    }
+    if (value.cutMode !== "partial" && value.cutMode !== "full" && value.cutMode !== "none") {
+      throw new Error("The ledger cut mode is invalid.");
+    }
   }
 }
 
@@ -173,28 +219,68 @@ export async function listPrinters(sender: WebContents): Promise<ApiResponse<Sys
 }
 
 export async function printReceipt(
-  receipt: unknown
-): Promise<ApiResponse<{ bytesWritten: number }>> {
+  receipt: unknown,
+  raster: unknown
+): Promise<ApiResponse<RawPrintResult>> {
   try {
-    const printerName = await getConfiguredPrinterName();
-    validateRawReceiptData(receipt);
-    const payload = buildEscPosReceipt(receipt);
+    validateRawReceiptData(receipt, { validateFinishing: false });
+    const { printerName, printing } = await getConfiguredPrinting();
+    const authoritativeReceipt = withReceiptFinishing(receipt, printing);
+    validateRawReceiptData(authoritativeReceipt);
+    let payload: Buffer;
+    let modeUsed = printing.defaultPrintMode;
+    let fellBack = false;
+
+    if (printing.defaultPrintMode === "device-text") {
+      payload = buildEscPosReceipt(authoritativeReceipt);
+    } else {
+      try {
+        validateRasterReceiptSegments(raster, Boolean(authoritativeReceipt.upi));
+        payload = buildEscPosRasterReceipt(authoritativeReceipt, raster);
+      } catch (error) {
+        console.warn("Raster receipt preparation was rejected; using device text.", error);
+        payload = buildEscPosReceipt(authoritativeReceipt);
+        modeUsed = "device-text";
+        fellBack = true;
+      }
+    }
+
     const bytesWritten = await sendRawToWindowsPrinter(printerName, payload);
-    return { status: "success", data: { bytesWritten } };
+    return { status: "success", data: { bytesWritten, modeUsed, fellBack } };
   } catch (error) {
     return errorResponse(error);
   }
 }
 
 export async function printLedger(
-  statement: unknown
-): Promise<ApiResponse<{ bytesWritten: number }>> {
+  statement: unknown,
+  raster: unknown
+): Promise<ApiResponse<RawPrintResult>> {
   try {
-    const printerName = await getConfiguredPrinterName();
-    validateRawLedgerStatementData(statement);
-    const payload = buildEscPosLedgerStatement(statement);
+    validateRawLedgerStatementData(statement, { validateFinishing: false });
+    const { printerName, printing } = await getConfiguredPrinting();
+    const authoritativeStatement = withLedgerFinishing(statement, printing);
+    validateRawLedgerStatementData(authoritativeStatement);
+    let payload: Buffer;
+    let modeUsed = printing.defaultPrintMode;
+    let fellBack = false;
+
+    if (printing.defaultPrintMode === "device-text") {
+      payload = buildEscPosLedgerStatement(authoritativeStatement);
+    } else {
+      try {
+        validateRasterLedgerSegments(raster);
+        payload = buildEscPosRasterLedgerStatement(authoritativeStatement, raster);
+      } catch (error) {
+        console.warn("Raster ledger preparation was rejected; using device text.", error);
+        payload = buildEscPosLedgerStatement(authoritativeStatement);
+        modeUsed = "device-text";
+        fellBack = true;
+      }
+    }
+
     const bytesWritten = await sendRawToWindowsPrinter(printerName, payload);
-    return { status: "success", data: { bytesWritten } };
+    return { status: "success", data: { bytesWritten, modeUsed, fellBack } };
   } catch (error) {
     return errorResponse(error);
   }
@@ -202,15 +288,44 @@ export async function printLedger(
 
 export async function printReceiptWithLedger(
   receipt: unknown,
-  statement: unknown
-): Promise<ApiResponse<{ bytesWritten: number }>> {
+  statement: unknown,
+  receiptRaster: unknown,
+  ledgerRaster: unknown
+): Promise<ApiResponse<RawPrintResult>> {
   try {
-    const printerName = await getConfiguredPrinterName();
-    validateRawReceiptData(receipt);
-    validateRawLedgerStatementData(statement);
-    const payload = buildEscPosReceiptWithLedger(receipt, statement);
+    validateRawReceiptData(receipt, { validateFinishing: false });
+    validateRawLedgerStatementData(statement, { validateFinishing: false });
+    const { printerName, printing } = await getConfiguredPrinting();
+    const authoritativeReceipt = withReceiptFinishing(receipt, printing);
+    const authoritativeStatement = withLedgerFinishing(statement, printing);
+    validateRawReceiptData(authoritativeReceipt);
+    validateRawLedgerStatementData(authoritativeStatement);
+    let payload: Buffer;
+    let modeUsed = printing.defaultPrintMode;
+    let fellBack = false;
+
+    if (printing.defaultPrintMode === "device-text") {
+      payload = buildEscPosReceiptWithLedger(authoritativeReceipt, authoritativeStatement);
+    } else {
+      try {
+        validateRasterReceiptSegments(receiptRaster, Boolean(authoritativeReceipt.upi));
+        validateRasterLedgerSegments(ledgerRaster);
+        payload = buildEscPosRasterReceiptWithLedger(
+          authoritativeReceipt,
+          authoritativeStatement,
+          receiptRaster,
+          ledgerRaster
+        );
+      } catch (error) {
+        console.warn("Combined raster preparation was rejected; using device text.", error);
+        payload = buildEscPosReceiptWithLedger(authoritativeReceipt, authoritativeStatement);
+        modeUsed = "device-text";
+        fellBack = true;
+      }
+    }
+
     const bytesWritten = await sendRawToWindowsPrinter(printerName, payload);
-    return { status: "success", data: { bytesWritten } };
+    return { status: "success", data: { bytesWritten, modeUsed, fellBack } };
   } catch (error) {
     return errorResponse(error);
   }

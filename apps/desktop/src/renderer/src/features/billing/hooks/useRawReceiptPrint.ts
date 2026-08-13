@@ -1,10 +1,12 @@
 import { apiClient } from "@/lib/apiClient";
+import { prepareRasterReceipt } from "@/features/settings/thermalRaster";
 import { filterValidLineItems } from "@/utils/renderer.utils";
 import type { BillingSessionData } from "@/features/billing/store/billingSession.types";
 import { useBillingSessionStore } from "@/features/billing/store/billingSession.store";
 import type {
   AppPreferencesResponse,
   PrintingConfig,
+  RasterReceiptSegments,
   RawReceiptData,
   StoreProfile
 } from "@shared/types";
@@ -40,6 +42,7 @@ function createRawReceiptData(
   const items = validItems.map((item) => ({
     name: item.productSnapshot,
     quantity: item.quantity,
+    checkedQty: item.checkedQty ?? 0,
     unitPricePaisa: rupeesToPaisa(Number(item.price)),
     totalPaisa: item.totalPrice,
     mrpPaisa: item.mrp ?? undefined
@@ -98,7 +101,7 @@ export function buildRawReceiptPreviewData(
 
 const useRawReceiptPrint = () => {
   const prepareReceipt = useCallback(
-    async (tabId: string): Promise<{ receipt: RawReceiptData }> => {
+    async (tabId: string, options: { omitFooter?: boolean } = {}) => {
       const [profile, preferences] = await Promise.all([
         apiClient.get<StoreProfile>("/api/store-profile"),
         apiClient.get<AppPreferencesResponse>("/api/app-preferences")
@@ -107,17 +110,24 @@ const useRawReceiptPrint = () => {
       const session = useBillingSessionStore.getState().sessions[tabId];
       if (!session) throw new Error("The synchronized billing session is no longer available.");
 
-      return {
-        receipt: buildRawReceiptData(session, profile, preferences.config.printing)
-      };
+      const receipt = buildRawReceiptData(session, profile, preferences.config.printing);
+      let raster: RasterReceiptSegments | undefined;
+      if (preferences.config.printing.defaultPrintMode === "raster") {
+        try {
+          raster = await prepareRasterReceipt(receipt, options);
+        } catch (error) {
+          console.warn("High-quality receipt preparation failed; device text will be used.", error);
+        }
+      }
+      return { receipt, raster };
     },
     []
   );
 
   const printReceipt = useCallback(
-    async (tabId: string): Promise<{ bytesWritten: number }> => {
-      const { receipt } = await prepareReceipt(tabId);
-      const response = await window.rawPrintApi.printReceipt(receipt);
+    async (tabId: string) => {
+      const { receipt, raster } = await prepareReceipt(tabId);
+      const response = await window.rawPrintApi.printReceipt(receipt, raster);
       if (response.status === "error") throw new Error(response.error.message);
       return response.data;
     },

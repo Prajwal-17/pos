@@ -26,6 +26,13 @@ import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 
+const RASTER_FALLBACK_MESSAGE =
+  "Printed using device text because the high-quality receipt could not be prepared";
+
+function warnIfRasterFellBack(fellBack: boolean) {
+  if (fellBack) toast(RASTER_FALLBACK_MESSAGE, { icon: "⚠️" });
+}
+
 export const SummaryFooter = () => {
   const { type, id } = useParams();
   const navigate = useNavigate();
@@ -66,7 +73,8 @@ export const SummaryFooter = () => {
       const synced = await waitForSync();
       if (!synced || !activeTabId) return;
 
-      await printReceipt(activeTabId);
+      const result = await printReceipt(activeTabId);
+      warnIfRasterFellBack(result.fellBack);
       navigate(`/dashboard/${type}`);
     } catch (error) {
       console.error("Print failed", error);
@@ -83,14 +91,18 @@ export const SummaryFooter = () => {
 
       const customer = readSynchronizedCustomer();
       const [receiptJob, ledgerJob] = await Promise.all([
-        prepareReceipt(activeTabId),
-        prepareCustomerLedger(customer)
+        prepareReceipt(activeTabId, { omitFooter: true }),
+        prepareCustomerLedger(customer, undefined, { includeHeader: false })
       ]);
+      const useRaster = Boolean(receiptJob.raster && ledgerJob.raster);
       const response = await window.rawPrintApi.printReceiptWithLedger(
         receiptJob.receipt,
-        ledgerJob.statement
+        ledgerJob.statement,
+        useRaster ? receiptJob.raster : undefined,
+        useRaster ? ledgerJob.raster : undefined
       );
       if (response.status === "error") throw new Error(response.error.message);
+      warnIfRasterFellBack(response.data.fellBack);
       navigate("/dashboard/" + type);
     } catch (error) {
       console.error("Bill and ledger print failed", error);
@@ -114,7 +126,8 @@ export const SummaryFooter = () => {
       const synced = await waitForSync();
       if (!synced) return;
 
-      await printCustomerLedger(readSynchronizedCustomer());
+      const result = await printCustomerLedger(readSynchronizedCustomer());
+      warnIfRasterFellBack(result.fellBack);
       toast.success("Customer ledger sent to printer.");
     } catch (error) {
       console.error("Ledger print failed", error);

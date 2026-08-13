@@ -17,6 +17,7 @@ export function getDefaultExportsConfig(): AppConfig["exports"] {
 export function getDefaultPrintingConfig(): PrintingConfig {
   return {
     printerName: "",
+    defaultPrintMode: "raster",
     extraFeedLines: 4,
     cutMode: "partial",
     showAddress: true,
@@ -37,9 +38,14 @@ export function getDefaultPrintingConfig(): PrintingConfig {
 }
 
 export function normalizePrintingConfig(config?: Partial<PrintingConfig>): PrintingConfig {
+  const defaultPrintMode = config?.defaultPrintMode;
   return {
     ...getDefaultPrintingConfig(),
-    ...config
+    ...config,
+    defaultPrintMode:
+      defaultPrintMode === "device-text" || defaultPrintMode === "raster"
+        ? defaultPrintMode
+        : "raster"
   };
 }
 

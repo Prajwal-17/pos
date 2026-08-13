@@ -28,10 +28,16 @@ const exportApi: ExportApi = {
 
 const rawPrintApi: RawPrintApi = {
   listPrinters: () => ipcRenderer.invoke("printer:list"),
-  printReceipt: (receipt) => ipcRenderer.invoke("printer:raw-receipt", receipt),
-  printLedger: (statement) => ipcRenderer.invoke("printer:raw-ledger", statement),
-  printReceiptWithLedger: (receipt, statement) =>
-    ipcRenderer.invoke("printer:raw-receipt-with-ledger", receipt, statement)
+  printReceipt: (receipt, raster) => ipcRenderer.invoke("printer:raw-receipt", receipt, raster),
+  printLedger: (statement, raster) => ipcRenderer.invoke("printer:raw-ledger", statement, raster),
+  printReceiptWithLedger: (receipt, statement, receiptRaster, ledgerRaster) =>
+    ipcRenderer.invoke(
+      "printer:raw-receipt-with-ledger",
+      receipt,
+      statement,
+      receiptRaster,
+      ledgerRaster
+    )
 };
 
 const zoomApi: ZoomApi = {

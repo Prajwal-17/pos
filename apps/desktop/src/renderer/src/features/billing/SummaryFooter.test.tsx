@@ -14,7 +14,8 @@ const mocks = vi.hoisted(() => ({
   prepareCustomerLedger: vi.fn(),
   printCustomerLedger: vi.fn(),
   printReceiptWithLedger: vi.fn(),
-  toastError: vi.fn()
+  toastError: vi.fn(),
+  toastWarning: vi.fn()
 }));
 
 vi.mock("@/features/billing/hooks/useRawReceiptPrint", () => ({
@@ -55,11 +56,11 @@ vi.mock("@/features/billing/syncWorker", () => ({
 }));
 
 vi.mock("react-hot-toast", () => ({
-  default: {
+  default: Object.assign(mocks.toastWarning, {
     error: mocks.toastError,
     success: vi.fn(),
     dismiss: vi.fn()
-  }
+  })
 }));
 
 vi.mock("react-router-dom", async () => {
@@ -89,14 +90,16 @@ describe("Save & Print RAW workflow", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.prepareReceipt.mockResolvedValue({
-      receipt: { transactionNo: 42 }
+      receipt: { transactionNo: 42 },
+      raster: { body: { dataBase64: "receipt" } }
     });
     mocks.prepareCustomerLedger.mockResolvedValue({
-      statement: { customerName: "Anita" }
+      statement: { customerName: "Anita" },
+      raster: { body: { dataBase64: "ledger" } }
     });
     mocks.printReceiptWithLedger.mockResolvedValue({
       status: "success",
-      data: { bytesWritten: 1280 }
+      data: { bytesWritten: 1280, modeUsed: "raster", fellBack: false }
     });
     Object.defineProperty(window, "rawPrintApi", {
       configurable: true,
@@ -106,7 +109,7 @@ describe("Save & Print RAW workflow", () => {
 
   it("awaits flushSync and Windows acceptance before navigating", async () => {
     const sync = deferred<void>();
-    const print = deferred<{ bytesWritten: number }>();
+    const print = deferred<{ bytesWritten: number; modeUsed: "raster"; fellBack: boolean }>();
     mocks.flushSync.mockReturnValue(sync.promise);
     mocks.printReceipt.mockReturnValue(print.promise);
 
@@ -122,12 +125,17 @@ describe("Save & Print RAW workflow", () => {
     await waitFor(() => expect(mocks.printReceipt).toHaveBeenCalledWith("tab-1"));
     expect(mocks.navigate).not.toHaveBeenCalled();
 
-    await act(async () => print.resolve({ bytesWritten: 512 }));
+    await act(async () =>
+      print.resolve({ bytesWritten: 512, modeUsed: "raster", fellBack: false })
+    );
     await waitFor(() => expect(mocks.navigate).toHaveBeenCalledWith("/dashboard/sales"));
   });
 
   it("submits the bill and customer ledger as one RAW job before navigating", async () => {
-    const combinedPrint = deferred<{ status: "success"; data: { bytesWritten: number } }>();
+    const combinedPrint = deferred<{
+      status: "success";
+      data: { bytesWritten: number; modeUsed: "raster"; fellBack: boolean };
+    }>();
     mocks.flushSync.mockResolvedValue(undefined);
     mocks.printReceiptWithLedger.mockReturnValue(combinedPrint.promise);
 
@@ -135,26 +143,62 @@ describe("Save & Print RAW workflow", () => {
     fireEvent.click(screen.getByRole("button", { name: "More print options" }));
     fireEvent.click(await screen.findByRole("menuitem", { name: /Save & print bill \+ ledger/ }));
 
-    await waitFor(() => expect(mocks.prepareReceipt).toHaveBeenCalledWith("tab-1"));
-    expect(mocks.prepareCustomerLedger).toHaveBeenCalledWith({
-      id: "customer-1",
-      name: "Anita"
-    });
+    await waitFor(() =>
+      expect(mocks.prepareReceipt).toHaveBeenCalledWith("tab-1", { omitFooter: true })
+    );
+    expect(mocks.prepareCustomerLedger).toHaveBeenCalledWith(
+      { id: "customer-1", name: "Anita" },
+      undefined,
+      { includeHeader: false }
+    );
     expect(mocks.printReceipt).not.toHaveBeenCalled();
     expect(mocks.printCustomerLedger).not.toHaveBeenCalled();
     expect(mocks.printReceiptWithLedger).toHaveBeenCalledWith(
       { transactionNo: 42 },
-      { customerName: "Anita" }
+      { customerName: "Anita" },
+      { body: { dataBase64: "receipt" } },
+      { body: { dataBase64: "ledger" } }
     );
     expect(mocks.navigate).not.toHaveBeenCalled();
 
     await act(async () =>
       combinedPrint.resolve({
         status: "success",
-        data: { bytesWritten: 1280 }
+        data: { bytesWritten: 1280, modeUsed: "raster", fellBack: false }
       })
     );
     await waitFor(() => expect(mocks.navigate).toHaveBeenCalledWith("/dashboard/sales"));
+  });
+
+  it("omits both raster documents when either combined raster preparation fails", async () => {
+    mocks.flushSync.mockResolvedValue(undefined);
+    mocks.prepareCustomerLedger.mockResolvedValue({
+      statement: { customerName: "Anita" },
+      raster: undefined
+    });
+    mocks.printReceiptWithLedger.mockResolvedValue({
+      status: "success",
+      data: { bytesWritten: 1280, modeUsed: "device-text", fellBack: true }
+    });
+
+    render(<SummaryFooter />);
+    fireEvent.click(screen.getByRole("button", { name: "More print options" }));
+    fireEvent.click(await screen.findByRole("menuitem", { name: /Save & print bill [+] ledger/ }));
+
+    await waitFor(() =>
+      expect(mocks.printReceiptWithLedger).toHaveBeenCalledWith(
+        { transactionNo: 42 },
+        { customerName: "Anita" },
+        undefined,
+        undefined
+      )
+    );
+    await waitFor(() =>
+      expect(mocks.toastWarning).toHaveBeenCalledWith(
+        "Printed using device text because the high-quality receipt could not be prepared",
+        { icon: "⚠️" }
+      )
+    );
   });
 
   it("stays on billing and shows the printer error when submission fails", async () => {
@@ -168,5 +212,25 @@ describe("Save & Print RAW workflow", () => {
       expect(mocks.toastError).toHaveBeenCalledWith("The printer is disconnected.")
     );
     expect(mocks.navigate).not.toHaveBeenCalled();
+  });
+
+  it("warns after a successful automatic device-text fallback", async () => {
+    mocks.flushSync.mockResolvedValue(undefined);
+    mocks.printReceipt.mockResolvedValue({
+      bytesWritten: 512,
+      modeUsed: "device-text",
+      fellBack: true
+    });
+
+    render(<SummaryFooter />);
+    fireEvent.click(screen.getByRole("button", { name: "Save & Print" }));
+
+    await waitFor(() =>
+      expect(mocks.toastWarning).toHaveBeenCalledWith(
+        "Printed using device text because the high-quality receipt could not be prepared",
+        { icon: "⚠️" }
+      )
+    );
+    expect(mocks.navigate).toHaveBeenCalledWith("/dashboard/sales");
   });
 });

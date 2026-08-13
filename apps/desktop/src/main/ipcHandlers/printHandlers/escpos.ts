@@ -1,17 +1,24 @@
-import type { RawLedgerStatementData, RawReceiptData, ReceiptCutMode } from "../../../shared/types";
+import type {
+  RasterLedgerSegments,
+  RasterReceiptSegments,
+  RawLedgerStatementData,
+  RawReceiptData,
+  ReceiptCutMode
+} from "../../../shared/types";
 import {
   buildThermalUpiUri,
   fitThermalText,
   formatThermalReceiptDate,
-  thermalLedgerEntryLines,
   receiptDocumentLabel,
   safeThermalText,
-  thermalItemLines,
   THERMAL_RECEIPT_LINE_WIDTH,
+  thermalItemLines,
+  thermalLedgerEntryLines,
   wrapThermalText
 } from "../../../shared/utils/thermalReceipt";
 import { paisaToRupeeString } from "../../../shared/utils/utils";
 import { escPosCommands } from "./escposCommands";
+import { buildGsV0Raster } from "./raster";
 
 const LINE_WIDTH = THERMAL_RECEIPT_LINE_WIDTH;
 
@@ -223,4 +230,60 @@ export function buildEscPosReceiptWithLedger(
   });
 
   return Buffer.concat([receiptPart, ledgerPart]);
+}
+
+function nativeQrSection(receipt: RawReceiptData): Buffer {
+  const upiUri = buildUpiUri(receipt);
+  if (!upiUri) return Buffer.alloc(0);
+  return Buffer.concat([
+    escPosCommands.alignCenter,
+    buildNativeQrCode(upiUri),
+    escPosCommands.alignLeft
+  ]);
+}
+
+export function buildEscPosRasterReceipt(
+  receipt: RawReceiptData,
+  raster: RasterReceiptSegments
+): Buffer {
+  const chunks = [escPosCommands.reset, buildGsV0Raster(raster.body)];
+  const upiUri = buildUpiUri(receipt);
+  if (upiUri) {
+    if (!raster.afterQr) throw new Error("The receipt raster after-QR segment is required.");
+    chunks.push(nativeQrSection(receipt), buildGsV0Raster(raster.afterQr));
+  }
+  chunks.push(paperFinish(receipt.extraFeedLines, receipt.cutMode));
+  return Buffer.concat(chunks);
+}
+
+export function buildEscPosRasterLedgerStatement(
+  statement: RawLedgerStatementData,
+  raster: RasterLedgerSegments
+): Buffer {
+  return Buffer.concat([
+    escPosCommands.reset,
+    buildGsV0Raster(raster.body),
+    paperFinish(statement.extraFeedLines, statement.cutMode)
+  ]);
+}
+
+export function buildEscPosRasterReceiptWithLedger(
+  receipt: RawReceiptData,
+  statement: RawLedgerStatementData,
+  receiptRaster: RasterReceiptSegments,
+  ledgerRaster: RasterLedgerSegments
+): Buffer {
+  const chunks = [escPosCommands.reset, buildGsV0Raster(receiptRaster.body)];
+  const upiUri = buildUpiUri(receipt);
+  if (upiUri) {
+    if (!receiptRaster.afterQr) {
+      throw new Error("The receipt raster after-QR segment is required.");
+    }
+    chunks.push(nativeQrSection(receipt), buildGsV0Raster(receiptRaster.afterQr));
+  }
+  chunks.push(
+    buildGsV0Raster(ledgerRaster.body),
+    paperFinish(statement.extraFeedLines, statement.cutMode)
+  );
+  return Buffer.concat(chunks);
 }

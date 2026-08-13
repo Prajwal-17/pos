@@ -60,6 +60,30 @@ export const escPosCommands = {
   // print the stored qr code
   printQr: bytes(GS, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x51, 0x30),
 
+  // print a one bit raster image
+  gsV0RasterHeader(widthBytes: number, height: number): Buffer {
+    if (
+      !Number.isInteger(widthBytes) ||
+      widthBytes < 1 ||
+      widthBytes > 0xffff ||
+      !Number.isInteger(height) ||
+      height < 1 ||
+      height > 0xffff
+    ) {
+      throw new Error("Raster command dimensions are invalid.");
+    }
+    return bytes(
+      GS,
+      0x76,
+      0x30,
+      0x00,
+      widthBytes & 0xff,
+      (widthBytes >> 8) & 0xff,
+      height & 0xff,
+      (height >> 8) & 0xff
+    );
+  },
+
   // feed blank lines
   feedLines(lineCount: number): Buffer {
     return bytes(ESC, 0x64, lineCount);

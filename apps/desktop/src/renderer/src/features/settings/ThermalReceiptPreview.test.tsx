@@ -37,6 +37,7 @@ const profile: StoreProfile = {
 
 const printing: PrintingConfig = {
   printerName: "Everycom EC-801",
+  defaultPrintMode: "device-text",
   extraFeedLines: 4,
   cutMode: "partial",
   showAddress: true,
@@ -128,7 +129,7 @@ describe("thermal receipt settings preview", () => {
     expect(receipt.gstin).toBe("29ABCDE1234F1Z5");
   });
 
-  it("stays collapsed until requested and switches the preview document", async () => {
+  it("keeps the preview inactive until opened and switches the preview document", async () => {
     const user = userEvent.setup();
     vi.mocked(apiClient.get).mockResolvedValue(profile);
 
@@ -136,9 +137,12 @@ describe("thermal receipt settings preview", () => {
 
     expect(screen.queryByTestId("thermal-receipt-paper")).not.toBeInTheDocument();
     expect(apiClient.get).not.toHaveBeenCalled();
-    await user.click(screen.getByRole("button", { name: /Print preview/ }));
+    await user.click(screen.getByRole("button", { name: "Open preview" }));
 
     const paper = await screen.findByTestId("thermal-receipt-paper");
+    expect(screen.getByRole("dialog", { name: "Receipt preview" })).toBeVisible();
+    expect(screen.getByText("Device text")).toBeVisible();
+    expect(screen.getByText("Font A · 48 columns")).toBeVisible();
     expect(paper).toHaveTextContent("Invoice no: 1048");
     expect(paper).toHaveTextContent("GSTIN: 29ABCDE1234F1Z5");
     expect(paper).toHaveTextContent("YOU SAVED Rs.58.50");
@@ -159,15 +163,13 @@ describe("thermal receipt settings preview", () => {
     expect(paper).toHaveTextContent("Scan to pay");
     expect(paper).toHaveTextContent("QuickCart Test Store");
 
-    await user.click(screen.getByRole("combobox", { name: "Preview document" }));
-    await user.click(screen.getByRole("option", { name: "Estimate bill" }));
+    await user.click(screen.getByRole("button", { name: "Estimate" }));
 
     await waitFor(() => expect(paper).toHaveTextContent("Estimate no: 1048"));
     expect(paper).not.toHaveTextContent("GSTIN:");
     expect(screen.queryByTitle("Sample UPI payment QR")).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("combobox", { name: "Preview document" }));
-    await user.click(screen.getByRole("option", { name: "Customer ledger" }));
+    await user.click(screen.getByRole("button", { name: "Ledger" }));
 
     const ledgerPaper = await screen.findByTestId("thermal-ledger-paper");
     expect(ledgerPaper).toHaveTextContent("ACCOUNTS");
@@ -189,7 +191,7 @@ describe("thermal receipt settings preview", () => {
       <ThermalReceiptPreview printing={{ ...printing, extraFeedLines: 0, cutMode: "none" }} />,
       { wrapper: TestQueryProvider }
     );
-    await user.click(screen.getByRole("button", { name: /Print preview/ }));
+    await user.click(screen.getByRole("button", { name: "Open preview" }));
 
     expect(await screen.findByTestId("thermal-receipt-feed")).toHaveAttribute(
       "aria-label",

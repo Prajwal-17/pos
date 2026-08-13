@@ -26,6 +26,7 @@ const profile: StoreProfile = {
 
 const printing: PrintingConfig = {
   printerName: "Everycom EC-801",
+  defaultPrintMode: "raster",
   extraFeedLines: 4,
   cutMode: "partial",
   showAddress: true,
@@ -56,6 +57,7 @@ function session(type: "sale" | "estimate"): BillingSessionData {
         productSnapshot: "Loose rice",
         price: "12.50",
         quantity: "1.25",
+        checkedQty: 0.75,
         totalPrice: 1563
       }
     ]
@@ -94,6 +96,7 @@ describe("RAW receipt data", () => {
       {
         name: "Loose rice",
         quantity: "1.25",
+        checkedQty: 0.75,
         unitPricePaisa: 1250,
         totalPaisa: 1563,
         mrpPaisa: undefined

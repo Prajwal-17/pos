@@ -21,6 +21,7 @@ export const updatePreferencesSchema = z.object({
   printing: z
     .object({
       printerName: z.string().optional(),
+      defaultPrintMode: z.enum(["raster", "device-text"]).optional(),
       extraFeedLines: z.number().int().min(0).max(10).optional(),
       cutMode: z.enum(["partial", "full", "none"]).optional(),
       showAddress: z.boolean().optional(),

@@ -3,10 +3,15 @@ import { listPrinters, printLedger, printReceipt, printReceiptWithLedger } from 
 
 export function printHandlers() {
   ipcMain.handle("printer:list", (event) => listPrinters(event.sender));
-  ipcMain.handle("printer:raw-receipt", (_event, receipt: unknown) => printReceipt(receipt));
-  ipcMain.handle("printer:raw-ledger", (_event, statement: unknown) => printLedger(statement));
+  ipcMain.handle("printer:raw-receipt", (_event, receipt: unknown, raster: unknown) =>
+    printReceipt(receipt, raster)
+  );
+  ipcMain.handle("printer:raw-ledger", (_event, statement: unknown, raster: unknown) =>
+    printLedger(statement, raster)
+  );
   ipcMain.handle(
     "printer:raw-receipt-with-ledger",
-    (_event, receipt: unknown, statement: unknown) => printReceiptWithLedger(receipt, statement)
+    (_event, receipt: unknown, statement: unknown, receiptRaster: unknown, ledgerRaster: unknown) =>
+      printReceiptWithLedger(receipt, statement, receiptRaster, ledgerRaster)
   );
 }

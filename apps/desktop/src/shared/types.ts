@@ -610,9 +610,11 @@ export const PRODUCT_OPERATION = {
 export type ProductOperation = (typeof PRODUCT_OPERATION)[keyof typeof PRODUCT_OPERATION];
 
 export type ReceiptCutMode = "partial" | "full" | "none";
+export type PrintRenderMode = "raster" | "device-text";
 
 export type PrintingConfig = {
   printerName: string;
+  defaultPrintMode: PrintRenderMode;
   extraFeedLines: number;
   cutMode: ReceiptCutMode;
   showAddress: boolean;
@@ -688,6 +690,7 @@ export interface ExportApi {
 export type RawReceiptItem = {
   name: string;
   quantity: string;
+  checkedQty?: number;
   unitPricePaisa: number;
   totalPaisa: number;
   mrpPaisa?: number;
@@ -747,14 +750,44 @@ export type SystemPrinterInfo = {
   description: string;
 };
 
+export type MonochromeRasterData = {
+  dataBase64: string;
+  width: number;
+  height: number;
+  stride: number;
+};
+
+export type RasterReceiptSegments = {
+  body: MonochromeRasterData;
+  afterQr?: MonochromeRasterData;
+};
+
+export type RasterLedgerSegments = {
+  body: MonochromeRasterData;
+};
+
+export type RawPrintResult = {
+  bytesWritten: number;
+  modeUsed: PrintRenderMode;
+  fellBack: boolean;
+};
+
 export interface RawPrintApi {
   listPrinters(): Promise<ApiResponse<SystemPrinterInfo[]>>;
-  printReceipt(receipt: RawReceiptData): Promise<ApiResponse<{ bytesWritten: number }>>;
-  printLedger(statement: RawLedgerStatementData): Promise<ApiResponse<{ bytesWritten: number }>>;
+  printReceipt(
+    receipt: RawReceiptData,
+    raster?: RasterReceiptSegments
+  ): Promise<ApiResponse<RawPrintResult>>;
+  printLedger(
+    statement: RawLedgerStatementData,
+    raster?: RasterLedgerSegments
+  ): Promise<ApiResponse<RawPrintResult>>;
   printReceiptWithLedger(
     receipt: RawReceiptData,
-    statement: RawLedgerStatementData
-  ): Promise<ApiResponse<{ bytesWritten: number }>>;
+    statement: RawLedgerStatementData,
+    receiptRaster?: RasterReceiptSegments,
+    ledgerRaster?: RasterLedgerSegments
+  ): Promise<ApiResponse<RawPrintResult>>;
 }
 
 export interface ZoomApi {

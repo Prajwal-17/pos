@@ -11,15 +11,16 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppPreferences } from "@/features/preferences/useAppPreferences";
+import { cn } from "@/lib/utils";
 import type { PrintingConfig } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, LockKeyhole, RefreshCw } from "lucide-react";
+import { Loader2, LockKeyhole, RefreshCw, ScanLine, Type } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { SettingsField } from "../SettingsField";
 import { SettingsSection } from "../SettingsSection";
 import { ThermalReceiptPreview } from "../ThermalReceiptPreview";
 
-const RESETTABLE_FIELDS_COUNT = 15;
+const RESETTABLE_FIELDS_COUNT = 16;
 const inputClass = "text-sm font-medium";
 
 type TextPrintingField = "footerMessage" | "upiId" | "upiPayeeName";
@@ -199,7 +200,8 @@ export const PrintingSection = () => {
     <div className="space-y-3">
       <ThermalReceiptPreview printing={printing} />
       <SettingsSection
-        title="Print settings"
+        title="Printing"
+        description="Printer, paper, and receipt options."
         resettableFieldsCount={RESETTABLE_FIELDS_COUNT}
         onResetSection={() => resetSection("printing")}
         isResetting={isResetting}
@@ -216,10 +218,7 @@ export const PrintingSection = () => {
 
           <TabsContent value="printer" className="mt-0">
             <SettingsGroup title="Printer">
-              <SettingsField
-                label="Windows printer"
-                hint="QuickCart finds printers installed in Windows."
-              >
+              <SettingsField label="Windows printer" hint="Choose an installed printer.">
                 <div className="flex items-start gap-2">
                   <Select
                     value={printing.printerName || undefined}
@@ -267,10 +266,85 @@ export const PrintingSection = () => {
                   </p>
                 ) : null}
               </SettingsField>
+              <SettingsField label="Print quality" hint="Choose the receipt output.">
+                <div
+                  className="grid gap-2 sm:grid-cols-2"
+                  role="radiogroup"
+                  aria-label="Print quality"
+                >
+                  {(
+                    [
+                      {
+                        value: "raster",
+                        label: "Raster quality",
+                        description: "Sharp 576-dot Inter text",
+                        icon: ScanLine
+                      },
+                      {
+                        value: "device-text",
+                        label: "Device text",
+                        description: "Fast Font A compatibility",
+                        icon: Type
+                      }
+                    ] as const
+                  ).map((option) => {
+                    const Icon = option.icon;
+                    const isSelected = printing.defaultPrintMode === option.value;
+
+                    return (
+                      <label
+                        key={option.value}
+                        className={cn(
+                          "focus-within:ring-ring flex min-h-20 cursor-pointer items-center gap-3 rounded-(--radius-control) border px-3 text-left transition-colors focus-within:ring-2 focus-within:outline-none",
+                          isSelected
+                            ? "border-strong bg-muted"
+                            : "border-border bg-card hover:bg-hover",
+                          isUpdating && "pointer-events-none opacity-50"
+                        )}
+                      >
+                        <input
+                          type="radio"
+                          name="default-print-quality"
+                          value={option.value}
+                          checked={isSelected}
+                          disabled={isUpdating}
+                          className="sr-only"
+                          onChange={() => updatePrinting({ defaultPrintMode: option.value })}
+                        />
+                        <span
+                          className={cn(
+                            "flex size-9 shrink-0 items-center justify-center rounded-(--radius-control)",
+                            isSelected
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted text-muted-foreground"
+                          )}
+                        >
+                          <Icon className="size-4" aria-hidden="true" />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="text-foreground block text-sm font-semibold">
+                            {option.label}
+                          </span>
+                          <span className="text-muted-foreground mt-0.5 block text-xs leading-4">
+                            {option.description}
+                          </span>
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+                <p className="text-muted-foreground text-xs">
+                  Raster jobs are larger and may print slightly slower.
+                </p>
+              </SettingsField>
               <FixedSetting
-                label="Paper size"
-                hint="Fixed for reliable thermal printing."
-                value="80 mm · Font A · 48 columns"
+                label="Paper"
+                hint="Fixed thermal format."
+                value={
+                  printing.defaultPrintMode === "raster"
+                    ? "80 mm · 576 dots · GS v 0"
+                    : "80 mm · Font A · 48 columns"
+                }
               />
             </SettingsGroup>
 

@@ -27,6 +27,9 @@ import toast from "react-hot-toast";
 import { AccountSummaryPanel } from "./AccountSummaryPanel";
 import { LedgerTable } from "./LedgerTable";
 
+const RASTER_FALLBACK_MESSAGE =
+  "Printed using device text because the high-quality receipt could not be prepared";
+
 type PrintScope = LedgerPrintSelection["scope"];
 
 const PRINT_SCOPES: Array<{ value: PrintScope; label: string }> = [
@@ -130,7 +133,8 @@ export function AccountingTab({ customer }: { customer: Customer }) {
 
     setIsPrinting(true);
     try {
-      await printCustomerLedger({ id: customer.id, name: customer.name }, selection);
+      const result = await printCustomerLedger({ id: customer.id, name: customer.name }, selection);
+      if (result.fellBack) toast(RASTER_FALLBACK_MESSAGE, { icon: "⚠️" });
       toast.success("Account history sent to printer.");
       setIsPrintOpen(false);
     } catch (printError) {
