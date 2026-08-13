@@ -609,6 +609,27 @@ export const PRODUCT_OPERATION = {
 
 export type ProductOperation = (typeof PRODUCT_OPERATION)[keyof typeof PRODUCT_OPERATION];
 
+export type ReceiptCutMode = "partial" | "full" | "none";
+
+export type PrintingConfig = {
+  printerName: string;
+  extraFeedLines: number;
+  cutMode: ReceiptCutMode;
+  showAddress: boolean;
+  showPhone: boolean;
+  showGstinOnSales: boolean;
+  showCustomerName: boolean;
+  showSavings: boolean;
+  savingsThresholdPaisa: number;
+  showLedgerPaymentMode: boolean;
+  showLedgerNotes: boolean;
+  footerMessage: string;
+  upiId: string;
+  upiPayeeName: string;
+  printUpiQrOnSales: boolean;
+  printUpiQrOnEstimates: boolean;
+  includeAmountInUpiQr: boolean;
+};
 export interface AppConfig {
   billing: {
     defaultCustomerId: string;
@@ -621,6 +642,7 @@ export interface AppConfig {
     defaultPdfLocation: string;
     defaultExportFormat: string;
   };
+  printing: PrintingConfig;
 }
 
 export type AppPreferencesResponse = {
@@ -661,6 +683,78 @@ export interface DialogApi {
 export interface ExportApi {
   exportAsPdf: (id: string, type: TransactionType) => Promise<ApiResponse<string>>;
   showItemInFolder: (path: string) => void;
+}
+
+export type RawReceiptItem = {
+  name: string;
+  quantity: string;
+  unitPricePaisa: number;
+  totalPaisa: number;
+  mrpPaisa?: number;
+};
+
+export type RawReceiptData = {
+  storeName: string;
+  addressLines: string[];
+  phone?: string;
+  gstin?: string;
+  transactionType: "sale" | "estimate";
+  transactionNo: number;
+  customerName: string;
+  dateTime: string;
+  items: RawReceiptItem[];
+  subtotalPaisa: number;
+  totalPaisa: number;
+  savingsPaisa?: number;
+  extraFeedLines: number;
+  cutMode: ReceiptCutMode;
+  footerMessage?: string;
+  upi?: {
+    id: string;
+    payeeName: string;
+    includeAmount: boolean;
+  };
+};
+
+export type RawLedgerEntry = {
+  dateTime: string;
+  particulars: string;
+  amountDuePaisa: number;
+  amountPaidPaisa: number;
+  runningBalancePaisa: number;
+  paymentMode?: string;
+  notes?: string;
+};
+
+export type RawLedgerStatementData = {
+  storeName: string;
+  addressLines: string[];
+  phone?: string;
+  customerName: string;
+  generatedAt: string;
+  entries: RawLedgerEntry[];
+  totalDuePaisa: number;
+  totalPaidPaisa: number;
+  closingBalancePaisa: number;
+  extraFeedLines: number;
+  cutMode: ReceiptCutMode;
+  footerMessage?: string;
+};
+
+export type SystemPrinterInfo = {
+  name: string;
+  displayName: string;
+  description: string;
+};
+
+export interface RawPrintApi {
+  listPrinters(): Promise<ApiResponse<SystemPrinterInfo[]>>;
+  printReceipt(receipt: RawReceiptData): Promise<ApiResponse<{ bytesWritten: number }>>;
+  printLedger(statement: RawLedgerStatementData): Promise<ApiResponse<{ bytesWritten: number }>>;
+  printReceiptWithLedger(
+    receipt: RawReceiptData,
+    statement: RawLedgerStatementData
+  ): Promise<ApiResponse<{ bytesWritten: number }>>;
 }
 
 export interface ZoomApi {

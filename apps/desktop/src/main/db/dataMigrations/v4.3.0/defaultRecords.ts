@@ -24,6 +24,10 @@ function buildCurrentConfig(
     exports: {
       ...defaults.exports,
       ...existing?.exports
+    },
+    printing: {
+      ...defaults.printing,
+      ...existing?.printing
     }
   };
 }
