@@ -80,7 +80,7 @@ describe("canonical raster thermal papers", () => {
     const rows = screen.getAllByTestId("raster-receipt-item-row");
     const receiptHeader = paper.querySelector("header");
     const receiptMain = paper.querySelector("main");
-    const gridTemplateColumns = "32px minmax(0, 1fr) 84px 94px 116px";
+    const gridTemplateColumns = "32px minmax(0, 1fr) 92px 84px 108px";
 
     expect(paper).toHaveStyle({
       width: "576px",
@@ -94,8 +94,8 @@ describe("canonical raster thermal papers", () => {
     );
     expect(header).toHaveClass("text-[22px]", "font-[700]");
     expect(meta).toHaveClass("text-[24px]", "font-[400]");
-    expect(receiptHeader).toHaveClass("px-2");
-    expect(receiptMain).toHaveClass("px-2");
+    expect(receiptHeader).toHaveClass("px-1");
+    expect(receiptMain).toHaveClass("px-1");
     expect(meta).toHaveClass("border-y", "border-dashed", "border-black");
     expect(header).toHaveClass("border-b", "border-dashed", "border-black");
     expect(header).toHaveStyle({ gridTemplateColumns });
@@ -116,8 +116,12 @@ describe("canonical raster thermal papers", () => {
     expect(paper).toHaveTextContent(receipt.items[0]!.name);
     expect(paper).toHaveTextContent("Rs.12,34,567.89");
     expect(paper).toHaveTextContent("2.5(1.5)");
-    expect(screen.getByLabelText("1.5 of 2.5 checked")).toBeInTheDocument();
-    expect(screen.getByLabelText("1 of 1 checked")).toBeInTheDocument();
+    expect(paper).toHaveTextContent("Date: Mon,");
+    const partiallyChecked = screen.getByLabelText("1.5 of 2.5 checked");
+    const fullyChecked = screen.getByLabelText("1 of 1 checked");
+    expect(partiallyChecked.querySelector("svg")).not.toBeInTheDocument();
+    expect(fullyChecked.querySelector("svg")).toBeInTheDocument();
+    expect(fullyChecked).toHaveClass("items-center", "whitespace-nowrap", "leading-none");
   });
 
   it("trims only whole line-item decimals and keeps totals fixed to two decimals", () => {
@@ -171,10 +175,15 @@ describe("canonical raster thermal papers", () => {
     expect(
       body.container.querySelector('[data-testid="raster-receipt-savings"]')
     ).not.toBeInTheDocument();
+    expect(screen.getByTestId("raster-receipt-before-qr-gap")).toHaveClass("h-8");
     body.unmount();
 
     const afterQr = render(<RasterReceiptPaper receipt={receipt} segment="after-qr" />);
     expect(afterQr.container.querySelector("[data-preview-only-qr] svg")).not.toBeInTheDocument();
+    expect(afterQr.container.querySelector('[data-raster-segment="after-qr"]')).toHaveClass(
+      "px-1",
+      "pt-0"
+    );
     expect(screen.getByText("Scan to pay")).toBeInTheDocument();
     expect(screen.getByTestId("raster-receipt-savings")).toHaveTextContent(
       "*** YOU SAVED Rs.58.50 ***"
