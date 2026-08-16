@@ -31,10 +31,6 @@ const receiptItemGridStyle = {
   gridTemplateColumns: "32px minmax(0, 1fr) 84px 94px 116px"
 } as const;
 
-function ReceiptRule() {
-  return <div className="h-1 bg-black" data-receipt-rule aria-hidden="true" />;
-}
-
 function ReceiptAmount({
   paisa,
   prefix = false,
@@ -69,11 +65,10 @@ function ReceiptSavings({ paisa }: { paisa?: number }) {
   if (paisa == null || paisa <= 0) return null;
   return (
     <div
-      className="pt-2 pb-4 text-center text-[21px] leading-[1.25] font-[400]"
+      className="pt-3 pb-4 text-center text-[26px] leading-[1.2] font-[600]"
       data-testid="raster-receipt-savings"
     >
-      You saved Rs.{paisaToRupeeString(paisa)}{" "}
-      <span className="whitespace-nowrap">(not payable)</span>
+      *** YOU SAVED Rs.{paisaToRupeeString(paisa)} ***
     </div>
   );
 }
@@ -133,9 +128,8 @@ function RasterReceiptBody({
       </header>
 
       <main className="px-2">
-        <ReceiptRule />
         <div
-          className="py-2.5 text-[24px] leading-[1.3] font-[400]"
+          className="border-y border-dashed border-black py-2.5 text-[24px] leading-[1.3] font-[400]"
           data-testid="raster-receipt-meta"
         >
           <div>
@@ -153,11 +147,10 @@ function RasterReceiptBody({
             </div>
           ) : null}
         </div>
-        <ReceiptRule />
 
         <section>
           <div
-            className="grid py-2.5 text-[22px] leading-none font-[700] uppercase"
+            className="grid border-b border-dashed border-black py-2.5 text-[22px] leading-none font-[700] uppercase"
             style={receiptItemGridStyle}
             data-testid="raster-receipt-item-header"
           >
@@ -167,8 +160,10 @@ function RasterReceiptBody({
             <span className="w-full text-right">Rate</span>
             <span className="w-full text-right">Amt</span>
           </div>
-          <ReceiptRule />
-          <div className="py-1" data-testid="raster-receipt-items">
+          <div
+            className="border-b border-dashed border-black py-1"
+            data-testid="raster-receipt-items"
+          >
             {receipt.items.map((item, index) => (
               <article
                 key={index}

@@ -78,7 +78,6 @@ describe("canonical raster thermal papers", () => {
     const header = screen.getByTestId("raster-receipt-item-header");
     const items = screen.getByTestId("raster-receipt-items");
     const rows = screen.getAllByTestId("raster-receipt-item-row");
-    const rules = paper.querySelectorAll("[data-receipt-rule]");
     const receiptHeader = paper.querySelector("header");
     const receiptMain = paper.querySelector("main");
     const gridTemplateColumns = "32px minmax(0, 1fr) 84px 94px 116px";
@@ -97,14 +96,13 @@ describe("canonical raster thermal papers", () => {
     expect(meta).toHaveClass("text-[24px]", "font-[400]");
     expect(receiptHeader).toHaveClass("px-2");
     expect(receiptMain).toHaveClass("px-2");
-    expect(rules).toHaveLength(3);
-    for (const rule of rules) expect(rule).toHaveClass("h-1", "bg-black");
-    expect(paper.querySelector(".border-dashed")).not.toBeInTheDocument();
+    expect(meta).toHaveClass("border-y", "border-dashed", "border-black");
+    expect(header).toHaveClass("border-b", "border-dashed", "border-black");
     expect(header).toHaveStyle({ gridTemplateColumns });
     for (const heading of Array.from(header.children).slice(2)) {
       expect(heading).toHaveClass("w-full", "text-right");
     }
-    expect(items).not.toHaveClass("border-b-2", "border-dashed");
+    expect(items).toHaveClass("border-b", "border-dashed", "border-black");
     expect(rows).toHaveLength(receipt.items.length);
     for (const row of rows) {
       expect(row).toHaveClass("py-1", "text-[24px]", "leading-[1.2]", "font-[500]");
@@ -150,7 +148,8 @@ describe("canonical raster thermal papers", () => {
 
     const footer = screen.getByText(receipt.footerMessage!);
     const savings = screen.getByTestId("raster-receipt-savings");
-    expect(savings).toHaveTextContent("You saved Rs.58.50 (not payable)");
+    expect(savings).toHaveClass("text-[26px]", "font-[600]");
+    expect(savings).toHaveTextContent("*** YOU SAVED Rs.58.50 ***");
     expect(footer.compareDocumentPosition(savings) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
   });
 
@@ -160,7 +159,7 @@ describe("canonical raster thermal papers", () => {
     const previewQr = preview.container.querySelector("[data-preview-only-qr]");
     const previewSavings = screen.getByTestId("raster-receipt-savings");
     expect(previewQr).toBeInTheDocument();
-    expect(previewSavings).toHaveTextContent("You saved Rs.58.50 (not payable)");
+    expect(previewSavings).toHaveTextContent("*** YOU SAVED Rs.58.50 ***");
     expect(
       previewQr!.compareDocumentPosition(previewSavings) & Node.DOCUMENT_POSITION_FOLLOWING
     ).not.toBe(0);
@@ -177,7 +176,9 @@ describe("canonical raster thermal papers", () => {
     const afterQr = render(<RasterReceiptPaper receipt={receipt} segment="after-qr" />);
     expect(afterQr.container.querySelector("[data-preview-only-qr] svg")).not.toBeInTheDocument();
     expect(screen.getByText("Scan to pay")).toBeInTheDocument();
-    expect(screen.getByTestId("raster-receipt-savings")).toHaveTextContent("(not payable)");
+    expect(screen.getByTestId("raster-receipt-savings")).toHaveTextContent(
+      "*** YOU SAVED Rs.58.50 ***"
+    );
   });
 
   it("preserves the ledger information contract", () => {
