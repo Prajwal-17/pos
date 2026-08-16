@@ -28,7 +28,7 @@ const receiptPaperStyle = {
 } as const;
 
 const receiptItemGridStyle = {
-  gridTemplateColumns: "32px minmax(0, 1fr) 84px 94px 116px"
+  gridTemplateColumns: "32px minmax(0, 1fr) 92px 84px 108px"
 } as const;
 
 function ReceiptAmount({
@@ -81,14 +81,29 @@ function CheckedQuantity({ item }: { item: RawReceiptData["items"][number] }) {
   const partiallyChecked = Number.isFinite(quantity) && checkedQuantity < quantity;
   return (
     <span
-      className="inline-flex flex-wrap items-center justify-end gap-x-1 tabular-nums"
+      className="inline-flex items-center justify-end gap-x-1 align-middle leading-none whitespace-nowrap tabular-nums"
       aria-label={`${item.checkedQty} of ${item.quantity} checked`}
     >
       <span>{item.quantity}</span>
-      {partiallyChecked ? <span>({item.checkedQty})</span> : null}
-      <Check className="size-5 shrink-0" strokeWidth={4} aria-hidden="true" />
+      {partiallyChecked ? (
+        <span>({item.checkedQty})</span>
+      ) : (
+        <Check className="size-[18px] shrink-0 self-center" strokeWidth={3} aria-hidden="true" />
+      )}
     </span>
   );
+}
+
+function formatRasterReceiptDate(dateTime: string): string {
+  const formattedDate = formatThermalReceiptDate(dateTime);
+  const date = new Date(dateTime);
+  if (Number.isNaN(date.getTime())) return formattedDate;
+
+  const weekday = new Intl.DateTimeFormat("en-IN", {
+    weekday: "short",
+    timeZone: "Asia/Kolkata"
+  }).format(date);
+  return weekday + ", " + formattedDate;
 }
 
 function RasterReceiptBody({
@@ -105,7 +120,7 @@ function RasterReceiptBody({
 
   return (
     <div data-raster-segment="body">
-      <header className="px-2 pt-7 pb-4 text-center">
+      <header className="px-1 pt-7 pb-4 text-center">
         <h2
           className="m-0 text-[36px] leading-[1.12] font-[700] break-words uppercase"
           data-testid="raster-receipt-store-name"
@@ -127,7 +142,7 @@ function RasterReceiptBody({
         ) : null}
       </header>
 
-      <main className="px-2">
+      <main className="px-1">
         <div
           className="border-y border-dashed border-black py-2.5 text-[24px] leading-[1.3] font-[400]"
           data-testid="raster-receipt-meta"
@@ -138,7 +153,7 @@ function RasterReceiptBody({
           </div>
           <div>
             <span className="font-[600]">Date: </span>
-            <span className="tabular-nums">{formatThermalReceiptDate(receipt.dateTime)}</span>
+            <span className="tabular-nums">{formatRasterReceiptDate(receipt.dateTime)}</span>
           </div>
           {receipt.customerName ? (
             <div className="break-words">
@@ -212,7 +227,10 @@ function RasterReceiptBody({
           </div>
         </section>
 
-        <div className="h-5" />
+        <div
+          className={includeSavings ? "h-5" : "h-8"}
+          data-testid="raster-receipt-before-qr-gap"
+        />
         {includeFooter ? (
           <ReceiptFooter
             message={receipt.footerMessage}
@@ -233,7 +251,7 @@ function RasterAfterQr({
   includeFooter: boolean;
 }) {
   return (
-    <div data-raster-segment="after-qr" className="px-2 pt-3 text-center">
+    <div data-raster-segment="after-qr" className="px-1 pt-0 text-center">
       <div className="text-[24px] leading-[1.3] font-[500]">Scan to pay</div>
       {receipt.upi?.payeeName ? (
         <div className="text-[24px] leading-[1.3] font-[400]">{receipt.upi.payeeName}</div>
@@ -280,7 +298,7 @@ export function RasterReceiptPaper({
       ) : null}
       {segment === "preview" && upiUri ? (
         <>
-          <div className="flex justify-center bg-white py-1" data-preview-only-qr>
+          <div className="flex justify-center bg-white pt-1" data-preview-only-qr>
             <QRCodeSVG
               value={upiUri}
               level="M"
