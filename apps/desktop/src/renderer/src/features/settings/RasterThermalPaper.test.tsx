@@ -74,7 +74,9 @@ describe("canonical raster thermal papers", () => {
   it("uses larger crisp typography and one shared aligned item grid", () => {
     render(<RasterReceiptPaper receipt={receipt} />);
     const paper = screen.getByTestId("raster-receipt-paper");
+    const meta = screen.getByTestId("raster-receipt-meta");
     const header = screen.getByTestId("raster-receipt-item-header");
+    const items = screen.getByTestId("raster-receipt-items");
     const rows = screen.getAllByTestId("raster-receipt-item-row");
     const gridTemplateColumns = "32px minmax(0, 1fr) 84px 94px 116px";
 
@@ -88,12 +90,22 @@ describe("canonical raster thermal papers", () => {
       "text-[34px]",
       "font-[800]"
     );
-    expect(header).toHaveClass("text-[20px]", "font-[800]");
+    expect(header).toHaveClass("text-[21px]", "font-[700]");
+    expect(meta).toHaveClass("text-[23px]", "font-[500]");
+    expect(meta).toHaveClass("border-solid");
+    expect(meta).not.toHaveClass("border-dashed");
+    expect(header).toHaveClass("border-solid");
+    expect(header).not.toHaveClass("border-dashed");
     expect(header).toHaveStyle({ gridTemplateColumns });
+    expect(items).not.toHaveClass("border-b-2", "border-dashed");
     expect(rows).toHaveLength(receipt.items.length);
     for (const row of rows) {
-      expect(row).toHaveClass("text-[22px]", "font-[600]");
+      expect(row).toHaveClass("py-1.5", "text-[23px]", "leading-[1.2]", "font-[500]");
       expect(row).toHaveStyle({ gridTemplateColumns });
+      expect(row.children[1]).toHaveClass("font-[600]");
+      expect(row.children[2]).toHaveClass("font-[500]");
+      expect(row.children[3]).toHaveClass("font-[500]");
+      expect(row.children[4]).toHaveClass("font-[600]");
     }
 
     expect(paper).toHaveTextContent(receipt.items[0]!.name);
@@ -124,10 +136,10 @@ describe("canonical raster thermal papers", () => {
     expect(summaryAmounts.map((amount) => amount.textContent)).toEqual(["419.00", "Rs.419.00"]);
     expect(summary.children[0]).toHaveTextContent("Subtotal");
     expect(summary.children[1]).toHaveTextContent("419.00");
-    expect(summary.children[2]).toHaveClass("border-t-2");
-    expect(summary.children[3]).toHaveTextContent("TOTAL");
-    expect(summary.children[3]).toHaveClass("text-[28px]", "font-[800]");
-    expect(summary.children[4]).toHaveClass("text-[31px]", "font-[800]");
+    expect(summary.querySelector('[aria-hidden="true"]')).not.toBeInTheDocument();
+    expect(summary.children[2]).toHaveTextContent("TOTAL");
+    expect(summary.children[2]).toHaveClass("text-[28px]", "font-[700]");
+    expect(summary.children[3]).toHaveClass("text-[31px]", "font-[700]");
   });
 
   it("shows a native-looking QR preview but excludes it from captured body and after-QR segments", () => {

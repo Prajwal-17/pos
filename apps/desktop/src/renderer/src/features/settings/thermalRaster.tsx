@@ -67,8 +67,8 @@ export function packMonochromePixels(
 }
 
 async function waitForRasterFonts() {
-  const weights = [600, 700, 800];
-  await Promise.all(weights.map((weight) => document.fonts.load(`${weight} 22px InterVariable`)));
+  const weights = [500, 600, 700, 800];
+  await Promise.all(weights.map((weight) => document.fonts.load(`${weight} 23px InterVariable`)));
   await document.fonts.ready;
   await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 }
