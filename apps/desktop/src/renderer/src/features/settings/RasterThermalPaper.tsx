@@ -358,16 +358,16 @@ export function RasterLedgerPaper({
         <div className="h-5" />
       )}
 
-      <main className="mx-8 border-t-2 border-dashed border-black">
+      <main className="mx-8 pb-3">
         <h3 className="m-0 py-2.5 text-center text-[22px] leading-none font-[800] tracking-[0.04em]">
           ACCOUNTS
         </h3>
-        <div className="border-y-2 border-dashed border-black py-2.5 text-[19px] leading-[1.3]">
+        <div className="pb-3 text-[19px] leading-[1.3]">
           <span className="font-[700]">Customer: </span>
           <span className="font-[700]">{statement.customerName}</span>
         </div>
 
-        <div className="border-b-2 border-dashed border-black py-1">
+        <div className="py-1" data-testid="raster-ledger-entries">
           {statement.entries.map((entry, index) => {
             const amount = entry.amountPaidPaisa > 0 ? entry.amountPaidPaisa : entry.amountDuePaisa;
             return (
@@ -382,15 +382,6 @@ export function RasterLedgerPaper({
               </article>
             );
           })}
-        </div>
-
-        <div className="flex items-baseline justify-between gap-6 py-3 text-[22px] leading-none font-[800]">
-          <span>TOTAL AMOUNT</span>
-          <ReceiptAmount
-            paisa={statement.closingBalancePaisa}
-            prefix
-            className="text-[24px] tracking-[-0.01em]"
-          />
         </div>
       </main>
 

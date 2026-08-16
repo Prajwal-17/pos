@@ -190,15 +190,21 @@ describe("canonical raster thermal papers", () => {
     );
   });
 
-  it("preserves the ledger information contract", () => {
+  it("shows only the dated ledger entries without separators or an aggregate total", () => {
     render(<RasterLedgerPaper statement={statement} />);
     const paper = screen.getByTestId("raster-ledger-paper");
+    const entries = screen.getByTestId("raster-ledger-entries");
 
     expect(paper).toHaveTextContent("ACCOUNTS");
     expect(paper).toHaveTextContent("Anita");
+    expect(entries).toHaveTextContent("01 Aug 2026");
     expect(paper).toHaveTextContent("Sale");
+    expect(entries).toHaveTextContent("05 Aug 2026");
     expect(paper).toHaveTextContent("Payment");
-    expect(paper).toHaveTextContent("TOTAL AMOUNT");
+    expect(entries.querySelectorAll("article")).toHaveLength(statement.entries.length);
+    expect(paper.querySelector(".border-dashed")).not.toBeInTheDocument();
+    expect(paper).not.toHaveTextContent("TOTAL AMOUNT");
+    expect(paper).not.toHaveTextContent("Rs.312.50");
     expect(paper).not.toHaveTextContent("Invoice no");
     expect(paper).not.toHaveTextContent("Mode:");
     expect(paper).not.toHaveTextContent("Total sales");
