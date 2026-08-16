@@ -71,19 +71,63 @@ const statement: RawLedgerStatementData = {
 afterEach(cleanup);
 
 describe("canonical raster thermal papers", () => {
-  it("uses a fixed 576-pixel Inter paper with wrapping names and visible large totals", () => {
+  it("uses larger crisp typography and one shared aligned item grid", () => {
     render(<RasterReceiptPaper receipt={receipt} />);
     const paper = screen.getByTestId("raster-receipt-paper");
+    const header = screen.getByTestId("raster-receipt-item-header");
+    const rows = screen.getAllByTestId("raster-receipt-item-row");
+    const gridTemplateColumns = "32px minmax(0, 1fr) 84px 94px 116px";
 
     expect(paper).toHaveStyle({
       width: "576px",
-      fontFamily: "InterVariable, system-ui, sans-serif"
+      fontFamily: "InterVariable, system-ui, sans-serif",
+      fontSynthesis: "none",
+      letterSpacing: "normal"
     });
+    expect(screen.getByTestId("raster-receipt-store-name")).toHaveClass(
+      "text-[34px]",
+      "font-[800]"
+    );
+    expect(header).toHaveClass("text-[20px]", "font-[800]");
+    expect(header).toHaveStyle({ gridTemplateColumns });
+    expect(rows).toHaveLength(receipt.items.length);
+    for (const row of rows) {
+      expect(row).toHaveClass("text-[22px]", "font-[600]");
+      expect(row).toHaveStyle({ gridTemplateColumns });
+    }
+
     expect(paper).toHaveTextContent(receipt.items[0]!.name);
     expect(paper).toHaveTextContent("Rs.12,34,567.89");
     expect(paper).toHaveTextContent("2.5(1.5)");
     expect(screen.getByLabelText("1.5 of 2.5 checked")).toBeInTheDocument();
     expect(screen.getByLabelText("1 of 1 checked")).toBeInTheDocument();
+  });
+
+  it("trims only whole line-item decimals and keeps totals fixed to two decimals", () => {
+    const wholeTotalReceipt: RawReceiptData = {
+      ...receipt,
+      subtotalPaisa: 41_900,
+      totalPaisa: 41_900,
+      upi: undefined
+    };
+    render(<RasterReceiptPaper receipt={wholeTotalReceipt} />);
+
+    const rows = screen.getAllByTestId("raster-receipt-item-row");
+    const firstRowAmounts = Array.from(rows[0]!.querySelectorAll("[data-receipt-amount]"));
+    const secondRowAmounts = Array.from(rows[1]!.querySelectorAll("[data-receipt-amount]"));
+    expect(firstRowAmounts.map((amount) => amount.textContent)).toEqual(["85", "212.50"]);
+    expect(secondRowAmounts.map((amount) => amount.textContent)).toEqual(["199", "199"]);
+
+    const summary = screen.getByTestId("raster-receipt-summary");
+    const summaryAmounts = Array.from(summary.querySelectorAll("[data-receipt-amount]"));
+    expect(summary).toHaveClass("ml-auto", "grid", "min-w-[330px]");
+    expect(summaryAmounts.map((amount) => amount.textContent)).toEqual(["419.00", "Rs.419.00"]);
+    expect(summary.children[0]).toHaveTextContent("Subtotal");
+    expect(summary.children[1]).toHaveTextContent("419.00");
+    expect(summary.children[2]).toHaveClass("border-t-2");
+    expect(summary.children[3]).toHaveTextContent("TOTAL");
+    expect(summary.children[3]).toHaveClass("text-[28px]", "font-[800]");
+    expect(summary.children[4]).toHaveClass("text-[31px]", "font-[800]");
   });
 
   it("shows a native-looking QR preview but excludes it from captured body and after-QR segments", () => {
@@ -93,12 +137,12 @@ describe("canonical raster thermal papers", () => {
     preview.unmount();
 
     const body = render(<RasterReceiptPaper receipt={receipt} segment="body" />);
-    expect(body.container.querySelector("svg")).not.toBeInTheDocument();
+    expect(body.container.querySelector("[data-preview-only-qr] svg")).not.toBeInTheDocument();
     expect(body.container.querySelector('[data-raster-segment="body"]')).toBeInTheDocument();
     body.unmount();
 
     const afterQr = render(<RasterReceiptPaper receipt={receipt} segment="after-qr" />);
-    expect(afterQr.container.querySelector("svg")).not.toBeInTheDocument();
+    expect(afterQr.container.querySelector("[data-preview-only-qr] svg")).not.toBeInTheDocument();
     expect(screen.getByText("Scan to pay")).toBeInTheDocument();
   });
 
