@@ -3,7 +3,7 @@ import fs from "node:fs";
 import { join, resolve } from "node:path";
 import type { DatabaseUpgradeStatus } from "../shared/types";
 import { getBackupPaths } from "./db/backup";
-import { getDatabasePath, getMigrationsFolder, initDb } from "./db/db";
+import { configureDatabasePath, getDatabasePath, getMigrationsFolder, initDb } from "./db/db";
 import { inspectDatabaseUpgrade, type UpgradeInspection } from "./db/upgradeCoordinator";
 import { initMainEnv } from "./loadEnv";
 import { createMainWindow } from "./mainWindow";
@@ -56,7 +56,7 @@ if (!app.requestSingleInstanceLock()) {
     setupIpcHandlers();
 
     // these values are passed to the forked server process.
-    process.env.M_VITE_DATABASE_URL = join(app.getPath("userData"), "pos.db");
+    configureDatabasePath(app.getPath("userData"));
     process.env.M_VITE_IS_PACKAGED = String(app.isPackaged);
     process.env.M_VITE_MIGRATION_FOLDER = app.isPackaged
       ? join(process.resourcesPath, "drizzle")

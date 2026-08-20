@@ -31,6 +31,22 @@ describe("database configuration", () => {
     expect(getMigrationsFolder()).toBe("/app/drizzle");
   });
 
+  it("preserves an explicitly configured database path", async () => {
+    vi.stubEnv("M_VITE_DATABASE_URL", "/data/test-data.db");
+    const { configureDatabasePath } = await loadDatabaseModule();
+
+    expect(configureDatabasePath("/user-data")).toBe("/data/test-data.db");
+    expect(process.env.M_VITE_DATABASE_URL).toBe("/data/test-data.db");
+  });
+
+  it("defaults the database path to the Electron user-data directory", async () => {
+    vi.stubEnv("M_VITE_DATABASE_URL", "");
+    const { configureDatabasePath } = await loadDatabaseModule();
+
+    expect(configureDatabasePath("/user-data")).toBe(path.join("/user-data", "pos.db"));
+    expect(process.env.M_VITE_DATABASE_URL).toBe(path.join("/user-data", "pos.db"));
+  });
+
   it("uses the development migration folder when none is configured", async () => {
     vi.stubEnv("M_VITE_MIGRATION_FOLDER", "");
     vi.stubEnv("M_VITE_IS_PACKAGED", "false");

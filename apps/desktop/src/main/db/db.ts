@@ -12,6 +12,11 @@ export type InitDbOptions = {
   onStatus?: (status: DatabaseUpgradeStatus) => void;
 };
 
+export function configureDatabasePath(userDataPath: string): string {
+  process.env.M_VITE_DATABASE_URL ||= path.join(userDataPath, "pos.db");
+  return process.env.M_VITE_DATABASE_URL;
+}
+
 export function getDatabasePath(): string {
   return process.env.M_VITE_DATABASE_URL || getFallbackDbPath();
 }

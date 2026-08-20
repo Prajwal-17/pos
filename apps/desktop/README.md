@@ -63,25 +63,45 @@ native preload features are unavailable in that mode.
 
 Run these from `apps/desktop` unless shown otherwise.
 
-| Command               | Purpose                                            |
-| --------------------- | -------------------------------------------------- |
-| `pnpm dev`            | Start Electron development mode                    |
-| `pnpm dev:standalone` | Start the local API and browser renderer           |
-| `pnpm build`          | Typecheck and create the production Electron build |
-| `pnpm start`          | Preview the production build                       |
-| `pnpm lint`           | Run ESLint                                         |
-| `pnpm typecheck`      | Typecheck application and test code                |
-| `pnpm typecheck:test` | Typecheck Vitest suites and helpers                |
-| `pnpm test --run`     | Run Vitest once                                    |
-| `pnpm format`         | Format the desktop package                         |
-| `pnpm db:migrate:dev` | Apply development migrations                       |
-| `pnpm db:studio:dev`  | Open Drizzle Studio for development data           |
-| `pnpm db:push:dev`    | Push the schema to the development database        |
-| `pnpm build:win`      | Build the Windows installer                        |
-| `pnpm build:linux`    | Build AppImage and Debian packages                 |
+| Command                    | Purpose                                            |
+| -------------------------- | -------------------------------------------------- |
+| `pnpm dev`                 | Start Electron development mode                    |
+| `pnpm dev:test-data`       | Start Electron with generated test data            |
+| `pnpm dev:standalone`      | Start the local API and browser renderer           |
+| `pnpm build`               | Typecheck and create the production Electron build |
+| `pnpm start`               | Preview the production build                       |
+| `pnpm lint`                | Run ESLint                                         |
+| `pnpm typecheck`           | Typecheck application and test code                |
+| `pnpm typecheck:test`      | Typecheck Vitest suites and helpers                |
+| `pnpm test --run`          | Run Vitest once                                    |
+| `pnpm format`              | Format the desktop package                         |
+| `pnpm db:migrate:dev`      | Apply development migrations                       |
+| `pnpm db:studio:dev`       | Open Drizzle Studio for development data           |
+| `pnpm db:push:dev`         | Push the schema to the development database        |
+| `pnpm db:create:test-data` | Create a populated local test database             |
+| `pnpm build:win`           | Build the Windows installer                        |
+| `pnpm build:linux`         | Build AppImage and Debian packages                 |
 
 Production database commands use the corresponding `:prod` suffix. Packaging output is written
 to `dist/`; Electron build output is written to `out/`.
+
+### Comprehensive test data
+
+Create a migrated database with customers, products, price history, sales, estimates, and customer
+ledger activity:
+
+```bash
+pnpm db:create:test-data -- --scale standard --seed 20260820
+pnpm dev:test-data
+```
+
+The default target is `.local/quickcart-test.db`; `pnpm dev:test-data` starts Electron with that
+database. Close any running QuickCart development instance first so its single-instance lock does
+not focus the old process. The generator supports `small`, `standard`, and `large` scales; use
+`--as-of YYYY-MM-DD` for dates reproducible across days. It refuses to replace a non-empty target unless `--reset` is passed. Treat `--reset` as
+destructive whenever `--database` points somewhere other than the default disposable path.
+
+Run `pnpm db:create:test-data -- --help` for every option.
 
 ## Local data and environment
 
