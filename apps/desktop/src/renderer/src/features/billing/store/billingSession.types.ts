@@ -10,6 +10,7 @@ export type LineItem = {
   weight: string | null;
   unit: string | null;
   mrp: number | null;
+  purchasePrice: number | null;
   price: string;
   quantity: string;
   totalPrice: number; // UI-only
@@ -24,14 +25,13 @@ export type LineItem = {
 export type PrefillCustomer = {
   id: string;
   name: string;
+  customerType: string;
 };
 
 export type BillingPrintOptions = {
   includeUpiQr: boolean | null;
   includeAmountInUpiQr: boolean | null;
   selectedUpiQrProfileId: string | null;
-  includeAccountSummary: boolean;
-  accountSummaryStartedAt: number;
 };
 
 export type BillingSessionData = {

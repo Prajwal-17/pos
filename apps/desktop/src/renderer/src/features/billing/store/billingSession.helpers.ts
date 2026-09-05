@@ -54,9 +54,7 @@ export const createInitialSession = (): BillingSessionData => {
     printOptions: {
       includeUpiQr: null,
       includeAmountInUpiQr: null,
-      selectedUpiQrProfileId: null,
-      includeAccountSummary: false,
-      accountSummaryStartedAt: Date.now()
+      selectedUpiQrProfileId: null
     },
     lineItems: [createInitialLineItem()]
   };
@@ -72,6 +70,7 @@ export function createInitialLineItem(position = 0) {
     weight: null,
     unit: null,
     mrp: null,
+    purchasePrice: null,
     price: "",
     quantity: "",
     totalPrice: 0,
@@ -100,6 +99,7 @@ export function normalizeLineItems(itemsArray: UnifiedTransactionItem[]) {
     weight: item.weight,
     unit: item.unit,
     mrp: item.mrp,
+    purchasePrice: item.purchasePrice,
     price: item.price ? paisaToRupees(Number(item.price)).toString() : "",
     quantity: fromMilliUnits(item.quantity).toString(),
     totalPrice: item.totalPrice,
