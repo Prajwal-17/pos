@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: "class",
   content: ["./src/**/*.{ts,tsx}"],
   presets: [require("nativewind/preset")],
   theme: {
@@ -15,6 +16,7 @@ module.exports = {
         "primary-foreground": "#FFFFFF",
         sales: "#1F9D72",
         "sales-soft": "#E3F5EF",
+        "sales-ink": "#0B5C43",
         accent: "#B6532B",
         "accent-soft": "#FBE9E1",
         destructive: "#9B342A"
