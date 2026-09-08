@@ -6,7 +6,7 @@ const config = getDefaultConfig(__dirname);
 // expo-sqlite uses WebAssembly in the browser. Metro must treat the binary as an
 // asset, and the dev server must opt into the cross-origin isolation required by
 // SharedArrayBuffer.
-config.resolver.assetExts.push("wasm");
+config.resolver.assetExts.push("wasm", "db");
 config.server.enhanceMiddleware = (middleware) => (request, response, next) => {
   response.setHeader("Cross-Origin-Embedder-Policy", "credentialless");
   response.setHeader("Cross-Origin-Opener-Policy", "same-origin");

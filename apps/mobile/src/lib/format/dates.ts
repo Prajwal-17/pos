@@ -1,4 +1,4 @@
-import type { LocalDate } from "@/features/money/money.types";
+export type LocalDate = `${number}-${number}-${number}`;
 
 export interface LedgerMonth {
   year: number;

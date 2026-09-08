@@ -10,6 +10,7 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 import { AppButton } from "@/components/ui/app-button";
 import { migrateDatabase } from "@/lib/db/money-database";
+import { DesktopDatabaseProvider } from "@/lib/db/desktop-database";
 
 function RootNavigator() {
   return (
@@ -65,7 +66,9 @@ export default function RootLayout() {
           onInit={migrateDatabase}
           onError={setDatabaseError}
         >
-          <RootNavigator />
+          <DesktopDatabaseProvider>
+            <RootNavigator />
+          </DesktopDatabaseProvider>
         </SQLiteProvider>
       )}
     </SafeAreaProvider>

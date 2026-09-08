@@ -1,5 +1,4 @@
-import { UpcomingScreen } from "@/components/ui/upcoming-screen";
-
-export default function EstimatesScreen() {
-  return <UpcomingScreen title="Estimates" />;
+import { TransactionsScreen } from "@/features/transactions/transactions-screen";
+export default function EstimatesRoute() {
+  return <TransactionsScreen kind="estimate" />;
 }

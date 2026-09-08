@@ -17,6 +17,13 @@ module.exports = {
         sales: "#1F9D72",
         "sales-soft": "#E3F5EF",
         "sales-ink": "#0B5C43",
+        estimate: "#B44A68",
+        "estimate-soft": "#F8E9EE",
+        "estimate-ink": "#6F263E",
+        gold: "#754300",
+        "gold-soft": "#FFF0C7",
+        olive: "#3F521B",
+        "olive-soft": "#D4E6AD",
         accent: "#B6532B",
         "accent-soft": "#FBE9E1",
         destructive: "#9B342A"

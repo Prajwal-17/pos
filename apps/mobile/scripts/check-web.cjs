@@ -3,9 +3,10 @@ const assert = require("node:assert/strict");
 const { createRequire } = require("node:module");
 const { mkdir } = require("node:fs/promises");
 const path = require("node:path");
-const { chromium, expect } = createRequire(path.resolve(__dirname, "../../desktop/package.json"))(
-  "@playwright/test"
-);
+const { chromium, expect: baseExpect } = createRequire(
+  path.resolve(__dirname, "../../desktop/package.json")
+)("@playwright/test");
+const expect = baseExpect.configure({ timeout: 15000 });
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
@@ -20,15 +21,15 @@ const { chromium, expect } = createRequire(path.resolve(__dirname, "../../deskto
       waitUntil: "networkidle",
       timeout: 120000
     });
-    await expect(page.getByRole("button", { name: "Add record", exact: true })).toBeVisible({
+    await expect(page.getByRole("button", { name: "Money entry", exact: true })).toBeVisible({
       timeout: 120000
     });
-    const ledgerTab = page.getByRole("tab", { name: "Ledger", exact: true });
-    await expect(ledgerTab).toBeVisible();
-    const tabBounds = await ledgerTab.boundingBox();
-    assert(tabBounds.y > 740, "Ledger navigation must be at the bottom");
+    const homeTab = page.getByRole("tab", { name: "Home", exact: true });
+    await expect(homeTab).toBeVisible();
+    const tabBounds = await homeTab.boundingBox();
+    assert(tabBounds.y > 740, "Navigation must be at the bottom");
     await expect(page.getByText("Relay", { exact: true })).toHaveCount(0);
-    for (const section of ["Sales", "Estimates", "Customers"]) {
+    for (const section of ["Sales", "Estimates", "Customers", "Products"]) {
       await page.getByRole("tab", { name: section, exact: true }).click();
       await expect(page).toHaveURL(new RegExp(`/${section.toLowerCase()}$`));
       await expect(page.getByRole("tab", { name: section, exact: true })).toHaveAttribute(
@@ -37,8 +38,31 @@ const { chromium, expect } = createRequire(path.resolve(__dirname, "../../deskto
       );
       await expect(page.getByRole("heading", { name: section, exact: true })).toBeVisible();
     }
-    await ledgerTab.click();
-    await expect(page.getByRole("button", { name: "Add record", exact: true })).toBeVisible();
+    await homeTab.click();
+    for (const width of [360, 390, 768]) {
+      await page.setViewportSize({ width, height: 844 });
+      for (const section of ["Home", "Sales", "Estimates", "Customers", "Products"]) {
+        const navLabel = page
+          .getByRole("tab", { name: section, exact: true })
+          .getByText(section, { exact: true });
+        assert(
+          await navLabel.evaluate((label) => {
+            const bounds = label.getBoundingClientRect();
+            return (
+              bounds.height >= parseFloat(getComputedStyle(label).fontSize) &&
+              bounds.bottom <= window.innerHeight &&
+              label.scrollWidth <= label.clientWidth
+            );
+          }),
+          `${section} tab label clipped at ${width}px`
+        );
+      }
+    }
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.getByRole("button", { name: "Money entry", exact: true }).click();
+    await expect(page.getByRole("button", { name: "Add record", exact: true })).toBeVisible({
+      timeout: 30000
+    });
     await page.screenshot({ path: `${output}/home-empty.png` });
     await page.getByRole("button", { name: "Add record", exact: true }).click();
     await page.getByLabel("Cash received", { exact: true }).fill("12450");
@@ -55,7 +79,7 @@ const { chromium, expect } = createRequire(path.resolve(__dirname, "../../deskto
       .getByLabel("Note · optional", { exact: true })
       .fill("Rice and cooking oil · Invoice 208");
     await page.getByRole("button", { name: "Save", exact: true }).click();
-    await expect(page).toHaveURL(/\/$/);
+    await expect(page).toHaveURL(/\/money$/);
     await expect(page.getByText("Saved", { exact: true })).toBeVisible();
     await expect(page.getByText("₹16,650.50", { exact: true })).toBeVisible();
     await page.reload();
@@ -64,21 +88,6 @@ const { chromium, expect } = createRequire(path.resolve(__dirname, "../../deskto
 
     for (const width of [360, 390, 768]) {
       await page.setViewportSize({ width, height: 844 });
-      for (const section of ["Ledger", "Sales", "Estimates", "Customers"]) {
-        const navLabel = page
-          .getByRole("tab", { name: section, exact: true })
-          .getByText(section, { exact: true });
-        assert(
-          await navLabel.evaluate((label) => {
-            const bounds = label.getBoundingClientRect();
-            return (
-              bounds.height >= parseFloat(getComputedStyle(label).fontSize) &&
-              bounds.bottom <= window.innerHeight
-            );
-          }),
-          `${section} tab label clipped at ${width}px`
-        );
-      }
       assert(
         await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
         `Horizontal overflow at ${width}px`
@@ -138,7 +147,7 @@ const { chromium, expect } = createRequire(path.resolve(__dirname, "../../deskto
     await page.getByRole("button", { name: "Back to entry", exact: true }).click();
     await page.getByLabel("Shop bank transfer", { exact: true }).fill("100");
     await page.getByRole("button", { name: "Save", exact: true }).click();
-    await expect(page).toHaveURL(/\/$/);
+    await expect(page).toHaveURL(/\/money$/);
     await expect(
       page.getByText("₹16,750.50", { exact: true }).filter({ visible: true })
     ).toBeVisible();
@@ -151,7 +160,7 @@ const { chromium, expect } = createRequire(path.resolve(__dirname, "../../deskto
     ).toBeVisible();
     await page.getByRole("button", { name: "Back to entry", exact: true }).click();
     await page.getByRole("button", { name: "Save", exact: true }).click();
-    await expect(page).toHaveURL(/\/$/);
+    await expect(page).toHaveURL(/\/money$/);
     await expect(
       page.getByText("₹16,750.50", { exact: true }).filter({ visible: true })
     ).toBeVisible();

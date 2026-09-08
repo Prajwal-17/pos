@@ -3,7 +3,7 @@
 Workspace packages use the `@relay` scope: `@relay/workspace`, `@relay/desktop`,
 `@relay/eslint-config` and `@relay/typescript-config`. Native app identities remain Relay / Relay-Dev.
 
-Relay contains an offline-first desktop billing application and a focused mobile daily ledger.
+Relay contains a local desktop billing application and an Expo mobile companion.
 
 ## Capabilities
 
@@ -20,14 +20,15 @@ Relay contains an offline-first desktop billing application and a focused mobile
 - Today-first daily cash and online receipt entry, with calendar history
 - Supplier and distributor payment tracking
 - Daily received, paid-out, and net totals
-- Private on-device SQLite storage
+- Read-only desktop customers, ledgers, sales, estimates, products and reports
+- Bill PDF sharing and private on-device SQLite storage
 
 ## Repository
 
 ```text
 apps/
   desktop/                Electron billing application and local API
-  mobile/                 Expo daily-ledger application
+  mobile/                 Expo mobile companion
 assets/
   desktop/                Shared Relay desktop identity assets
   mobile/                 Shared Relay mobile identity assets
@@ -48,9 +49,9 @@ apps/desktop/src/
   shared/     Types, schemas, constants, and cross-process utilities
 ```
 
-The mobile application uses Expo Router screens under `apps/mobile/src/app`, reusable components
-under `apps/mobile/src/components`, and its independent local data layer under
-`apps/mobile/src/lib`.
+The mobile application uses thin Expo Router routes under `apps/mobile/src/app`, feature code under
+`apps/mobile/src/features`, reusable controls under `apps/mobile/src/components/ui`, and connection /
+formatting helpers under `apps/mobile/src/lib`.
 
 ## Requirements
 
@@ -70,6 +71,7 @@ pnpm dev
 Start the mobile application separately with:
 
 ```bash
+pnpm --dir apps/mobile snapshot:desktop /path/to/desktop.db
 pnpm --dir apps/mobile start
 ```
 
@@ -98,8 +100,9 @@ Electron initializes and migrates a local SQLite database, then forks a Hono API
 React renderer talks to that server over local HTTP. The preload bridge is reserved for native
 operations such as printing, file selection, product images, and PDF export.
 
-The mobile application initializes its own on-device SQLite database and remains independent from
-the desktop data model and runtime.
+The mobile application reads a private snapshot of the desktop SQLite database using the same
+schema. Its separate writable database holds daily money entries. Refresh the snapshot with the
+mobile command above; no desktop process or network API is needed at runtime.
 
 Development and production desktop builds use separate application data directories and ports so
 an installed copy cannot conflict with local development.

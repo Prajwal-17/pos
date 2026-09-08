@@ -1,6 +1,7 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import {
+  ArrowLeft,
   CalendarDays,
   Check,
   ChevronLeft,
@@ -29,7 +30,11 @@ import {
   shiftMonth,
   type LedgerMonth
 } from "@/lib/format/dates";
-import { deleteDailyEntry, getDailyEntry, listMonthSummaries } from "@/features/money/money.repository";
+import {
+  deleteDailyEntry,
+  getDailyEntry,
+  listMonthSummaries
+} from "@/features/money/money.repository";
 import {
   summarizeEntry,
   type DailyEntry,
@@ -38,7 +43,7 @@ import {
 } from "@/features/money/money.types";
 import { formatRupee } from "@/lib/format/money";
 
-export default function HomeScreen() {
+export default function MoneyScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
   const today = getTodayIST();
@@ -140,7 +145,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView className="bg-canvas flex-1" edges={["top", "left", "right"]}>
+    <SafeAreaView className="bg-canvas flex-1" edges={["top", "left", "right", "bottom"]}>
       <ScrollView
         className="flex-1"
         contentContainerClassName="items-center px-4 pb-5 pt-2"
@@ -155,8 +160,18 @@ export default function HomeScreen() {
       >
         <View className="w-full max-w-xl gap-3">
           <View className="flex-row flex-wrap items-center justify-between gap-3">
-            <View>
-              <Text className="text-ink text-xl font-semibold tracking-tight">Ledger</Text>
+            <View className="flex-row items-center gap-3">
+              <IconButton
+                icon={ArrowLeft}
+                label="Back"
+                onPress={() => (router.canGoBack() ? router.back() : router.replace("/"))}
+              />
+              <Text
+                accessibilityRole="header"
+                className="text-ink text-xl font-semibold tracking-tight"
+              >
+                Money
+              </Text>
             </View>
             <AppButton
               compact

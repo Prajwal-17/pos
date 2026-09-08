@@ -1,4 +1,5 @@
-export type LocalDate = `${number}-${number}-${number}`;
+import type { LocalDate } from "@/lib/format/dates";
+export type { LocalDate } from "@/lib/format/dates";
 
 export interface OnlineChannel {
   id: number;

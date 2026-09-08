@@ -1,96 +1,121 @@
 # Relay Mobile
 
-Relay Mobile is a portrait daily ledger for recording one financial close per
-business date. It is an independent Expo application and does not connect to the desktop billing app.
+A compact Expo companion for the shop. Desktop records are read-only; daily money entries are editable.
 
-## Capabilities
+## Screens
 
-- Today-first daily entries with calendar history
-- Cash received and online receipts split by provider
-- Repeatable supplier and distributor payments
-- Daily received, paid-out, and net totals
-- Editable and deletable historical entries
-- Reusable custom online channels
+- **Home:** today's sales and estimates, recent bills, Money entry and Reports.
+- **Sales / Estimates:** search, dates, sorting, historical line items, customer and product links, PDF sharing.
+- **Customers:** balances, search and filters, ledger with running balances, sales, estimates and account details.
+- **Products:** prices, status, price history and linked bills. Product images are omitted.
+- **Reports:** separate sales and estimate totals, trends, top products by sales quantity, current dues and advances.
+- **Money:** cash, UPI providers, vendor payments, calendar history, edit and delete. Vendor names suggest the six most recently saved matches.
 
-## Data and money
+Native Android/iOS are the product targets. Web previews use the same screens and SQLite queries.
 
-Data is stored only on the device in `quickcart-ledger.db` through Expo SQLite. The application
-enables WAL mode and foreign keys, then applies versioned migrations at startup. Clearing app data
-or uninstalling the application can remove the ledger; backup and cloud sync are not included.
+## Setup and snapshot
 
-All money is stored as integer paisa. Business dates are stored as `YYYY-MM-DD` values in the
-Asia/Kolkata calendar. A day's figures are calculated as:
-
-```text
-received = cash + online receipts
-paid     = supplier payments
-net      = received - paid
-```
-
-## Stack
-
-- Expo SDK 57, React Native, and Expo Router
-- Expo SQLite for local persistence
-- NativeWind 4 with Tailwind CSS 3
-- CVA, `clsx`, and `tailwind-merge` for reusable variants
-- Lucide React Native icons
-
-Relay uses the existing charcoal Continuum mark in `../../assets/mobile`. Launcher and splash PNGs
-are rasterizations of its Android foreground SVG. The app name is Relay; the existing database
-filename and app scheme remain stable so this UI update does not strand local records.
-
-Theme values are defined in `tailwind.config.js`. Application routes live under `src/app`, feature screens and domain code under `src/features`, shared primitives under `src/components/ui`,
-and database initialization / portable formatting under `src/lib`. Route files only compose screens.
-
-## Web preview
-
-Web uses client-only (`web.output: single`) rendering because the ledger reads device-local data.
-This also avoids the SDK 57 static-rendering worker-chunk failure during development.
-Expo SQLite uses WebAssembly on web. The Metro development server is configured in
-`metro.config.js` to bundle `.wasm` assets and send the cross-origin isolation headers required by
-`SharedArrayBuffer`. A separately deployed web build must provide equivalent COEP and COOP headers.
-
-## Commands
-
-Run from the repository root:
+Run from the repository root with dependencies installed and Python 3 available:
 
 ```bash
+pnpm --dir apps/mobile snapshot:desktop /path/to/desktop.db
 pnpm --dir apps/mobile start
-pnpm --dir apps/mobile android
-pnpm --dir apps/mobile ios
+# Or preview in a browser:
 pnpm --dir apps/mobile web
-pnpm --dir apps/mobile lint
-pnpm --dir apps/mobile typecheck
 ```
+
+The snapshot command uses SQLite backup to include WAL data, validates the desktop schema and
+atomically replaces `assets/data/desktop.db`. Run it before the first start and again when desktop
+data needs refreshing. Restart Expo and reload the app after refreshing. The private asset is
+ignored by Git but included in local app bundles; do not publish a build containing shop data.
+The source database is never modified.
+
+On native startup, Expo SQLite imports the asset into `relay-desktop.db`, checks its integrity and
+schema, then enforces `PRAGMA query_only`. Web loads the same asset into an in-memory SQLite database
+through Expo's `deserializeDatabaseAsync`, avoiding repeated browser-file rewrites. Neither runs desktop migrations or writes desktop
+records. Schema, IDs, historical product snapshots, integer paisa and integer milli-unit quantities
+are preserved. Portable shared types and quantity helpers come from `apps/desktop/src/shared`.
+
+Money entries use a separate connection and the existing `quickcart-ledger.db` filename, so updating
+the desktop snapshot preserves them. They remain accessible if snapshot initialization fails.
+Only this money database runs the mobile migrations. There is no cloud sync or in-app import.
+Clearing application data removes locally saved money entries.
+
+Dates and report boundaries use Asia/Kolkata. Sales and estimates stay separate in totals; product
+rankings include sales only. Customer dues and advances use current balances, including archived
+accounts, independently of the selected report period. A bill appears in a customer ledger only
+when the source database contains a corresponding ledger entry.
+
+## Structure
+
+```text
+src/
+  app/                    Thin Expo Router routes and navigation layouts
+  features/
+    home/                 Overview
+    money/                Writable ledger, providers and vendor inputs
+    customers/            Customer workspace and ledger
+    transactions/         Sales, estimates, bill details and PDF export
+    products/             Catalog and product history
+    reports/              Trends and balance drilldowns
+  components/ui/          Shared mobile controls and list primitives
+  lib/db/                 Connection providers, schema contract and read-query helpers
+  lib/format/             Money, quantities and IST dates
+scripts/                  Snapshot refresh and mobile verification
+```
+
+Feature repositories contain parameterized SQLite queries. TanStack Query owns read-only snapshot
+state and pagination (50 rows per page); screen-local state owns search and filters. Routes do not
+contain queries. NativeWind semantic tokens live in `tailwind.config.js` and extend the Relay palette
+in `../../DESIGN.md`. Lucide supplies UI icons; bundled payment marks are attributed in `assets/README.md`.
 
 ## Mobile UI contract
 
-- Warm canvas `#F5F5F2`, white surfaces, charcoal `#283129` actions, terracotta `#B6532B` focus.
-- Teal `#E3F5EF` icon plates use dark `#0B5C43` foregrounds; amounts stay ink coloured.
-- System sans-serif, 16px form labels, 18px amount inputs, tabular totals, 48px main actions.
-- Bottom navigation uses Expo Router tabs: Ledger, Sales, Estimates, and Customers, with Lucide
-  icons. The latter three show a minimal placeholder until implemented. Entry and provider screens open
-  above the tabs. Home has a compact page toolbar without an app-name header.
-- Home opens on the selected day's record. History opens the calendar; future dates are disabled.
-- Amounts use single-row inputs. Vendor names suggest the six most recently used saved names,
-  filtered as you type and deduplicated without case; new names can be entered directly.
-- Cash, UPI/online, and vendor payments are distinct, labelled groups. Provider marks are bundled.
-- Save stays at the bottom, fields stop accepting edits during save, and leaving a dirty record
-  requires confirmation. Successful saves return to the saved record with native haptic feedback.
-- Check at 360×800 and 390×844, including large text, long names, large rupee amounts, keyboard,
-  empty/error states, provider management, save, discard, and delete confirmation on a device.
-- Native Android/iOS are the product targets. Web testing uses the same SQLite schema with
-  `withTransactionAsync`; native uses exclusive transactions. Web confirmation dialogs use the
-  browser’s confirmation prompt. Browser storage and device storage are independent.
+- Warm canvas, white surfaces, charcoal actions and terracotta selection. Teal identifies sales;
+  berry identifies estimates. System fonts and tabular money amounts.
+- Bottom tabs: Home, Sales, Estimates, Customers, Products. Details open above tabs with Back.
+- Compact page headers, full monetary values, useful empty/error states and touch targets of at least 44px.
+- Native screen transitions, press feedback and subtle haptics. No app-name banner or explanatory filler.
+- Money entry keeps Save within reach, confirms unsaved changes and destructive actions, and preserves
+  receipts for archived providers. Browser and phone storage are independent.
+- PDF export uses stored historical items and the copied store profile. Native uses Expo Print and
+  the share sheet; web opens the browser print dialog. Print styles are isolated from app chrome.
 
-## Browser regression check
+## Web runtime
 
-With Expo web running, run from the repository root:
+`web.output: single` avoids SQLite worker failures during static rendering. Metro bundles `.wasm`
+and `.db` assets and serves COOP `same-origin` / COEP `credentialless` headers for SQLite's
+SharedArrayBuffer. A separately served web export needs equivalent headers.
+
+For a server-only preview without launching standalone React Native DevTools:
 
 ```bash
-MOBILE_WEB_URL=http://localhost:8084 node apps/mobile/scripts/check-web.cjs
+EXPO_UNSTABLE_HEADLESS=1 pnpm --dir apps/mobile web --port 8084
 ```
 
-The check reuses the desktop workspace’s existing Playwright dependency and Chromium install.
-It creates an isolated browser database and checks save/reload, totals, history, discard,
-vendor suggestions, bottom navigation, provider management, historical receipts, and delete. Screenshots go to `/tmp/relay-mobile-check`.
+This does not change Chromium sandbox permissions.
+
+## Verification
+
+```bash
+pnpm --dir apps/mobile lint
+pnpm --dir apps/mobile typecheck
+python3 apps/mobile/scripts/check-snapshot.py
+node apps/mobile/scripts/check-read-model.cjs
+# With Expo web running on port 8084:
+node apps/mobile/scripts/check-web.cjs
+node apps/mobile/scripts/check-workspace-web.cjs
+node apps/mobile/scripts/check-browse-web.cjs
+node apps/mobile/scripts/check-bill-export.cjs
+```
+
+The read-model checks require Node 22.13+ with `node:sqlite`. Browser checks reuse the installed
+Playwright driver from the desktop workspace and target **only Expo mobile**, each with isolated
+browser storage. Set `MOBILE_WEB_URL` to change the preview URL. Snapshot checks apply desktop
+migrations only to disposable test databases. These commands do not launch desktop E2E tests.
+
+Checks cover snapshot safety, schema parity, read-only enforcement, pagination, paisa/quantity
+accuracy, ledger ordering, IST dates, report totals, mobile navigation, PDF pagination and money
+entry persistence. Screenshots and the synthetic PDF go to `/tmp/relay-mobile-check` and
+`/tmp/relay-mobile-workspace`. Verify native keyboard, large text, safe areas, haptics and PDF sharing
+in Expo Go on the target phone; browser checks cannot validate native behavior.

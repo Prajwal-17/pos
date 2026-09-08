@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { Tabs } from "expo-router";
-import { BookOpen, FileText, Receipt, Users } from "lucide-react-native";
+import { House, FileText, Package, Receipt, Users } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
@@ -25,7 +25,7 @@ export default function TabLayout() {
           paddingBottom: 4 + insets.bottom
         },
         tabBarIconStyle: { width: 24, height: 24 },
-        tabBarLabelStyle: { fontSize: 12, lineHeight: 16, fontWeight: "600", flexShrink: 0 },
+        tabBarLabelStyle: { fontSize: 11, lineHeight: 16, fontWeight: "600", flexShrink: 0 },
         tabBarLabelPosition: "below-icon",
         tabBarHideOnKeyboard: true
       }}
@@ -33,8 +33,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Ledger",
-          tabBarIcon: ({ color }) => <BookOpen size={22} color={color} strokeWidth={1.8} />
+          title: "Home",
+          tabBarIcon: ({ color }) => <House size={22} color={color} strokeWidth={1.8} />
         }}
       />
       <Tabs.Screen
@@ -56,6 +56,13 @@ export default function TabLayout() {
         options={{
           title: "Customers",
           tabBarIcon: ({ color }) => <Users size={22} color={color} strokeWidth={1.8} />
+        }}
+      />
+      <Tabs.Screen
+        name="products"
+        options={{
+          title: "Products",
+          tabBarIcon: ({ color }) => <Package size={22} color={color} strokeWidth={1.8} />
         }}
       />
     </Tabs>

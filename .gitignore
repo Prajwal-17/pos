@@ -15,3 +15,7 @@ apps/desktop/blob-report/
 apps/desktop/playwright/.cache/
 .impeccable
 dist/
+
+# Local shop snapshot, regenerated with mobile snapshot:desktop
+apps/mobile/assets/data/
+__pycache__/
